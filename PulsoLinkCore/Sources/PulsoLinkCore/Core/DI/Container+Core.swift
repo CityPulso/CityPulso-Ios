@@ -90,7 +90,61 @@ extension Container {
         }.singleton
     }
 
+    public var authService: Factory<AuthService> {
+        self { AuthService(auth: self.authRepository(), authEventBus: self.authEventBus()) }.singleton
+    }
+
     public var startupGate: Factory<StartupGate> {
-        self { StartupGate(sessionStore: self.authSessionStore(), sessionTerminator: self.sessionTerminator()) }.singleton
+        self {
+            StartupGate(
+                sessionStore: self.authSessionStore(),
+                sessionTerminator: self.sessionTerminator(),
+                profileBootstrap: self.profileBootstrap(),
+                profileStore: self.profileStore(),
+                preferenceBootstrap: self.preferenceBootstrap()
+            )
+        }.singleton
+    }
+
+    /* ------------------------------ Profile / preference ------------------------------ */
+
+    public var profileStore: Factory<ProfileStore> {
+        self { ProfileStore() }.singleton
+    }
+
+    public var profileBootstrap: Factory<ProfileBootstrap> {
+        self {
+            ProfileBootstrap(
+                authService: self.authService(),
+                sessionStore: self.authSessionStore(),
+                profileStore: self.profileStore(),
+                authEventBus: self.authEventBus()
+            )
+        }.singleton
+    }
+
+    public var preferenceRepository: Factory<PreferenceRepository> {
+        self { PreferenceRepository() }.singleton
+    }
+
+    public var preferenceBootstrap: Factory<PreferenceBootstrap> {
+        self {
+            PreferenceBootstrap(
+                profileStore: self.profileStore(),
+                preferenceRepository: self.preferenceRepository(),
+                config: self.pulsoCoreConfig()
+            )
+        }.singleton
+    }
+
+    public var preferenceService: Factory<PreferenceService> {
+        self {
+            PreferenceService(
+                preferenceRepository: self.preferenceRepository(),
+                authService: self.authService(),
+                sessionStore: self.authSessionStore(),
+                config: self.pulsoCoreConfig()
+            )
+        }.singleton
     }
 }

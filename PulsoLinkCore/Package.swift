@@ -15,6 +15,8 @@ let package = Package(
         .package(url: "https://github.com/marksands/BetterCodable.git", from: "0.4.0"),
         .package(url: "https://github.com/kishikawakatsumi/KeychainAccess.git", from: "4.2.2"),
         .package(url: "https://github.com/hmlongco/Factory.git", from: "2.4.0"),
+        .package(url: "https://github.com/apple/swift-async-algorithms.git", from: "1.0.4"),
+        .package(url: "https://github.com/groue/Semaphore.git", from: "0.1.0"),
     ],
     targets: [
         .target(
@@ -33,6 +35,8 @@ let package = Package(
                     condition: .when(platforms: [.iOS, .macOS])
                 ),
                 "Factory",
+                .product(name: "AsyncAlgorithms", package: "swift-async-algorithms"),
+                "Semaphore",
             ]
         ),
         .testTarget(name: "PulsoLinkCoreTests", dependencies: ["PulsoLinkCore"]),

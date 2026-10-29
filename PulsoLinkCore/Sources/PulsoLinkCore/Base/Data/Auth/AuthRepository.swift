@@ -1,5 +1,12 @@
 import Foundation
 
+/** 当前会话所选身份的账号聚合（后端按 token 里的 profile_id 投影成单个身份）。 */
+public enum CurrentFullAccountInformation: Sendable, Hashable {
+    case community(FullAccountInformationWithCommunityProfile)
+    case organization(FullAccountInformationWithOrganizationProfile)
+    case authority(FullAccountInformationWithAuthorityProfile)
+}
+
 /** 认证仓储——方法与 WEB `ApiAuthRepository` 逐一对齐（URL_PATHS.AUTH）。 */
 public struct AuthRepository: Sendable {
     private let publicAPI: AuthPublicAPI
@@ -38,6 +45,22 @@ public struct AuthRepository: Sendable {
 
     public func selectProfile(_ body: SelectProfileRequest) async throws -> SelectProfileResponse {
         try await protectedAPI.selectProfile(body).dataOrThrow("SelectProfile")
+    }
+
+    /* ------------------------------ 账号 / 身份 ------------------------------ */
+
+    public func getCurrentFullAccountInformationWithProfile(kind: ProfileKind) async throws -> CurrentFullAccountInformation {
+        switch kind {
+        case .community:
+            .community(try await protectedAPI.getFullAccountInformationWithCommunityProfile()
+                .dataOrThrow("GetCurrentFullAccountInformationWithProfile"))
+        case .organization:
+            .organization(try await protectedAPI.getFullAccountInformationWithOrganizationProfile()
+                .dataOrThrow("GetCurrentFullAccountInformationWithProfile"))
+        case .authority:
+            .authority(try await protectedAPI.getFullAccountInformationWithAuthorityProfile()
+                .dataOrThrow("GetCurrentFullAccountInformationWithProfile"))
+        }
     }
 
     /* ------------------------------ 邮箱 / 密码 ------------------------------ */

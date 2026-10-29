@@ -1,59 +1,23 @@
 import Foundation
 import Testing
 @testable import PulsoLinkCore
-#if canImport(FoundationNetworking)
-import FoundationNetworking
-#endif
 
-/** 进程内假服务器：按请求返回 (status, body)，并记录收到的请求。 */
-final class StubProtocol: URLProtocol {
-    nonisolated(unsafe) static var handler: (@Sendable (URLRequest) -> (Int, String))?
-    nonisolated(unsafe) static var received: [URLRequest] = []
-    static let lock = NSLock()
+private let host = "api-client.stub"
+private let config = stubConfig(host: host)
 
-    override class func canInit(with request: URLRequest) -> Bool { true }
-    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
-
-    override func startLoading() {
-        Self.lock.withLock { Self.received.append(request) }
-        let (status, body) = Self.handler?(request) ?? (500, "")
-        let response = HTTPURLResponse(url: request.url!, statusCode: status, httpVersion: nil, headerFields: [
-            "Content-Type": "application/json",
-        ])!
-        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-        client?.urlProtocol(self, didLoad: Data(body.utf8))
-        client?.urlProtocolDidFinishLoading(self)
-    }
-
-    override func stopLoading() {}
-}
-
-private let config = PulsoCoreConfig(
-    apiBaseURL: URL(string: "http://stub.local/api")!,
-    signupPlatform: .pulsoloop,
-    appName: "Test",
-    shellDestinations: []
-)
-
-private func stubConfiguration() -> URLSessionConfiguration {
-    let configuration = URLSessionConfiguration.ephemeral
-    configuration.protocolClasses = [StubProtocol.self]
-    return configuration
-}
-
-/** URLProtocol 的 handler 是全局的，这组测试串行跑。 */
+/** 这组测试共用一个假主机，串行跑。 */
 @Suite(.serialized)
 struct APIClientTests {
     init() {
-        StubProtocol.lock.withLock { StubProtocol.received = [] }
+        StubProtocol.reset(host)
     }
 
     @Test func omitsNilQueryAndEncodesSnakeCase() async throws {
-        StubProtocol.handler = { request in
-            #expect(request.url?.absoluteString == "http://stub.local/api/auth/me/profiles?limit=20")
+        StubProtocol.serve(host) { request in
+            #expect(request.url?.absoluteString == "http://\(host)/api/auth/me/profiles?limit=20")
             return (200, #"{"data":{"items":[{"profile_id":"p1","kind":"community"}],"total":1}}"#)
         }
-        let client = APIClient(config: config, interceptor: nil, configuration: stubConfiguration())
+        let client = APIClient(config: config, interceptor: nil, configuration: StubProtocol.configuration)
         let page: DataResponse<ListWithTotal<ProfileItem>> = try await client.request(
             .get, "auth/me/profiles", query: ["limit": "20", "offset": nil]
         )
@@ -61,8 +25,8 @@ struct APIClientTests {
     }
 
     @Test func non2xxThrowsAPIError() async {
-        StubProtocol.handler = { _ in (409, #"{"err_code":"EMAIL_TAKEN","message":"Email already used"}"#) }
-        let client = APIClient(config: config, interceptor: nil, configuration: stubConfiguration())
+        StubProtocol.serve(host) { _ in (409, #"{"err_code":"EMAIL_TAKEN","message":"Email already used"}"#) }
+        let client = APIClient(config: config, interceptor: nil, configuration: StubProtocol.configuration)
         await #expect(throws: APIError(status: 409, errCode: "EMAIL_TAKEN", message: "Email already used")) {
             try await client.send(.post, "auth/me/emails", body: CreateEmailRequest(email: "a@b.c"))
         }
@@ -78,7 +42,7 @@ struct APIClientTests {
             deviceIdProvider: DeviceIdProvider(defaults: UserDefaults(suiteName: "tests-\(UUID().uuidString)")!),
             sessionTerminator: terminator
         )
-        StubProtocol.handler = { request in
+        StubProtocol.serve(host) { request in
             request.value(forHTTPHeaderField: "Authorization") == "Bearer access-2"
                 ? (200, #"{"data":{"email_id":"e1"}}"#)
                 : (401, #"{"err_code":"INVALID_TOKEN"}"#)
@@ -86,13 +50,13 @@ struct APIClientTests {
         let client = APIClient(
             config: config,
             interceptor: ProtectedRequestInterceptor(sessionStore: store, tokenRefreshManager: refresh, sessionTerminator: terminator),
-            configuration: stubConfiguration()
+            configuration: StubProtocol.configuration
         )
 
         let created = try await AuthProtectedAPI(client: client).createEmail(CreateEmailRequest(email: "a@b.c"))
 
         #expect(try created.dataOrThrow("CreateEmail").emailId == "e1")
-        let headers = StubProtocol.lock.withLock { StubProtocol.received.map { $0.value(forHTTPHeaderField: "Authorization") } }
+        let headers = StubProtocol.received(host).map { $0.value(forHTTPHeaderField: "Authorization") }
         #expect(headers == ["Bearer access-1", "Bearer access-2"])
         #expect(store.state.value.accessToken == "access-2")
     }
@@ -107,11 +71,11 @@ struct APIClientTests {
             deviceIdProvider: DeviceIdProvider(defaults: UserDefaults(suiteName: "tests-\(UUID().uuidString)")!),
             sessionTerminator: terminator
         )
-        StubProtocol.handler = { _ in (401, #"{"err_code":"INVALID_TOKEN"}"#) }
+        StubProtocol.serve(host) { _ in (401, #"{"err_code":"INVALID_TOKEN"}"#) }
         let client = APIClient(
             config: config,
             interceptor: ProtectedRequestInterceptor(sessionStore: store, tokenRefreshManager: refresh, sessionTerminator: terminator),
-            configuration: stubConfiguration()
+            configuration: StubProtocol.configuration
         )
 
         await #expect(throws: APIError.self) {

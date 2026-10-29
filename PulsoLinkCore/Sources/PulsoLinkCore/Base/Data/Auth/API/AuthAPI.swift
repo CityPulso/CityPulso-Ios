@@ -47,6 +47,23 @@ public struct AuthProtectedAPI: Sendable {
         try await client.request(.post, "auth/me/select-profile", body: body)
     }
 
+    /* ------------------------------ 账号 / 身份 ------------------------------ */
+
+    public func getFullAccountInformationWithCommunityProfile() async throws
+        -> DataResponse<FullAccountInformationWithCommunityProfile> {
+        try await client.request(.get, "auth/me/full-account-information-with-community-profile")
+    }
+
+    public func getFullAccountInformationWithOrganizationProfile() async throws
+        -> DataResponse<FullAccountInformationWithOrganizationProfile> {
+        try await client.request(.get, "auth/me/full-account-information-with-organization-profile")
+    }
+
+    public func getFullAccountInformationWithAuthorityProfile() async throws
+        -> DataResponse<FullAccountInformationWithAuthorityProfile> {
+        try await client.request(.get, "auth/me/full-account-information-with-authority-profile")
+    }
+
     /* ------------------------------ 邮箱 / 密码 ------------------------------ */
 
     public func createEmail(_ body: CreateEmailRequest) async throws -> DataResponse<CreateEmailResponse> {
