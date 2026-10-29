@@ -33,12 +33,12 @@ public struct PulsoShellTabView<Page: View>: View {
     public var body: some View {
         TabView(selection: $selection) {
             ForEach(preference.capsuleSlots, id: \.destination) { slot in
-                Tab(slot.destination.labelKey, systemImage: slot.iconPack.systemImage, value: .destination(slot.destination)) {
+                Tab(slot.destination.labelKey, systemImage: slot.iconPack.systemImage, value: PulsoShellTab.destination(slot.destination)) {
                     NavigationStack { page(slot.destination) }
                 }
             }
 
-            Tab("home_nav_apps", systemImage: "square.grid.2x2", value: .apps) {
+            Tab("home_nav_apps", systemImage: "square.grid.2x2", value: PulsoShellTab.apps) {
                 NavigationStack {
                     List(trayDestinations, id: \.self) { destination in
                         NavigationLink(value: destination) {
@@ -53,7 +53,7 @@ public struct PulsoShellTabView<Page: View>: View {
             Tab(
                 preference.slot6.destination.labelKey,
                 systemImage: preference.slot6.iconPack.systemImage,
-                value: .destination(preference.slot6.destination),
+                value: PulsoShellTab.destination(preference.slot6.destination),
                 role: .search
             ) {
                 NavigationStack { page(preference.slot6.destination) }
