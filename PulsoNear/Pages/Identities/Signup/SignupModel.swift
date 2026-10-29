@@ -1,3 +1,4 @@
+import AuthenticationServices
 import Factory
 import PulsoLinkCore
 import PulsoLinkUI
@@ -98,6 +99,19 @@ final class SignupModel {
             try await signIn.loginWithGoogle(idToken: idToken, rememberMe: true)
         } catch {
             errorText = signInErrorText(error, fallback: "google_sign_in_failed")
+        }
+    }
+
+    func signInWithApple(_ result: Result<ASAuthorization, any Error>) async {
+        loading = true
+        errorText = nil
+        infoText = nil
+        defer { loading = false }
+        do {
+            guard let apple = try AppleIdToken.from(result) else { return }
+            try await signIn.loginWithApple(identityToken: apple.identityToken, displayName: apple.displayName, rememberMe: true)
+        } catch {
+            errorText = signInErrorText(error, fallback: "login_failed_retry")
         }
     }
 

@@ -6,3 +6,7 @@ PULSO_API_BASE_URL = http:/$()/192.168.1.76:10101/api
 
 // 真机调试的签名团队（Xcode → Settings → Accounts 里的 Team ID）。
 DEVELOPMENT_TEAM =
+
+// 「通过 Apple 登录」：Apple 开发者账号开通、App ID 勾选 Sign in with Apple 后改成 YES。
+// 后端 .env 的 APPLE_BUNDLE_IDS 也要填上 com.citypulso.pulsoloop,com.citypulso.pulsonear。
+PULSO_APPLE_SIGN_IN = NO

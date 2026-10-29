@@ -94,6 +94,9 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.citypulso.pulsoloop
         PULSO_DISPLAY_NAME: 跃圈
         PULSO_PUBLIC_HOST: pulsoloop.com
+        # 「通过 Apple 登录」要付费开发者账号才能签名；Local.xcconfig 设 PULSO_APPLE_SIGN_IN = YES 后才带上权限。
+        CODE_SIGN_ENTITLEMENTS: $(PULSO_ENTITLEMENTS_$(PULSO_APPLE_SIGN_IN))
+        PULSO_ENTITLEMENTS_YES: PulsoLoop/PulsoLoop.entitlements
 
   PulsoNear:
     templates: [PulsoApp]
@@ -109,6 +112,9 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.citypulso.pulsonear
         PULSO_DISPLAY_NAME: 娱邻
         PULSO_PUBLIC_HOST: pulsonear.com
+        # 「通过 Apple 登录」要付费开发者账号才能签名；Local.xcconfig 设 PULSO_APPLE_SIGN_IN = YES 后才带上权限。
+        CODE_SIGN_ENTITLEMENTS: $(PULSO_ENTITLEMENTS_$(PULSO_APPLE_SIGN_IN))
+        PULSO_ENTITLEMENTS_YES: PulsoNear/PulsoNear.entitlements
 
   # 宿主在 PulsoLoop 里跑的测试（截图等需要 UIKit 窗口的测试）。
   PulsoLoopTests:

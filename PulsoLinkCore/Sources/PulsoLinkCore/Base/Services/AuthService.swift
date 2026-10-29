@@ -20,6 +20,10 @@ public struct AuthService: Sendable {
         try await auth.loginWithGoogle(body)
     }
 
+    public func loginWithApple(_ body: LoginWithAppleRequest) async throws -> LoginWithEmailResponse {
+        try await auth.loginWithApple(body)
+    }
+
     /** Google 登录要的 web client ID（ID token 的 audience，后端用它验 token）。 */
     public func googleClientId() async throws -> String {
         try await auth.getAuthEnv().env.googleClientId

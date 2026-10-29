@@ -58,7 +58,7 @@ struct WelcomeView: View {
                     }
                 }
                 .tabViewStyle(.page(indexDisplayMode: .always))
-                .indexViewStyle(.page(backgroundDisplayMode: .interactive))
+                .indexViewStyle(.page(backgroundDisplayMode: .always))
 
                 VStack(spacing: 10) {
                     Button {

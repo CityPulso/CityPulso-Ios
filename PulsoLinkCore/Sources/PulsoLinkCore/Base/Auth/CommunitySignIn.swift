@@ -73,6 +73,22 @@ public struct CommunitySignIn: Sendable {
         try await complete(response, rememberMe: rememberMe, deviceId: deviceId)
     }
 
+    /** [identityToken] 是「通过 Apple 登录」给的 identity token；[displayName] 只有第一次授权才有。 */
+    public func loginWithApple(identityToken: String, displayName: String?, rememberMe: Bool) async throws {
+        let deviceId = await deviceId()
+        let response = try await authService.loginWithApple(
+            LoginWithAppleRequest(
+                identityToken: identityToken,
+                displayName: displayName,
+                deviceId: deviceId,
+                signupPlatform: config.signupPlatform,
+                lang: language,
+                clientOs: .ios
+            )
+        )
+        try await complete(response, rememberMe: rememberMe, deviceId: deviceId)
+    }
+
     public func sendSignupCode(email: String) async throws {
         try await authService.sendVerificationCode(SendVerificationCodeRequest(email: email, lang: language))
     }

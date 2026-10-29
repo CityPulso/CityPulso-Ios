@@ -55,6 +55,36 @@ public struct LoginWithGoogleRequest: Encodable, Sendable {
     }
 }
 
+/**
+ * POST /auth/login/with-apple 请求（iOS「通过 Apple 登录」）。
+ * displayName 只有第一次授权时 Apple 才给，用来给新账号的身份起名。
+ */
+public struct LoginWithAppleRequest: Encodable, Sendable {
+    public let identityToken: String
+    public let displayName: String?
+    public let deviceId: String
+    public let signupPlatform: AuthSignupPlatform
+    /** 只在这次登录新建账号时使用：账号语言与设备系统。 */
+    public let lang: PulsoLanguage
+    public let clientOs: ClientOS
+
+    public init(
+        identityToken: String,
+        displayName: String?,
+        deviceId: String,
+        signupPlatform: AuthSignupPlatform,
+        lang: PulsoLanguage,
+        clientOs: ClientOS
+    ) {
+        self.identityToken = identityToken
+        self.displayName = displayName
+        self.deviceId = deviceId
+        self.signupPlatform = signupPlatform
+        self.lang = lang
+        self.clientOs = clientOs
+    }
+}
+
 /** GET /auth/env 响应内层。 */
 public struct AuthRuntimeEnv: Codable, Sendable {
     public let googleClientId: String

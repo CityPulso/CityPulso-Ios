@@ -27,6 +27,10 @@ public struct AuthRepository: Sendable {
         try await publicAPI.loginWithGoogle(body).dataOrThrow("LoginWithGoogle")
     }
 
+    public func loginWithApple(_ body: LoginWithAppleRequest) async throws -> LoginWithEmailResponse {
+        try await publicAPI.loginWithApple(body).dataOrThrow("LoginWithApple")
+    }
+
     public func getAuthEnv() async throws -> AuthEnv {
         try await publicAPI.getAuthEnv().dataOrThrow("GetAuthEnv")
     }

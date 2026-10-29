@@ -16,6 +16,10 @@ public struct AuthPublicAPI: Sendable {
         try await client.request(.post, "auth/login/with-google", body: body)
     }
 
+    public func loginWithApple(_ body: LoginWithAppleRequest) async throws -> DataResponse<LoginWithEmailResponse> {
+        try await client.request(.post, "auth/login/with-apple", body: body)
+    }
+
     public func getAuthEnv() async throws -> DataResponse<AuthEnv> {
         try await client.request(.get, "auth/env")
     }

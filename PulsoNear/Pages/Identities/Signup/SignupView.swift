@@ -1,4 +1,6 @@
+import AuthenticationServices
 import GoogleSignInSwift
+import PulsoLinkUI
 import SwiftUI
 
 /** 注册页（对应 Android `SignupScreen`）：系统表单，验证码用 `.oneTimeCode` 让键盘直接带出邮件里的码。 */
@@ -84,6 +86,15 @@ struct SignupView: View {
                     .buttonStyle(.glassProminent)
                     .controlSize(.large)
                     .disabled(!model.canSubmit)
+
+                    SignInWithAppleButton(.signUp) { request in
+                        request.requestedScopes = AppleIdToken.scopes
+                    } onCompletion: { result in
+                        Task { await model.signInWithApple(result) }
+                    }
+                    .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
+                    .frame(height: 44)
+                    .disabled(model.loading)
 
                     GoogleSignInButton(scheme: colorScheme == .dark ? .dark : .light, style: .wide) {
                         Task { await model.signInWithGoogle() }

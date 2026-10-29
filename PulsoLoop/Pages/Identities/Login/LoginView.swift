@@ -1,4 +1,6 @@
+import AuthenticationServices
 import GoogleSignInSwift
+import PulsoLinkUI
 import SwiftUI
 
 /** 登录页（对应 Android `LoginScreen`）：系统表单，提交按钮用 Liquid Glass，Google 用官方按钮。 */
@@ -47,6 +49,15 @@ struct LoginView: View {
                     .controlSize(.large)
                     .disabled(!model.canSubmit)
 
+                    SignInWithAppleButton(.signIn) { request in
+                        request.requestedScopes = AppleIdToken.scopes
+                    } onCompletion: { result in
+                        Task { await model.signInWithApple(result) }
+                    }
+                    .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
+                    .frame(height: 44)
+                    .disabled(model.loading)
+
                     GoogleSignInButton(scheme: colorScheme == .dark ? .dark : .light, style: .wide) {
                         Task { await model.signInWithGoogle() }
                     }
@@ -84,6 +95,6 @@ struct AuthHeader: View {
                 .foregroundStyle(.secondary)
         }
         .listRowBackground(Color.clear)
-        .listRowInsets(EdgeInsets())
+        .listRowInsets(EdgeInsets(top: 0, leading: 4, bottom: 4, trailing: 4))
     }
 }

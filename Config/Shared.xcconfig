@@ -2,4 +2,7 @@
 MARKETING_VERSION = 0.1.0
 CURRENT_PROJECT_VERSION = 1
 
+// 「通过 Apple 登录」权限默认关闭（需要付费 Apple 开发者账号签名）；在 Local.xcconfig 里改成 YES。
+PULSO_APPLE_SIGN_IN = NO
+
 #include? "Local.xcconfig"
