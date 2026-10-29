@@ -59,22 +59,23 @@ final class EventSearchModel {
 
     /** 跟着存着的筛选和当前身份；页面消失时随 `.task` 取消。 */
     func observe() async {
-        await withTaskGroup(of: Void.self) { group in
-            group.addTask { @MainActor in
+        var operations: [@MainActor () async -> Void] = [
+            {
                 for await next in self.filterStore.filters.values() {
                     self.filters = next
                     self.applyFilters()
                 }
-            }
-            group.addTask { @MainActor in
+            },
+            {
                 for await info in self.profileStore.current.values() {
                     self.isPulser = info?.isPulser == true
                 }
-            }
-            for search in searches {
-                group.addTask { @MainActor in await search.observeLocation() }
-            }
+            },
+        ]
+        for search in searches {
+            operations.append { await search.observeLocation() }
         }
+        await concurrently(operations)
     }
 
     /** 翻到第 [index] 页，左右的页开始加载。 */

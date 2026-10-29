@@ -26,16 +26,23 @@ struct ProfileOverviewView: View {
 
     private func content(_ info: CurrentFullAccountInformation) -> some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
+            LazyVStack(alignment: .leading, spacing: 12, pinnedViews: .sectionHeaders) {
                 ProfileHero(urls: model.backgroundURLs)
                     .overlay(alignment: .bottomLeading) {
                         identityRow(info).padding(.horizontal).padding(.bottom, 12)
                     }
-                details(info).padding()
+                details(info).padding(.horizontal)
+                ActivityCenterSection(model: model.activity)
             }
         }
         .ignoresSafeArea(edges: .top)
-        .refreshable { await model.refresh(showIndicator: true) }
+        .refreshable {
+            async let profile: Void = model.refresh(showIndicator: true)
+            async let activity: Void = model.activity.refresh()
+            _ = await (profile, activity)
+        }
+        .task { await model.observeCounts() }
+        .task { await model.activity.observe() }
         .toolbar { toolbar(info) }
         .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
     }
@@ -95,6 +102,8 @@ struct ProfileOverviewView: View {
     private func details(_ info: CurrentFullAccountInformation) -> some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(spacing: 20) {
+                stat("calendar", model.hostedCount, "profile_stat_hosted")
+                stat("person.3.fill", model.joinedCount, "profile_stat_joined")
                 stat("envelope.fill", info.emails.count, "profile_stat_emails")
                 stat("phone.fill", info.phones.count, "profile_stat_phones")
             }

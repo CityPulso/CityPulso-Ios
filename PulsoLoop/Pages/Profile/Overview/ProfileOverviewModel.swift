@@ -5,7 +5,7 @@ import SwiftUI
 
 /**
  * 我的资料页（对应 Android `ProfileOverviewViewModel`）：[ProfileStore] 是唯一来源，别处改了资料这里跟着变。
- * 发起 / 参加的活动数要等活动数据移植（第 4–6 组）后接上。
+ * 发起 / 参加数是所有运动加起来（每种最多 100 条，含已结束），每个运动都回来了才更新。
  */
 @MainActor
 @Observable
@@ -13,11 +13,18 @@ final class ProfileOverviewModel {
     private(set) var info: CurrentFullAccountInformation?
     private(set) var loadError: UiError?
     private(set) var refreshing = false
+    private(set) var hostedCount = 0
+    private(set) var joinedCount = 0
     let avatar = AvatarUploadModel()
+    let activity = ActivityCenterModel()
 
     @ObservationIgnored @Injected(\.profileStore) private var profileStore
     @ObservationIgnored @Injected(\.profileBootstrap) private var profileBootstrap
     @ObservationIgnored @Injected(\.pulsoCoreConfig) private var config
+    @ObservationIgnored @Injected(\.loopSportServices) private var services
+    @ObservationIgnored @Injected(\.authSessionStore) private var sessionStore
+    @ObservationIgnored private var hostedBySport: [LoopSport: Int] = [:]
+    @ObservationIgnored private var joinedBySport: [LoopSport: Int] = [:]
 
     var avatarURL: URL? { ImageURLs.image(info?.avatarImageId, base: config.apiBaseURL) }
 
@@ -43,6 +50,41 @@ final class ProfileOverviewModel {
         for await current in profileStore.current.values() {
             if let current { info = current }
         }
+    }
+
+    /** 各运动的发起 / 参加数加起来；身份变了重算。页面消失时随 `.task` 取消。 */
+    func observeCounts() async {
+        let session = sessionStore.state.value
+        let accountId = session.currentAccountId
+        let profileId = session.currentProfileId
+        guard !accountId.isEmpty, !profileId.isEmpty else { return }
+        hostedBySport = [:]
+        joinedBySport = [:]
+        var operations: [@MainActor () async -> Void] = []
+        for (sport, service) in services {
+            let hostedStream = service.hostedEvents(accountId: accountId, profileId: profileId, hostedProfileId: profileId, limit: 100)
+            let joinedStream = service.myRegistrations(SportRegistrationsQuery(accountId: accountId, profileId: profileId, limit: 100))
+            operations.append {
+                for await case let .data(items) in hostedStream {
+                    self.hostedBySport[sport] = items.count
+                    self.publishCounts()
+                }
+            }
+            operations.append {
+                for await case let .data(items) in joinedStream {
+                    self.joinedBySport[sport] = items.count
+                    self.publishCounts()
+                }
+            }
+        }
+        await concurrently(operations)
+    }
+
+    /** 每个运动都回答了才换数字（Android `sumOrNull`）。 */
+    private func publishCounts() {
+        guard hostedBySport.count == services.count, joinedBySport.count == services.count else { return }
+        hostedCount = hostedBySport.values.reduce(0, +)
+        joinedCount = joinedBySport.values.reduce(0, +)
     }
 
     /** 首次静默加载不显示指示；下拉刷新失败而页面已有资料时只提示。 */

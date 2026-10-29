@@ -4,10 +4,10 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 
 ## 下一步
 
-- 第 0 组（地基）CI 全绿（run 40835297704）。
-- 第 3 组（个人页、编辑资料、背景图、身份）已写完，等 CI。个人页上「发起 / 参加」两个数字和下面的活动中心要等活动数据（第 4–6 组）。
-- 然后第 4 组：活动列表（羽毛球查询链）。
-- GRDB 本地库放到第 10 组（只有聊天 / 通知 / 好友用），深链 inbox 放到第 5 组（第一个深链目标是活动详情），不提前写没人用的代码。
+- **阻塞：GitHub Actions 停了**（2026-10-29：「recent account payments have failed or your spending limit needs to be increased」）。
+  从 00fb263 起的提交都没在 macOS 上编译过；SwiftUI 部分要等 CI 恢复才能验证，记为 🟦。
+- 第 4 组（活动搜索、日历 / 活动中心、日程、个人页的活动中心与发起 / 参加数）已写完：模型层在 Linux 上类型检查通过，视图待 CI。
+- 然后第 5 组：羽毛球活动详情、报名 / 候补 / 退出、发起、收款清单；深链 inbox。
 
 ## 状态
 
@@ -26,6 +26,7 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 
 | 项 | 原因 | 需要谁 |
 |---|---|---|
+| macOS CI | GitHub Actions 因付款失败 / 支出上限停止，任务不启动 | 用户（GitHub → Billing & plans） |
 | Apple 登录真机 | Apple 开发者账号在申请；`PULSO_APPLE_SIGN_IN = NO`，后端 `APPLE_BUNDLE_IDS` 为空 | 用户 |
 | 真机签名 | 同上 | 用户 |
 | Apple 登录接口上线 | PulsoLink-API 新 Go 代码需要 `task run:rebuild` | 用户 |
@@ -39,6 +40,8 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 | 字体 / 字号设置 | 不显示，用 Dynamic Type | iOS 系统设置 |
 | 编辑资料逐项弹窗 | 行内直接编辑的系统表单；离开时自动保存，改错时不能返回 | iOS 表单习惯 |
 | Loop 喜欢的运动不限个数 | 最多 3 个（与 Near 和 `FavoriteSport.MAX` 一致） | Android Loop 漏了上限，后端只收 3 个 |
+| 日程侧栏（左侧滑出） | 系统 sheet，同样从栈底页面左边缘右滑打开 | iOS 没有原生的左侧抽屉 |
+| 搜索页运动标签下划线 Tab | 横向胶囊 + 系统分页 TabView | iOS 习惯 |
 | 换图标要重启 | 备用图标立即生效，不显示「需要重启」 | iOS 行为 |
 | Firebase messaging | 不接 APNs | Android 只有 Gradle 依赖，Kotlin 里没有用到；通知走 Centrifugo + 通知列表 |
 | Stripe Android | stripe-ios（PaymentSheet / Connect） | 都是线下服务（订场、课程、赛事、会员），App Store 3.1.3(e) 允许，不用 IAP |
@@ -57,9 +60,11 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 | 图片加载 + 退出清缓存 | Coil、`ImageCacheLogoutClearable` | `PulsoLinkUI/Images`（Nuke） | 🟦 |
 | 深链 `youloopy://open/panel/...` | `navigation/LoopDeepLinks.kt` | — | ⬜ 第 5 组 |
 | 实时（Centrifugo） | `base/realtime/*` | — | ⬜ 第 10 组 |
-| 位置 | `base/stores/LocationStore`、`features/location` | — | ⬜ 第 7 组 |
+| 设备定位 / 附近搜索中心 | `stores/DeviceLocationStore`、`NearbyQueryLocationStore`、`features/location` | `Stores/LocationStores`、`Features/Location`（CoreLocation + MapKit 反查地名） | 🟦 |
 | 支付 | `base/data/payments`、`features/payments` | — | ⬜ 第 9 组 |
 | 枚举（wire 值、选项） | `*/enums/*.kt` | `Scripts/android_enums.py` 生成 `Enums/Generated` | 🟦 |
+| DTO / API | `*/dto/*.kt`、`*/api/*.kt`（Retrofit） | `Scripts/android_dtos.py`、`android_apis.py` 生成 `Data/Generated` | 🟩 |
+| 各运动数据层（仓储 / 缓存 / Service） | `data/<sport>`、`query`、`services` | 羽毛球手写，`Scripts/fork_sport.py` 生成其余 10 种 | 🟦 |
 | 全局消息条 | snackbar | `PulsoLinkUI/Messages` | 🟩 |
 | 加载失败 + 重试 | | `PulsoLoadErrorView` | 🟩 |
 
@@ -68,8 +73,8 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 | 目标 | Android 页面 | iOS | 组 | 状态 |
 |---|---|---|---|---|
 | EXPLORE | `pages/event/explore` | | 7 | ⬜ |
-| CALENDAR | `pages/event/calendar` | | 4 | ⬜ |
-| SEARCH | `pages/event/search` | | 4 | ⬜ |
+| CALENDAR | `pages/event/calendar` + `features/activity` | `Pages/Event/Calendar`、`Features/Activity` | 4 | 🟦 |
+| SEARCH | `pages/event/search` + `features/search` | `Pages/Event/Search`、`Features/Search` | 4 | 🟦 |
 | VENUE_SEARCH | `pages/venue/search` | | 8 | ⬜ |
 | SOCIAL | `pages/social/overview` | | 10 | ⬜ |
 | CREATE | `pages/event/create` | | 5 | ⬜ |
@@ -77,7 +82,7 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 | BILLING | `pages/billing` | | 9 | ⬜ |
 | NOTIFICATIONS | `pages/social/notifications` | | 10 | ⬜ |
 | CHAT_HUB | `pages/social/chat/hub` | | 10 | ⬜ |
-| PROFILE | `pages/profile/overview` | `Pages/Profile/Overview`（头部、头像、分享、复制 ID；活动中心和发起 / 参加数第 4–6 组补） | 3 | 🟦 部分 |
+| PROFILE | `pages/profile/overview` | `Pages/Profile/Overview`（含活动中心、发起 / 参加数） | 3–4 | 🟦 |
 | WALLET | `pages/wallet` | | 9 | ⬜ |
 | COURSES | `pages/program/mine` | | 12 | ⬜ |
 | COACHING | `pages/program/mine` | | 12 | ⬜ |
@@ -150,7 +155,7 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 | OpenCoach | `pages/program/coach` | | 12 | ⬜ |
 | OpenCoachPanel | `pages/coach/panel` | | 12 | ⬜ |
 | OpenTournament | `pages/tournament/detail` | | 12 | ⬜ |
-| （日程） | `pages/agenda` | | 4 | ⬜ |
+| （日程，左边缘右滑） | `pages/agenda` | `Pages/Agenda`（系统 sheet） | 4 | 🟦 |
 | OpenComingSoon | `navigation/ComingSoonRoute.kt` | `PulsoComingSoonView` | — | 🟩 |
 
 运动（第 6 组从羽毛球生成）：badminton、baseball、basketball、fishing、football、golf、hiking、pickleball、ski、tabletennis、tennis。每种运动都有自己的 data / query / service / detail / checklist / 报名卡片；venue 的 book / booking / confirm 只有 badminton、pickleball、tennis。

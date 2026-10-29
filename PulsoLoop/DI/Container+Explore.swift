@@ -66,3 +66,23 @@ extension Container {
         self { DeviceLocationBootstrap(store: self.deviceLocationStore()) }.singleton
     }
 }
+
+extension Container {
+    var venueEventBus: Factory<VenueEventBus> {
+        self { VenueEventBus() }.singleton
+    }
+
+    var venueQueryStore: Factory<VenueQueryStore> {
+        self {
+            let client = self.protectedClient()
+            let store = VenueQueryStore(
+                badminton: BadmintonEntryAPI(client: client),
+                tennis: TennisEntryAPI(client: client),
+                pickleball: PickleballEntryAPI(client: client),
+                eventBus: self.venueEventBus()
+            )
+            self.sessionTerminator().register(store)
+            return store
+        }.singleton
+    }
+}

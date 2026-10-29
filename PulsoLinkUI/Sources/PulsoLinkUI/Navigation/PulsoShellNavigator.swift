@@ -29,6 +29,11 @@ public final class PulsoShellNavigator {
         selection = destination
     }
 
+    /** 在当前栈底页面上推一个页面（侧栏、深链等页面外的入口用）。 */
+    public func push(_ route: some Hashable) {
+        paths[selection, default: NavigationPath()].append(route)
+    }
+
     public func path(for destination: ShellDestination) -> Binding<NavigationPath> {
         Binding(
             get: { self.paths[destination] ?? NavigationPath() },

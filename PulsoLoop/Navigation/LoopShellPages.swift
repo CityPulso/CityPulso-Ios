@@ -18,6 +18,8 @@ enum LoopShellPages {
             ProfileOverviewView()
         case .search:
             EventSearchView()
+        case .calendar:
+            CalendarView()
         default:
             PulsoComingSoonView(destination)
         }
