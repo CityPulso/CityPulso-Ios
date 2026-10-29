@@ -38,4 +38,12 @@ enum BaseballVariant: String, WireEnum {
         case .slowpitchSoftball: "sport_option_baseball_variant_slowpitch_softball"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .baseball: "sport_option_baseball_variant_baseball"
+        case .fastpitchSoftball: "sport_option_baseball_variant_fastpitch_softball"
+        case .slowpitchSoftball: "sport_option_baseball_variant_slowpitch_softball"
+        }
+    }
 }

@@ -38,6 +38,22 @@ enum LoopSport: String, WireEnum {
         }
     }
 
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .badminton: "shell_home_module_badminton"
+        case .tennis: "shell_home_module_tennis"
+        case .pickleball: "shell_home_module_pickleball"
+        case .basketball: "shell_home_module_basketball"
+        case .football: "shell_home_module_football"
+        case .baseball: "shell_home_module_baseball"
+        case .golf: "shell_home_module_golf"
+        case .hiking: "shell_home_module_hiking"
+        case .fishing: "shell_home_module_fishing"
+        case .ski: "shell_home_module_ski"
+        case .tableTennis: "shell_home_module_table_tennis"
+        }
+    }
+
     var available: Bool {
         switch self {
         case .badminton: true

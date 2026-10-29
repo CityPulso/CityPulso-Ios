@@ -6,9 +6,11 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 
 - **CI 只在手动触发时编译 App**（免费额度的 macOS 分钟用完，11 月 1 日恢复）：之后跑 `gh workflow run iOS --ref main`，
   修掉从 00fb263 起累积的编译错误。在那之前 SwiftUI 部分记为 🟦，模型层在 Linux 上类型检查。
-- 第 5 组进行中：活动详情（11 种运动共用一页）、报名 / 候补 / 成功 / 我的报名 / 退出 / 参与者弹层、占座付款、
-  发起人改基本信息（含收款账户选择）、结束活动、加入日历、收款清单已写完。
-- 第 5 组剩下：发起活动向导、深链 inbox；社交主页入口暂时是「即将推出」（第 10 组）。
+- 第 5、6 组的代码已写完：活动详情（11 种运动共用）、报名 / 候补 / 退出 / 参与者 / 占座付款、发起人改信息和结束、
+  加入日历、收款清单、发起活动向导（选运动、四步、照片上传、附近场馆自动关联、草稿、各运动自己的选项）。
+- 还差：深链 inbox；向导里的「在地图上选点」要等第 7 组的选点页（现在弹出的是「即将推出」，所以还发不了活动）；
+  发布后的「发个帖子」等第 11 组；社交主页入口等第 10 组。
+- 下一步：第 7 组地图 + 选点（MapLibre / OpenFreeMap），先做选点页，让发起活动能走通。
 
 ## 状态
 
@@ -78,7 +80,7 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 | SEARCH | `pages/event/search` + `features/search` | `Pages/Event/Search`、`Features/Search` | 4 | 🟦 |
 | VENUE_SEARCH | `pages/venue/search` | | 8 | ⬜ |
 | SOCIAL | `pages/social/overview` | | 10 | ⬜ |
-| CREATE | `pages/event/create` | | 5 | ⬜ |
+| CREATE | `pages/event/create` | `Pages/Event/Create`（一个向导给 11 种运动；各运动只差 `SportSettingsDetails` 和 `Features/Create/<Sport>Create.swift`） | 5 / 6 | 🟦 |
 | SETTINGS | `pages/settings/overview` | `Pages/Settings/Overview` | 2 | 🟩 |
 | BILLING | `pages/billing` | | 9 | ⬜ |
 | NOTIFICATIONS | `pages/social/notifications` | | 10 | ⬜ |

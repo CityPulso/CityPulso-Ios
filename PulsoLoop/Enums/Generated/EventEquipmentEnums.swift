@@ -4,7 +4,7 @@ import PulsoLinkCore
 import SwiftUI
 
 /** 羽毛球活动的常用装备要求（WEB `BadmintonEquipmentPresetEnum`）；存到活动上是 `{ icon, name }`，name 用发起人的语言。 */
-enum BadmintonEquipmentPreset: CaseIterable, Sendable, Hashable {
+enum BadmintonEquipmentPreset: CaseIterable, Codable, Sendable, Hashable {
     case bringRacket
     case shuttlecocksProvided
     case racketRental
@@ -33,9 +33,20 @@ enum BadmintonEquipmentPreset: CaseIterable, Sendable, Hashable {
         case .waterProvided: "create_equipment_badminton_water_provided"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .bringRacket: "create_equipment_badminton_bring_racket"
+        case .shuttlecocksProvided: "create_equipment_badminton_shuttlecocks_provided"
+        case .racketRental: "create_equipment_badminton_racket_rental"
+        case .bringShuttlecocks: "create_equipment_badminton_bring_shuttlecocks"
+        case .indoorShoes: "create_equipment_badminton_indoor_shoes"
+        case .waterProvided: "create_equipment_badminton_water_provided"
+        }
+    }
 }
 
-enum TennisEquipmentPreset: CaseIterable, Sendable, Hashable {
+enum TennisEquipmentPreset: CaseIterable, Codable, Sendable, Hashable {
     case bringRacket
     case ballsProvided
     case racketRental
@@ -64,9 +75,20 @@ enum TennisEquipmentPreset: CaseIterable, Sendable, Hashable {
         case .waterProvided: "create_equipment_tennis_water_provided"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .bringRacket: "create_equipment_tennis_bring_racket"
+        case .ballsProvided: "create_equipment_tennis_balls_provided"
+        case .racketRental: "create_equipment_tennis_racket_rental"
+        case .bringBalls: "create_equipment_tennis_bring_balls"
+        case .tennisShoes: "create_equipment_tennis_tennis_shoes"
+        case .waterProvided: "create_equipment_tennis_water_provided"
+        }
+    }
 }
 
-enum PickleballEquipmentPreset: CaseIterable, Sendable, Hashable {
+enum PickleballEquipmentPreset: CaseIterable, Codable, Sendable, Hashable {
     case bringPaddle
     case ballsProvided
     case paddleRental
@@ -95,10 +117,21 @@ enum PickleballEquipmentPreset: CaseIterable, Sendable, Hashable {
         case .waterProvided: "create_equipment_pickleball_water_provided"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .bringPaddle: "create_equipment_pickleball_bring_paddle"
+        case .ballsProvided: "create_equipment_pickleball_balls_provided"
+        case .paddleRental: "create_equipment_pickleball_paddle_rental"
+        case .bringBalls: "create_equipment_pickleball_bring_balls"
+        case .courtShoes: "create_equipment_pickleball_court_shoes"
+        case .waterProvided: "create_equipment_pickleball_water_provided"
+        }
+    }
 }
 
 /** Basketball event equipment notes (WEB `BasketballEquipmentPresetEnum`). */
-enum BasketballEquipmentPreset: CaseIterable, Sendable, Hashable {
+enum BasketballEquipmentPreset: CaseIterable, Codable, Sendable, Hashable {
     case bringTwoShirts
     case ballsProvided
     case indoorShoes
@@ -121,10 +154,19 @@ enum BasketballEquipmentPreset: CaseIterable, Sendable, Hashable {
         case .bringWater: "create_equipment_basketball_bring_water"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .bringTwoShirts: "create_equipment_basketball_bring_two_shirts"
+        case .ballsProvided: "create_equipment_basketball_balls_provided"
+        case .indoorShoes: "create_equipment_basketball_indoor_shoes"
+        case .bringWater: "create_equipment_basketball_bring_water"
+        }
+    }
 }
 
 /** Football event equipment notes (WEB `FootballEquipmentPresetEnum`). */
-enum FootballEquipmentPreset: CaseIterable, Sendable, Hashable {
+enum FootballEquipmentPreset: CaseIterable, Codable, Sendable, Hashable {
     case bringCleats
     case bringTwoShirts
     case shinGuards
@@ -147,10 +189,19 @@ enum FootballEquipmentPreset: CaseIterable, Sendable, Hashable {
         case .ballsProvided: "create_equipment_football_balls_provided"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .bringCleats: "create_equipment_football_bring_cleats"
+        case .bringTwoShirts: "create_equipment_football_bring_two_shirts"
+        case .shinGuards: "create_equipment_football_shin_guards"
+        case .ballsProvided: "create_equipment_football_balls_provided"
+        }
+    }
 }
 
 /** Baseball event equipment notes (WEB `BaseballEquipmentPresetEnum`). */
-enum BaseballEquipmentPreset: CaseIterable, Sendable, Hashable {
+enum BaseballEquipmentPreset: CaseIterable, Codable, Sendable, Hashable {
     case bringGlove
     case batsProvided
     case helmetRequired
@@ -173,10 +224,19 @@ enum BaseballEquipmentPreset: CaseIterable, Sendable, Hashable {
         case .bringWater: "create_equipment_baseball_bring_water"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .bringGlove: "create_equipment_baseball_bring_glove"
+        case .batsProvided: "create_equipment_baseball_bats_provided"
+        case .helmetRequired: "create_equipment_baseball_helmet_required"
+        case .bringWater: "create_equipment_baseball_bring_water"
+        }
+    }
 }
 
 /** Golf event equipment notes (WEB `GolfEquipmentPresetEnum`). */
-enum GolfEquipmentPreset: CaseIterable, Sendable, Hashable {
+enum GolfEquipmentPreset: CaseIterable, Codable, Sendable, Hashable {
     case bringClubs
     case collaredShirt
     case clubsRental
@@ -199,10 +259,19 @@ enum GolfEquipmentPreset: CaseIterable, Sendable, Hashable {
         case .cartIncluded: "create_equipment_golf_cart_included"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .bringClubs: "create_equipment_golf_bring_clubs"
+        case .collaredShirt: "create_equipment_golf_collared_shirt"
+        case .clubsRental: "create_equipment_golf_clubs_rental"
+        case .cartIncluded: "create_equipment_golf_cart_included"
+        }
+    }
 }
 
 /** Hiking event equipment notes (WEB `HikingEquipmentPresetEnum`). */
-enum HikingEquipmentPreset: CaseIterable, Sendable, Hashable {
+enum HikingEquipmentPreset: CaseIterable, Codable, Sendable, Hashable {
     case hikingShoes
     case bringWater
     case bringLayers
@@ -225,10 +294,19 @@ enum HikingEquipmentPreset: CaseIterable, Sendable, Hashable {
         case .bringSnacks: "create_equipment_hiking_bring_snacks"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .hikingShoes: "create_equipment_hiking_hiking_shoes"
+        case .bringWater: "create_equipment_hiking_bring_water"
+        case .bringLayers: "create_equipment_hiking_bring_layers"
+        case .bringSnacks: "create_equipment_hiking_bring_snacks"
+        }
+    }
 }
 
 /** Fishing event equipment notes (WEB `FishingEquipmentPresetEnum`). */
-enum FishingEquipmentPreset: CaseIterable, Sendable, Hashable {
+enum FishingEquipmentPreset: CaseIterable, Codable, Sendable, Hashable {
     case bringRod
     case licenseRequired
     case baitProvided
@@ -251,10 +329,19 @@ enum FishingEquipmentPreset: CaseIterable, Sendable, Hashable {
         case .rodRental: "create_equipment_fishing_rod_rental"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .bringRod: "create_equipment_fishing_bring_rod"
+        case .licenseRequired: "create_equipment_fishing_license_required"
+        case .baitProvided: "create_equipment_fishing_bait_provided"
+        case .rodRental: "create_equipment_fishing_rod_rental"
+        }
+    }
 }
 
 /** Ski event equipment notes (WEB `SkiEquipmentPresetEnum`). */
-enum SkiEquipmentPreset: CaseIterable, Sendable, Hashable {
+enum SkiEquipmentPreset: CaseIterable, Codable, Sendable, Hashable {
     case helmetRequired
     case bringGear
     case gearRental
@@ -277,10 +364,19 @@ enum SkiEquipmentPreset: CaseIterable, Sendable, Hashable {
         case .bringWater: "create_equipment_ski_bring_water"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .helmetRequired: "create_equipment_ski_helmet_required"
+        case .bringGear: "create_equipment_ski_bring_gear"
+        case .gearRental: "create_equipment_ski_gear_rental"
+        case .bringWater: "create_equipment_ski_bring_water"
+        }
+    }
 }
 
 /** Table tennis event equipment notes (WEB `TableTennisEquipmentPresetEnum`). */
-enum TableTennisEquipmentPreset: CaseIterable, Sendable, Hashable {
+enum TableTennisEquipmentPreset: CaseIterable, Codable, Sendable, Hashable {
     case bringPaddle
     case ballsProvided
     case paddleRental
@@ -303,4 +399,42 @@ enum TableTennisEquipmentPreset: CaseIterable, Sendable, Hashable {
         case .indoorShoes: "create_equipment_table_tennis_indoor_shoes"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .bringPaddle: "create_equipment_table_tennis_bring_paddle"
+        case .ballsProvided: "create_equipment_table_tennis_balls_provided"
+        case .paddleRental: "create_equipment_table_tennis_paddle_rental"
+        case .indoorShoes: "create_equipment_table_tennis_indoor_shoes"
+        }
+    }
 }
+
+/** 一项活动最多几条装备要求（API `EventMaxEquipment`）。 */
+let eventEquipmentMax = 10
+
+/** 装备要求名称最长几个字（API `EventMaxEquipmentNameLen`）。 */
+let eventEquipmentNameMax = 60
+
+/** 新建羽毛球活动默认带的两条：自备球拍、提供羽毛球。 */
+let badmintonEquipmentDefaults: [BadmintonEquipmentPreset] = [.bringRacket, .shuttlecocksProvided]
+
+let tennisEquipmentDefaults: [TennisEquipmentPreset] = [.bringRacket, .ballsProvided]
+
+let pickleballEquipmentDefaults: [PickleballEquipmentPreset] = [.bringPaddle, .ballsProvided]
+
+let basketballEquipmentDefaults: [BasketballEquipmentPreset] = [.bringTwoShirts, .ballsProvided]
+
+let footballEquipmentDefaults: [FootballEquipmentPreset] = [.bringCleats, .bringTwoShirts]
+
+let baseballEquipmentDefaults: [BaseballEquipmentPreset] = [.bringGlove, .batsProvided]
+
+let golfEquipmentDefaults: [GolfEquipmentPreset] = [.bringClubs, .collaredShirt]
+
+let hikingEquipmentDefaults: [HikingEquipmentPreset] = [.hikingShoes, .bringWater]
+
+let fishingEquipmentDefaults: [FishingEquipmentPreset] = [.bringRod, .licenseRequired]
+
+let skiEquipmentDefaults: [SkiEquipmentPreset] = [.helmetRequired, .bringGear]
+
+let tableTennisEquipmentDefaults: [TableTennisEquipmentPreset] = [.bringPaddle, .ballsProvided]

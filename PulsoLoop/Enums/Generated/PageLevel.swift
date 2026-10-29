@@ -7,7 +7,7 @@ import SwiftUI
  * 页面渲染层级。所有路由平级，谁盖住谁只由 level 决定。
  * 悬浮导航栏常驻在 [LoopLayerZ.SHELL_NAV] 永不移除，[PageLevel.AboveNav] 的页面画在它上面把它盖住。
  */
-enum PageLevel: CaseIterable, Sendable, Hashable {
+enum PageLevel: CaseIterable, Codable, Sendable, Hashable {
     /** 底栏槽位页面：被悬浮导航栏遮挡，底部预留导航栏净空。 */
     case base
     /** 盖住导航栏的页面：详情页、设置子页、Apps 托盘打开的页面。 */

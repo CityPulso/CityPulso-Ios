@@ -36,4 +36,11 @@ enum GolfHoles: String, WireEnum {
         case .eighteen: "sport_option_golf_holes_eighteen"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .nine: "sport_option_golf_holes_nine"
+        case .eighteen: "sport_option_golf_holes_eighteen"
+        }
+    }
 }

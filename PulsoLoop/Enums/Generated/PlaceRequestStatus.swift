@@ -20,4 +20,13 @@ enum PlaceRequestStatus: String, WireEnum {
         case .cancelled: "place_status_cancelled"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .pending: "place_status_pending"
+        case .approved: "place_status_approved"
+        case .rejected: "place_status_rejected"
+        case .cancelled: "place_status_cancelled"
+        }
+    }
 }

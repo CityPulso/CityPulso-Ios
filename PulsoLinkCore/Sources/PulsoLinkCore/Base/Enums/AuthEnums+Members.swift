@@ -1,8 +1,5 @@
 /* Android `AuthEnums.kt` 里枚举 companion 的常量与函数（生成器只生成取值本身）。 */
 
-/** 组织申请 `requested_category`：场馆运营者申请开通球馆时的产品类别 key。 */
-public let organizationApplicationCategoryVenue = "venue"
-
 extension AuthCommunityRole {
     /** 通过角色申请获得的社区角色（与 Link `AuthCommunityRolesApplicable` 一致）。 */
     public static let applicable: [AuthCommunityRole] = [.creator, .coach]

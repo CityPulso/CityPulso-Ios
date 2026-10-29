@@ -40,4 +40,13 @@ enum HikingDifficulty: String, WireEnum {
         case .expert: "sport_option_hiking_difficulty_expert"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .easy: "sport_option_hiking_difficulty_easy"
+        case .moderate: "sport_option_hiking_difficulty_moderate"
+        case .hard: "sport_option_hiking_difficulty_hard"
+        case .expert: "sport_option_hiking_difficulty_expert"
+        }
+    }
 }

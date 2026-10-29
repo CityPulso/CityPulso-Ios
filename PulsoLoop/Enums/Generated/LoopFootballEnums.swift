@@ -38,6 +38,14 @@ enum FootballFormat: String, WireEnum {
         case .elevenASide: "sport_option_football_format_eleven_a_side"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .fiveASide: "sport_option_football_format_five_a_side"
+        case .sevenASide: "sport_option_football_format_seven_a_side"
+        case .elevenASide: "sport_option_football_format_eleven_a_side"
+        }
+    }
 }
 
 /** Football pitch surface: grass / artificial_turf / indoor. */
@@ -49,6 +57,14 @@ enum PitchSurface: String, WireEnum {
     static let fallback: PitchSurface = .artificialTurf
 
     var labelKey: LocalizedStringKey {
+        switch self {
+        case .grass: "sport_option_pitch_surface_grass"
+        case .artificialTurf: "sport_option_pitch_surface_artificial_turf"
+        case .indoor: "sport_option_pitch_surface_indoor"
+        }
+    }
+
+    var labelResource: String.LocalizationValue {
         switch self {
         case .grass: "sport_option_pitch_surface_grass"
         case .artificialTurf: "sport_option_pitch_surface_artificial_turf"

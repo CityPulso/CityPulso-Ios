@@ -36,4 +36,11 @@ enum BasketballFormat: String, WireEnum {
         case .fullCourt: "sport_option_basketball_format_full_court"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .halfCourt: "sport_option_basketball_format_half_court"
+        case .fullCourt: "sport_option_basketball_format_full_court"
+        }
+    }
 }

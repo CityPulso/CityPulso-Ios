@@ -38,6 +38,14 @@ enum SkiDiscipline: String, WireEnum {
         case .both: "sport_option_ski_discipline_both"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .ski: "sport_option_ski_discipline_ski"
+        case .snowboard: "sport_option_ski_discipline_snowboard"
+        case .both: "sport_option_ski_discipline_both"
+        }
+    }
 }
 
 /** Terrain the group rides: beginner / intermediate / advanced / expert. */
@@ -50,6 +58,15 @@ enum SkiSkillLevel: String, WireEnum {
     static let fallback: SkiSkillLevel = .intermediate
 
     var labelKey: LocalizedStringKey {
+        switch self {
+        case .beginner: "sport_option_ski_skill_level_beginner"
+        case .intermediate: "sport_option_ski_skill_level_intermediate"
+        case .advanced: "sport_option_ski_skill_level_advanced"
+        case .expert: "sport_option_ski_skill_level_expert"
+        }
+    }
+
+    var labelResource: String.LocalizationValue {
         switch self {
         case .beginner: "sport_option_ski_skill_level_beginner"
         case .intermediate: "sport_option_ski_skill_level_intermediate"

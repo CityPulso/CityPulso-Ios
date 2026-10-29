@@ -36,13 +36,13 @@ enum ActivityPaymentMethodKind: String, WireEnum {
 }
 
 /** 收费场次同时接受银行卡与线下方式时，报名者的付款选择（对齐 WEB `RegistrationPayChoiceEnum`）。 */
-enum RegistrationPayChoice: CaseIterable, Sendable, Hashable {
+enum RegistrationPayChoice: CaseIterable, Codable, Sendable, Hashable {
     case card
     case direct
 }
 
 /** Common mahjong rule sets offered as presets on the create form (WEB `MahjongVariantPresetEnum`); the activity stores the host's text. */
-enum MahjongVariantPreset: CaseIterable, Sendable, Hashable {
+enum MahjongVariantPreset: CaseIterable, Codable, Sendable, Hashable {
     case sichuan
     case cantonese
     case guobiao
@@ -60,4 +60,18 @@ enum MahjongVariantPreset: CaseIterable, Sendable, Hashable {
         case .riichi: "create_mahjong_variant_riichi"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .sichuan: "create_mahjong_variant_sichuan"
+        case .cantonese: "create_mahjong_variant_cantonese"
+        case .guobiao: "create_mahjong_variant_guobiao"
+        case .hongkong: "create_mahjong_variant_hongkong"
+        case .shanghai: "create_mahjong_variant_shanghai"
+        case .riichi: "create_mahjong_variant_riichi"
+        }
+    }
 }
+
+/** Stripe 单笔最低收费（对齐 WEB `STRIPE_MIN_AMOUNT`）。 */
+let stripeMinAmount = 0.5

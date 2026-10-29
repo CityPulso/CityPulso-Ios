@@ -4,7 +4,7 @@ import PulsoLinkCore
 import SwiftUI
 
 /** Corner badge on an event feed card: whose event this is for the person reading the list. */
-enum EventFeedBadge: CaseIterable, Sendable, Hashable {
+enum EventFeedBadge: CaseIterable, Codable, Sendable, Hashable {
     case host
     case joined
 
@@ -14,10 +14,17 @@ enum EventFeedBadge: CaseIterable, Sendable, Hashable {
         case .joined: "shell_home_status_participating"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .host: "event_detail_host_badge"
+        case .joined: "shell_home_status_participating"
+        }
+    }
 }
 
 /** Whether an event still takes players. */
-enum EventOpenStatus: CaseIterable, Sendable, Hashable {
+enum EventOpenStatus: CaseIterable, Codable, Sendable, Hashable {
     case `open`
     case full
     case ended
@@ -29,21 +36,36 @@ enum EventOpenStatus: CaseIterable, Sendable, Hashable {
         case .ended: "event_detail_ended_badge"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .`open`: "event_status_open"
+        case .full: "event_status_full"
+        case .ended: "event_detail_ended_badge"
+        }
+    }
 }
 
 /** Tabs in the participants sheet. */
-enum ParticipantsTab: CaseIterable, Sendable, Hashable {
+enum ParticipantsTab: CaseIterable, Codable, Sendable, Hashable {
     case all
     case joined
     case waitlist
 }
 
 /** The two lists on someone else's profile. */
-enum SocialProfileTab: CaseIterable, Sendable, Hashable {
+enum SocialProfileTab: CaseIterable, Codable, Sendable, Hashable {
     case hosted
     case joined
 
     var labelKey: LocalizedStringKey {
+        switch self {
+        case .hosted: "social_profile_tab_hosted"
+        case .joined: "social_profile_tab_joined"
+        }
+    }
+
+    var labelResource: String.LocalizationValue {
         switch self {
         case .hosted: "social_profile_tab_hosted"
         case .joined: "social_profile_tab_joined"

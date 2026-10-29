@@ -4,7 +4,7 @@ import PulsoLinkCore
 import SwiftUI
 
 /** Payment methods a host can offer while drafting a session; each activity type's request maps it to its own wire enum. */
-enum CreatePaymentMethodKind: CaseIterable, Sendable, Hashable {
+enum CreatePaymentMethodKind: CaseIterable, Codable, Sendable, Hashable {
     case etransfer
     case wechat
     case cash

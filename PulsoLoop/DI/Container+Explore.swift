@@ -85,4 +85,12 @@ extension Container {
             return store
         }.singleton
     }
+
+    var eventCreateDraftStore: Factory<EventCreateDraftStore> {
+        self {
+            let store = EventCreateDraftStore()
+            self.sessionTerminator().register(store)
+            return store
+        }.singleton
+    }
 }

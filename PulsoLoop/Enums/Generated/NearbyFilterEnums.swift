@@ -16,6 +16,13 @@ enum EventNearbySort: String, WireEnum {
         case .startsAt: "nearby_filter_sort_starts_at"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .distance: "nearby_filter_sort_distance"
+        case .startsAt: "nearby_filter_sort_starts_at"
+        }
+    }
 }
 
 /** Order of the nearby venue list (API `sort`). */
@@ -27,6 +34,14 @@ enum VenueNearbySort: String, WireEnum {
     static let fallback: VenueNearbySort = .distance
 
     var labelKey: LocalizedStringKey {
+        switch self {
+        case .distance: "nearby_filter_sort_distance"
+        case .price: "nearby_filter_sort_price"
+        case .popular: "nearby_filter_sort_popular"
+        }
+    }
+
+    var labelResource: String.LocalizationValue {
         switch self {
         case .distance: "nearby_filter_sort_distance"
         case .price: "nearby_filter_sort_price"
@@ -67,6 +82,16 @@ enum EventDatePreset: String, WireEnum {
     static let fallback: EventDatePreset = .`any`
 
     var labelKey: LocalizedStringKey {
+        switch self {
+        case .`any`: "nearby_filter_date_any"
+        case .today: "nearby_filter_date_today"
+        case .thisWeek: "nearby_filter_date_week"
+        case .thisMonth: "nearby_filter_date_month"
+        case .custom: "nearby_filter_date_custom"
+        }
+    }
+
+    var labelResource: String.LocalizationValue {
         switch self {
         case .`any`: "nearby_filter_date_any"
         case .today: "nearby_filter_date_today"
@@ -140,6 +165,17 @@ enum VenueAmenityPreset: String, WireEnum {
     }
 
     var labelKey: LocalizedStringKey {
+        switch self {
+        case .parking: "nearby_filter_amenity_parking"
+        case .showers: "nearby_filter_amenity_showers"
+        case .lockers: "nearby_filter_amenity_lockers"
+        case .racketRental: "nearby_filter_amenity_racket_rental"
+        case .proShop: "nearby_filter_amenity_pro_shop"
+        case .wheelchairAccess: "nearby_filter_amenity_wheelchair"
+        }
+    }
+
+    var labelResource: String.LocalizationValue {
         switch self {
         case .parking: "nearby_filter_amenity_parking"
         case .showers: "nearby_filter_amenity_showers"

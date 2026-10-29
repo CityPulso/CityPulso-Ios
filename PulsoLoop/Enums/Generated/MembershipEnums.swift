@@ -157,7 +157,7 @@ enum MembershipPaymentMethod: String, WireEnum {
     static let fallback: MembershipPaymentMethod = .platform
 }
 
-enum MyMembershipsTab: CaseIterable, Sendable, Hashable {
+enum MyMembershipsTab: CaseIterable, Codable, Sendable, Hashable {
     case cards
     case pending
 }

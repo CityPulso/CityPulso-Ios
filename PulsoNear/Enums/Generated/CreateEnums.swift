@@ -4,19 +4,28 @@ import PulsoLinkCore
 import SwiftUI
 
 /** 创建向导阶段：先选活动类型，再填表单。 */
-enum CreateStep: CaseIterable, Sendable, Hashable {
+enum CreateStep: CaseIterable, Codable, Sendable, Hashable {
     case activityType
     case form
 }
 
 /** 表单的四步：基本信息 / 时间地点 / 活动设置 / 确认发布。 */
-enum CreateWizardStep: CaseIterable, Sendable, Hashable {
+enum CreateWizardStep: CaseIterable, Codable, Sendable, Hashable {
     case basics
     case whenWhere
     case settings
     case publish
 
     var labelKey: LocalizedStringKey {
+        switch self {
+        case .basics: "create_wizard_step_basics"
+        case .whenWhere: "create_wizard_step_when_where"
+        case .settings: "create_wizard_step_settings"
+        case .publish: "create_wizard_step_publish"
+        }
+    }
+
+    var labelResource: String.LocalizationValue {
         switch self {
         case .basics: "create_wizard_step_basics"
         case .whenWhere: "create_wizard_step_when_where"
@@ -36,7 +45,7 @@ enum CreateWizardStep: CaseIterable, Sendable, Hashable {
 }
 
 /** 开始时间之后的持续时长快捷项（结束时间仍可手改）。 */
-enum ActivityDurationPreset: CaseIterable, Sendable, Hashable {
+enum ActivityDurationPreset: CaseIterable, Codable, Sendable, Hashable {
     case hours2
     case hours4
     case hours6
@@ -45,14 +54,14 @@ enum ActivityDurationPreset: CaseIterable, Sendable, Hashable {
 }
 
 /** One picked photo on the create form, from the moment it is chosen until the asset is confirmed. */
-enum PhotoUploadStatus: CaseIterable, Sendable, Hashable {
+enum PhotoUploadStatus: CaseIterable, Codable, Sendable, Hashable {
     case uploading
     case ready
     case failed
 }
 
 /** How long before the start a player may still leave on their own (WEB `EXIT_DEADLINE_HOURS`). */
-enum ExitDeadlineHours: CaseIterable, Sendable, Hashable {
+enum ExitDeadlineHours: CaseIterable, Codable, Sendable, Hashable {
     case h1
     case h2
     case h3

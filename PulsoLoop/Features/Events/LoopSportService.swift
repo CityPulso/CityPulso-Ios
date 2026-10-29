@@ -14,7 +14,7 @@ struct SportRegistrationsQuery: Hashable, Sendable {
     var excludeHosted = false
 }
 
-protocol LoopSportService: SportEventDetailService, SportChecklistService {
+protocol LoopSportService: SportEventDetailService, SportChecklistService, SportCreateService {
     var sport: LoopSport { get }
 
     /** [hostedProfileId] 主持的活动（含已结束），最多 [limit] 条。 */

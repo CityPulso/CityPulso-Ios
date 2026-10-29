@@ -128,3 +128,6 @@ public enum FavoriteActivity: String, WireEnum {
 
     public static let fallback: FavoriteActivity = .mahjong
 }
+
+/** 组织申请 `requested_category`：场馆运营者（[AuthOrganizationRole.OPERATOR]）申请开通球馆时的产品类别 key。 */
+public let organizationApplicationCategoryVenue = "venue"

@@ -40,6 +40,15 @@ enum FishingMethod: String, WireEnum {
         case .fly: "sport_option_fishing_method_fly"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .shore: "sport_option_fishing_method_shore"
+        case .boat: "sport_option_fishing_method_boat"
+        case .ice: "sport_option_fishing_method_ice"
+        case .fly: "sport_option_fishing_method_fly"
+        }
+    }
 }
 
 /** What happens to the catch: catch_and_release / keep. */
@@ -50,6 +59,13 @@ enum CatchPolicy: String, WireEnum {
     static let fallback: CatchPolicy = .catchAndRelease
 
     var labelKey: LocalizedStringKey {
+        switch self {
+        case .catchAndRelease: "sport_option_catch_policy_catch_and_release"
+        case .keep: "sport_option_catch_policy_keep"
+        }
+    }
+
+    var labelResource: String.LocalizationValue {
         switch self {
         case .catchAndRelease: "sport_option_catch_policy_catch_and_release"
         case .keep: "sport_option_catch_policy_keep"

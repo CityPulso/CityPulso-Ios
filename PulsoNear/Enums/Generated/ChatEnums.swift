@@ -3,20 +3,20 @@
 import PulsoLinkCore
 import SwiftUI
 
-enum ChatComposerMode: CaseIterable, Sendable, Hashable {
+enum ChatComposerMode: CaseIterable, Codable, Sendable, Hashable {
     case text
     case voice
 }
 
 /** What sits under the chat input bar besides the keyboard. */
-enum ChatComposerPanel: CaseIterable, Sendable, Hashable {
+enum ChatComposerPanel: CaseIterable, Codable, Sendable, Hashable {
     case none
     case emoji
     case more
 }
 
 /** Long-press actions on a chat message, in menu order. */
-enum ChatMessageAction: CaseIterable, Sendable, Hashable {
+enum ChatMessageAction: CaseIterable, Codable, Sendable, Hashable {
     case copy
     case forward
     case quote
@@ -24,7 +24,7 @@ enum ChatMessageAction: CaseIterable, Sendable, Hashable {
 }
 
 /** Tabs of the chat favorites picker: saved things that can be shared into a conversation. */
-enum ChatFavoriteTab: CaseIterable, Sendable, Hashable {
+enum ChatFavoriteTab: CaseIterable, Codable, Sendable, Hashable {
     case buildings
     case venues
     case posts

@@ -49,6 +49,14 @@ enum ForumMemberRole: String, WireEnum {
         case .moderator: "discussion_role_moderator"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .owner: "discussion_role_owner"
+        case .admin: "discussion_role_admin"
+        case .moderator: "discussion_role_moderator"
+        }
+    }
 }
 
 enum ForumMemberStatus: String, WireEnum {
@@ -76,6 +84,15 @@ enum ForumPostStatus: String, WireEnum {
         case .removed: "discussion_post_status_removed"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .pending: "discussion_post_status_pending"
+        case .published: "discussion_post_status_published"
+        case .rejected: "discussion_post_status_rejected"
+        case .removed: "discussion_post_status_removed"
+        }
+    }
 }
 
 /** Feed tabs; `wire` is the API `tab` value. "Mine" is served by the my-posts list. */
@@ -88,6 +105,15 @@ enum ForumFeedTab: String, WireEnum {
     static let fallback: ForumFeedTab = .latest
 
     var labelKey: LocalizedStringKey {
+        switch self {
+        case .latest: "discussion_feed_tab_latest"
+        case .popular: "discussion_feed_tab_popular"
+        case .following: "discussion_feed_tab_following"
+        case .mine: "discussion_feed_tab_mine"
+        }
+    }
+
+    var labelResource: String.LocalizationValue {
         switch self {
         case .latest: "discussion_feed_tab_latest"
         case .popular: "discussion_feed_tab_popular"
@@ -111,10 +137,18 @@ enum ForumSort: String, WireEnum {
         case .name: "discussion_sort_name"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .popular: "discussion_sort_popular"
+        case .recent: "discussion_sort_recent"
+        case .name: "discussion_sort_name"
+        }
+    }
 }
 
 /** Forum search type filter; null scope = every forum. */
-enum ForumOwnerFilter: CaseIterable, Sendable, Hashable {
+enum ForumOwnerFilter: CaseIterable, Codable, Sendable, Hashable {
     case all
     case official
     case organization
@@ -137,9 +171,18 @@ enum ForumOwnerFilter: CaseIterable, Sendable, Hashable {
         case .community: "discussion_owner_community"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .all: "discussion_owner_all"
+        case .official: "discussion_owner_official"
+        case .organization: "discussion_owner_organization"
+        case .community: "discussion_owner_community"
+        }
+    }
 }
 
-enum ForumDetailTab: CaseIterable, Sendable, Hashable {
+enum ForumDetailTab: CaseIterable, Codable, Sendable, Hashable {
     case posts
     case about
     case staff
@@ -153,9 +196,18 @@ enum ForumDetailTab: CaseIterable, Sendable, Hashable {
         case .rules: "discussion_detail_tab_rules"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .posts: "discussion_detail_tab_posts"
+        case .about: "discussion_detail_tab_about"
+        case .staff: "discussion_detail_tab_staff"
+        case .rules: "discussion_detail_tab_rules"
+        }
+    }
 }
 
-enum ForumManageTab: CaseIterable, Sendable, Hashable {
+enum ForumManageTab: CaseIterable, Codable, Sendable, Hashable {
     case settings
     case staff
     case pending
@@ -164,6 +216,17 @@ enum ForumManageTab: CaseIterable, Sendable, Hashable {
     case topics
 
     var labelKey: LocalizedStringKey {
+        switch self {
+        case .settings: "discussion_manage_tab_settings"
+        case .staff: "discussion_manage_tab_staff"
+        case .pending: "discussion_manage_tab_pending"
+        case .reports: "discussion_manage_tab_reports"
+        case .announcements: "discussion_manage_tab_announcements"
+        case .topics: "discussion_manage_tab_topics"
+        }
+    }
+
+    var labelResource: String.LocalizationValue {
         switch self {
         case .settings: "discussion_manage_tab_settings"
         case .staff: "discussion_manage_tab_staff"
@@ -202,6 +265,17 @@ enum ForumReportReason: String, WireEnum {
         case .other: "discussion_report_reason_other"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .spam: "discussion_report_reason_spam"
+        case .abuse: "discussion_report_reason_abuse"
+        case .harassment: "discussion_report_reason_harassment"
+        case .nsfw: "discussion_report_reason_nsfw"
+        case .misinformation: "discussion_report_reason_misinformation"
+        case .other: "discussion_report_reason_other"
+        }
+    }
 }
 
 enum ForumReportStatus: String, WireEnum {
@@ -212,6 +286,14 @@ enum ForumReportStatus: String, WireEnum {
     static let fallback: ForumReportStatus = .`open`
 
     var labelKey: LocalizedStringKey {
+        switch self {
+        case .`open`: "discussion_report_status_open"
+        case .resolved: "discussion_report_status_resolved"
+        case .dismissed: "discussion_report_status_dismissed"
+        }
+    }
+
+    var labelResource: String.LocalizationValue {
         switch self {
         case .`open`: "discussion_report_status_open"
         case .resolved: "discussion_report_status_resolved"
@@ -229,6 +311,14 @@ enum ForumReportAction: String, WireEnum {
     static let fallback: ForumReportAction = .none
 
     var labelKey: LocalizedStringKey {
+        switch self {
+        case .none: "discussion_report_action_none"
+        case .removePost: "discussion_report_action_remove_post"
+        case .deleteComment: "discussion_report_action_delete_comment"
+        }
+    }
+
+    var labelResource: String.LocalizationValue {
         switch self {
         case .none: "discussion_report_action_none"
         case .removePost: "discussion_report_action_remove_post"
@@ -254,6 +344,15 @@ enum PostLinkType: String, WireEnum {
         case .building: "discussion_link_type_building"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .post: "discussion_link_type_post"
+        case .activity: "discussion_link_type_activity"
+        case .venue: "discussion_link_type_venue"
+        case .building: "discussion_link_type_building"
+        }
+    }
 }
 
 /** What a post is about; the card shows it as a coloured pill and feeds can filter by it. */
@@ -269,6 +368,18 @@ enum PostKind: String, WireEnum {
     static let fallback: PostKind = .discussion
 
     var labelKey: LocalizedStringKey {
+        switch self {
+        case .discussion: "discussion_kind_discussion"
+        case .playersWanted: "discussion_kind_players_wanted"
+        case .match: "discussion_kind_match"
+        case .activityRecap: "discussion_kind_activity_recap"
+        case .tips: "discussion_kind_tips"
+        case .question: "discussion_kind_question"
+        case .gear: "discussion_kind_gear"
+        }
+    }
+
+    var labelResource: String.LocalizationValue {
         switch self {
         case .discussion: "discussion_kind_discussion"
         case .playersWanted: "discussion_kind_players_wanted"

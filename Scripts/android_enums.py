@@ -351,7 +351,7 @@ def render(enum: KotlinEnum, access: str, string_type: str) -> list[str]:
     # Without a `wire` property, a @Serializable enum goes on the wire by @SerialName, else by its constant name.
     by_serial = wire is None and enum.serializable
     lines = doc_lines(enum.doc, "")
-    conformance = "String, WireEnum" if wire or by_serial else "CaseIterable, Sendable, Hashable"
+    conformance = "String, WireEnum" if wire or by_serial else "CaseIterable, Codable, Sendable, Hashable"
     lines.append(f"{access}enum {enum.name}: {conformance} {{")
     for entry in enum.entries:
         lines += doc_lines(entry.doc, "    ")
@@ -378,6 +378,12 @@ def render(enum: KotlinEnum, access: str, string_type: str) -> list[str]:
         for entry in enum.entries:
             lines.append(f"        case .{camel(entry.name)}: {swift_value(entry.args[index])}")
         lines += ["        }", "    }"]
+        if param.name == "labelRes" and kind == "LocalizedStringKey":
+            # Android reads the same @StringRes with getString() too (text the user keeps, e.g. equipment names).
+            lines += ["", f"    {access}var labelResource: String.LocalizationValue {{", "        switch self {"]
+            for entry in enum.entries:
+                lines.append(f"        case .{camel(entry.name)}: {swift_value(entry.args[index])}")
+            lines += ["        }", "    }"]
     lines.append("}")
     return lines
 
@@ -387,6 +393,27 @@ notes: list[str] = []
 
 def enum_args(enum: KotlinEnum, index: int) -> list[str]:
     return [entry.args[index] for entry in enum.entries]
+
+
+def render_lists(text: str, enums: list[KotlinEnum], access: str) -> list[str]:
+    """Top-level `const val` literals and `val NAME = listOf(Enum.A, Enum.B)` over an enum of this file → Swift constants."""
+    names = {enum.name for enum in enums}
+    lines: list[str] = []
+    for match in re.finditer(r"^const val (\w+)\s*=\s*(\"[^\"]*\"|-?[0-9][0-9_.]*[LfF]?)\s*$", text, re.M):
+        before = text[: match.start()]
+        tail = before[max(before.rfind("}"), before.rfind("\n\n")) + 1 :]
+        doc = kdoc(tail) if "/**" in tail else None
+        lines += doc_lines(doc, "") + [f"{access}let {camel(match.group(1))} = {swift_value(match.group(2))}", ""]
+    for match in re.finditer(r"^val (\w+)\s*=\s*listOf\(([^)]*)\)", text, re.M):
+        items = [item.strip() for item in match.group(2).split(",") if item.strip()]
+        types = {item.split(".")[0] for item in items}
+        if len(types) != 1 or not types <= names or not all(item.count(".") == 1 for item in items):
+            continue
+        before = text[: match.start()]
+        doc = kdoc(before[before.rfind("}") + 1 :]) if "/**" in before[before.rfind("}") + 1 :] else None
+        cases = ", ".join(f".{camel(item.split('.')[1])}" for item in items)
+        lines += doc_lines(doc, "") + [f"{access}let {camel(match.group(1))}: [{types.pop()}] = [{cases}]", ""]
+    return lines
 
 
 def generate(module: Module) -> dict[Path, str]:
@@ -404,6 +431,7 @@ def generate(module: Module) -> dict[Path, str]:
             lines += render(enum, module.access, module.string_type) + [""]
             for member in enum.skipped:
                 notes.append(f"{relative.name}: {enum.name}.{member}")
+        lines += render_lists(path.read_text(), enums, module.access)
         files[module.output / f"{path.stem}.swift"] = "\n".join(lines).rstrip() + "\n"
     return files
 

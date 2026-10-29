@@ -53,7 +53,7 @@ enum CoursePaymentMethod: String, WireEnum {
 }
 
 /** 报名结果：付款完成 / 已报名 / 等球馆确认。 */
-enum EnrollOutcome: CaseIterable, Sendable, Hashable {
+enum EnrollOutcome: CaseIterable, Codable, Sendable, Hashable {
     case enrolled
     case requested
 }

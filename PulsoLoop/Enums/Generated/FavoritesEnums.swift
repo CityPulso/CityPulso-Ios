@@ -4,7 +4,7 @@ import PulsoLinkCore
 import SwiftUI
 
 /** Tabs of the favorites page: places, then what was saved in the forums. */
-enum FavoritesTab: CaseIterable, Sendable, Hashable {
+enum FavoritesTab: CaseIterable, Codable, Sendable, Hashable {
     case venues
     case buildings
     case forums
@@ -12,6 +12,16 @@ enum FavoritesTab: CaseIterable, Sendable, Hashable {
     case comments
 
     var labelKey: LocalizedStringKey {
+        switch self {
+        case .venues: "favorites_tab_venues"
+        case .buildings: "favorites_tab_buildings"
+        case .forums: "favorites_tab_forums"
+        case .posts: "favorites_tab_posts"
+        case .comments: "favorites_tab_comments"
+        }
+    }
+
+    var labelResource: String.LocalizationValue {
         switch self {
         case .venues: "favorites_tab_venues"
         case .buildings: "favorites_tab_buildings"

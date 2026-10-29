@@ -4,7 +4,7 @@ import PulsoLinkCore
 import SwiftUI
 
 /** The three headings of the create picker (WEB `NEAR_ACTIVITY_TYPE_GROUPS`). */
-enum NearActivityGroup: CaseIterable, Sendable, Hashable {
+enum NearActivityGroup: CaseIterable, Codable, Sendable, Hashable {
     case tabletop
     case venue
     case social
@@ -16,10 +16,18 @@ enum NearActivityGroup: CaseIterable, Sendable, Hashable {
         case .social: "create_activity_group_social"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .tabletop: "create_activity_group_tabletop"
+        case .venue: "create_activity_group_venue"
+        case .social: "create_activity_group_social"
+        }
+    }
 }
 
 /** A notice the type shows on create, detail and registration (WEB `NEAR_ACTIVITY_TYPE_GAMBLING_NOTICE` / `_MINOR_NOTICE`). */
-enum NearActivityNotice: CaseIterable, Sendable, Hashable {
+enum NearActivityNotice: CaseIterable, Codable, Sendable, Hashable {
     /** Texas hold'em: no gambling of any kind; the host ticks it before publishing. */
     case noGambling
     /** Bar nights and karaoke: adults only. */
@@ -51,6 +59,26 @@ enum NearActivityKind: String, WireEnum {
     static let fallback: NearActivityKind = .mahjong
 
     var labelKey: LocalizedStringKey {
+        switch self {
+        case .mahjong: "shell_home_module_mahjong"
+        case .texasHoldem: "shell_home_module_texas_holdem"
+        case .boardGame: "shell_home_module_board_game"
+        case .werewolf: "shell_home_module_werewolf"
+        case .scriptMurder: "shell_home_module_script_murder"
+        case .billiards: "shell_home_module_billiards"
+        case .escapeRoom: "shell_home_module_escape_room"
+        case .esports: "shell_home_module_esports"
+        case .ktv: "shell_home_module_ktv"
+        case .barParty: "shell_home_module_bar_party"
+        case .indoorSocial: "shell_home_module_indoor_social"
+        case .outdoorSocial: "shell_home_module_outdoor_social"
+        case .languageExchange: "shell_home_module_language_exchange"
+        case .bookClub: "shell_home_module_book_club"
+        case .diy: "shell_home_module_diy"
+        }
+    }
+
+    var labelResource: String.LocalizationValue {
         switch self {
         case .mahjong: "shell_home_module_mahjong"
         case .texasHoldem: "shell_home_module_texas_holdem"

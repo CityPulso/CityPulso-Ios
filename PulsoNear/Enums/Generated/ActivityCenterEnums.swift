@@ -4,7 +4,7 @@ import PulsoLinkCore
 import SwiftUI
 
 /** Activity center (calendar and profile) second level, WEB sidebar 我发起的 / 我参加的 / 我的订场. */
-enum ActivityCenterTab: CaseIterable, Sendable, Hashable {
+enum ActivityCenterTab: CaseIterable, Codable, Sendable, Hashable {
     case hosted
     case joined
     case spaceBookings
@@ -16,14 +16,29 @@ enum ActivityCenterTab: CaseIterable, Sendable, Hashable {
         case .spaceBookings: "activity_tab_bookings"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .hosted: "activity_tab_hosted"
+        case .joined: "activity_tab_joined"
+        case .spaceBookings: "activity_tab_bookings"
+        }
+    }
 }
 
 /** Registration group in the filter sheet under [ActivityCenterTab.JOINED]: seats I hold, or places on the waitlist. */
-enum JoinedFilter: CaseIterable, Sendable, Hashable {
+enum JoinedFilter: CaseIterable, Codable, Sendable, Hashable {
     case participating
     case waitlisted
 
     var labelKey: LocalizedStringKey {
+        switch self {
+        case .participating: "activity_joined_participating"
+        case .waitlisted: "activity_joined_waitlisted"
+        }
+    }
+
+    var labelResource: String.LocalizationValue {
         switch self {
         case .participating: "activity_joined_participating"
         case .waitlisted: "activity_joined_waitlisted"

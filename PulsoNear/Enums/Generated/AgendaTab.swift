@@ -4,7 +4,7 @@ import PulsoLinkCore
 import SwiftUI
 
 /** 议程侧栏：即将到来的活动 / 即将到来的场地预订。 */
-enum AgendaTab: CaseIterable, Sendable, Hashable {
+enum AgendaTab: CaseIterable, Codable, Sendable, Hashable {
     case activities
     case spaces
 }

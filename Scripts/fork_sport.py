@@ -37,6 +37,7 @@ TEMPLATES: list[tuple[str, set[str] | None]] = [
     ("DI/Container+Badminton.swift", None),
     # Same racket fields as badminton (match format, division, courts × players).
     ("Features/Events/Rows/BadmintonRows.swift", {"tennis", "pickleball"}),
+    ("Features/Create/BadmintonCreate.swift", {"tennis", "pickleball"}),
 ]
 
 SOURCE = ("Badminton", "badminton", "badminton")

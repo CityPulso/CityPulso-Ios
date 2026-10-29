@@ -4,7 +4,7 @@ import PulsoLinkCore
 import SwiftUI
 
 /** 钱包一级页签：球馆会员卡 / 时长包。 */
-enum WalletTab: CaseIterable, Sendable, Hashable {
+enum WalletTab: CaseIterable, Codable, Sendable, Hashable {
     case memberships
     case bundles
 }

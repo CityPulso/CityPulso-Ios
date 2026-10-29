@@ -23,4 +23,13 @@ enum BuildingType: String, WireEnum {
         case .leisureVenue: "building_type_leisure_venue"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .sportsVenue: "building_type_sports_venue"
+        case .outdoorSpace: "building_type_outdoor_space"
+        case .park: "building_type_park"
+        case .leisureVenue: "building_type_leisure_venue"
+        }
+    }
 }

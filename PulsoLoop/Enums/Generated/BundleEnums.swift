@@ -31,7 +31,7 @@ enum BundleLedgerKind: String, WireEnum {
 }
 
 /** 时长包展示状态：在 [BundleStatus] 上再按余额与到期细分（对齐 WEB `BundleStateEnum`）。 */
-enum BundleState: CaseIterable, Sendable, Hashable {
+enum BundleState: CaseIterable, Codable, Sendable, Hashable {
     case pending
     case active
     case usedUp
@@ -40,7 +40,7 @@ enum BundleState: CaseIterable, Sendable, Hashable {
 }
 
 /** 「我的时长包」页签：可用、待球馆确认、全部（对齐 WEB `BundleCabinetTabEnum`）。 */
-enum BundleCabinetTab: CaseIterable, Sendable, Hashable {
+enum BundleCabinetTab: CaseIterable, Codable, Sendable, Hashable {
     case active
     case pending
     case all

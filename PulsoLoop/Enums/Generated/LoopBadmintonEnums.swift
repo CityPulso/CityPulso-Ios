@@ -20,6 +20,15 @@ enum EligibilityDivision: String, WireEnum {
         case .mixed: "create_eligibility_mixed"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .`open`: "create_eligibility_open"
+        case .womens: "create_eligibility_womens"
+        case .mens: "create_eligibility_mens"
+        case .mixed: "create_eligibility_mixed"
+        }
+    }
 }
 
 /** 对齐 WEB `MatchFormatEnum`。 */
@@ -31,6 +40,14 @@ enum MatchFormat: String, WireEnum {
     static let fallback: MatchFormat = .doubles
 
     var labelKey: LocalizedStringKey {
+        switch self {
+        case .singles: "create_match_format_singles"
+        case .doubles: "create_match_format_doubles"
+        case .triples: "create_match_format_triples"
+        }
+    }
+
+    var labelResource: String.LocalizationValue {
         switch self {
         case .singles: "create_match_format_singles"
         case .doubles: "create_match_format_doubles"
@@ -72,7 +89,10 @@ enum BadmintonPaymentMethodKind: String, WireEnum {
 }
 
 /** 收费场次同时接受银行卡与线下方式时，报名者的付款选择（对齐 WEB `RegistrationPayChoiceEnum`）。 */
-enum RegistrationPayChoice: CaseIterable, Sendable, Hashable {
+enum RegistrationPayChoice: CaseIterable, Codable, Sendable, Hashable {
     case card
     case direct
 }
+
+/** Stripe 单笔最低收费（对齐 WEB `STRIPE_MIN_AMOUNT`）。 */
+let stripeMinAmount = 0.5

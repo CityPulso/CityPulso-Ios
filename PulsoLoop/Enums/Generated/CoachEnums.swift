@@ -99,7 +99,7 @@ enum CoachCompensationStatus: String, WireEnum {
 }
 
 /** 教练面板页签（仅客户端）。 */
-enum CoachPanelTab: CaseIterable, Sendable, Hashable {
+enum CoachPanelTab: CaseIterable, Codable, Sendable, Hashable {
     case sessions
     case venues
     case compensation
@@ -107,7 +107,7 @@ enum CoachPanelTab: CaseIterable, Sendable, Hashable {
 }
 
 /** 教练申请合作的进度（仅 coach 角色可见）。 */
-enum CoachApplyState: CaseIterable, Sendable, Hashable {
+enum CoachApplyState: CaseIterable, Codable, Sendable, Hashable {
     case available
     case pending
     case partner

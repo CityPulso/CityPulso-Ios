@@ -4,7 +4,7 @@ import PulsoLinkCore
 import SwiftUI
 
 /** 账单二级：主持结算筛选。 */
-enum BillingHostedFilter: CaseIterable, Sendable, Hashable {
+enum BillingHostedFilter: CaseIterable, Codable, Sendable, Hashable {
     case unsettled
     case settled
 
@@ -14,10 +14,17 @@ enum BillingHostedFilter: CaseIterable, Sendable, Hashable {
         case .settled: "shell_billing_status_settled"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .unsettled: "shell_billing_status_unsettled"
+        case .settled: "shell_billing_status_settled"
+        }
+    }
 }
 
 /** 账单二级：我的付款筛选。 */
-enum BillingMineFilter: CaseIterable, Sendable, Hashable {
+enum BillingMineFilter: CaseIterable, Codable, Sendable, Hashable {
     case unpaid
     case paid
 
@@ -27,10 +34,17 @@ enum BillingMineFilter: CaseIterable, Sendable, Hashable {
         case .paid: "shell_billing_status_paid"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .unpaid: "shell_billing_status_unpaid"
+        case .paid: "shell_billing_status_paid"
+        }
+    }
 }
 
 /** 账单列表范围：我主持的 / 我的付款。 */
-enum BillingScope: CaseIterable, Sendable, Hashable {
+enum BillingScope: CaseIterable, Codable, Sendable, Hashable {
     case hosted
     case mine
 
@@ -40,10 +54,17 @@ enum BillingScope: CaseIterable, Sendable, Hashable {
         case .mine: "shell_billing_tab_mine"
         }
     }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .hosted: "shell_billing_tab_hosted"
+        case .mine: "shell_billing_tab_mine"
+        }
+    }
 }
 
 /** 收款账户可选国家（Stripe Connect 支持且平台已开通的）。 */
-enum PaymentAccountCountry: CaseIterable, Sendable, Hashable {
+enum PaymentAccountCountry: CaseIterable, Codable, Sendable, Hashable {
     case ca
     case us
 

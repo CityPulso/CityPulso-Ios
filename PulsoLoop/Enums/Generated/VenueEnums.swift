@@ -149,13 +149,13 @@ enum VenueRadiusMode: String, WireEnum {
 }
 
 /** 进入球馆详情后直接打开的面板（预约页「成为会员」、我的会员「续费」、我的时长包「再买时长」）。 */
-enum VenueDetailSheet: CaseIterable, Sendable, Hashable {
+enum VenueDetailSheet: CaseIterable, Codable, Sendable, Hashable {
     case membership
     case bundle
 }
 
 /** 我的场地预订 Tab。 */
-enum CourtBookingListTab: CaseIterable, Sendable, Hashable {
+enum CourtBookingListTab: CaseIterable, Codable, Sendable, Hashable {
     case upcoming
     case past
 }
@@ -172,18 +172,18 @@ enum SlotOccupancy: String, WireEnum {
 }
 
 /** What a favorite star saves: a Loop venue or a PulsoLink building. */
-enum FavoriteTarget: CaseIterable, Sendable, Hashable {
+enum FavoriteTarget: CaseIterable, Codable, Sendable, Hashable {
     case venue
     case building
 }
 
-enum VenueDetailTab: CaseIterable, Sendable, Hashable {
+enum VenueDetailTab: CaseIterable, Codable, Sendable, Hashable {
     case venue
     case events
 }
 
 /** Venue detail page sections, same order as WEB `VenueDetailPanelEnum`; empty ones are hidden. */
-enum VenueInfoTab: CaseIterable, Sendable, Hashable {
+enum VenueInfoTab: CaseIterable, Codable, Sendable, Hashable {
     case overview
     case courts
     case membership
@@ -195,13 +195,13 @@ enum VenueInfoTab: CaseIterable, Sendable, Hashable {
     case policies
 }
 
-enum BuildingSessionFilter: CaseIterable, Sendable, Hashable {
+enum BuildingSessionFilter: CaseIterable, Codable, Sendable, Hashable {
     case upcoming
     case history
 }
 
 /** Why the current selection cannot be booked. */
-enum BookingSelectionError: CaseIterable, Sendable, Hashable {
+enum BookingSelectionError: CaseIterable, Codable, Sendable, Hashable {
     /** A run is shorter than the venue's minimum. */
     case selectionTooShort
     /** A run is longer than the venue's maximum. */
@@ -209,3 +209,6 @@ enum BookingSelectionError: CaseIterable, Sendable, Hashable {
     /** All runs together exceed [VENUE_BOOKING_TOTAL_MINUTES_MAX]. */
     case selectionTotalTooLong
 }
+
+/** 自定义设施 / 装备要求的默认图标，也是未知图标 key 的回退（WEB `DEFAULT_CATALOG_ICON`）。 */
+let defaultCatalogIcon = "sparkles"

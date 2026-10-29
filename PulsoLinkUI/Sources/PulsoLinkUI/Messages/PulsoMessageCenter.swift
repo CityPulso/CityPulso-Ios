@@ -41,6 +41,11 @@ public final class PulsoMessageCenter {
         show(.error, String(localized: key))
     }
 
+    /** 带参数、已经格式化好的提示（`localizedFormat`）。 */
+    public func error(text: String) {
+        show(.error, text)
+    }
+
     public func success(_ key: String.LocalizationValue) {
         show(.success, String(localized: key))
     }

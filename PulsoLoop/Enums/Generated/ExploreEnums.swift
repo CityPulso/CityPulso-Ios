@@ -4,7 +4,7 @@ import PulsoLinkCore
 import SwiftUI
 
 /** What one explore map pin stands for; a cluster groups pins of any kind. */
-enum ExploreMapItemKind: CaseIterable, Sendable, Hashable {
+enum ExploreMapItemKind: CaseIterable, Codable, Sendable, Hashable {
     case venue
     case building
     case event
@@ -12,7 +12,7 @@ enum ExploreMapItemKind: CaseIterable, Sendable, Hashable {
 }
 
 /** Tabs at the top of a cluster panel (WEB `ExploreClusterTabEnum`); buildings without a venue sit under venues. */
-enum ExploreClusterTab: CaseIterable, Sendable, Hashable {
+enum ExploreClusterTab: CaseIterable, Codable, Sendable, Hashable {
     case all
     case venues
     case events
