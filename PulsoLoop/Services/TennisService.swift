@@ -10,6 +10,7 @@ struct TennisService: Sendable {
     let repository: TennisRepository
     let query: TennisQueryStore
     let eventBus: TennisEventBus
+    let exploreQuery: ExploreQueryStore
 
     static let rosterPageSize = TennisQueryStore.rosterPageSize
 
@@ -44,6 +45,7 @@ struct TennisService: Sendable {
     func incrementView(eventId: String) async throws -> IncrementTennisEventViewResponse {
         let response = try await repository.incrementTennisEventView(eventId: eventId)
         await query.overlayView(eventId: eventId, view: response.view)
+        await exploreQuery.overlayView(eventId: eventId, view: response.view)
         return response
     }
 

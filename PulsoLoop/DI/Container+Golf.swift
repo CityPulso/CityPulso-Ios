@@ -28,7 +28,12 @@ extension Container {
 
     var golfService: Factory<GolfService> {
         self {
-            GolfService(repository: self.golfRepository(), query: self.golfQueryStore(), eventBus: self.golfEventBus())
+            GolfService(
+                repository: self.golfRepository(),
+                query: self.golfQueryStore(),
+                eventBus: self.golfEventBus(),
+                exploreQuery: self.exploreQueryStore()
+            )
         }.singleton
     }
 }

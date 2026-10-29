@@ -10,6 +10,7 @@ struct PickleballService: Sendable {
     let repository: PickleballRepository
     let query: PickleballQueryStore
     let eventBus: PickleballEventBus
+    let exploreQuery: ExploreQueryStore
 
     static let rosterPageSize = PickleballQueryStore.rosterPageSize
 
@@ -44,6 +45,7 @@ struct PickleballService: Sendable {
     func incrementView(eventId: String) async throws -> IncrementPickleballEventViewResponse {
         let response = try await repository.incrementPickleballEventView(eventId: eventId)
         await query.overlayView(eventId: eventId, view: response.view)
+        await exploreQuery.overlayView(eventId: eventId, view: response.view)
         return response
     }
 

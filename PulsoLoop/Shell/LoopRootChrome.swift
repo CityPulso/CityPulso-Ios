@@ -27,7 +27,11 @@ struct LoopRootChrome: View {
         }
         .onChange(of: scenePhase, initial: true) { _, phase in
             // 用户可能刚在系统设置里改了本 App 的语言。
-            if phase == .active { Task { await AppLanguageSync.sync() } }
+            if phase == .active {
+                Task { await AppLanguageSync.sync() }
+                // 回到前台重新定位（Android 在 onStart 时同样刷新），附近列表和地图用新位置。
+                Task { await Container.shared.deviceLocationBootstrap().refresh() }
+            }
         }
     }
 }

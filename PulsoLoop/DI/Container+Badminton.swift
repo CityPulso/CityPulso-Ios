@@ -26,7 +26,12 @@ extension Container {
 
     var badmintonService: Factory<BadmintonService> {
         self {
-            BadmintonService(repository: self.badmintonRepository(), query: self.badmintonQueryStore(), eventBus: self.badmintonEventBus())
+            BadmintonService(
+                repository: self.badmintonRepository(),
+                query: self.badmintonQueryStore(),
+                eventBus: self.badmintonEventBus(),
+                exploreQuery: self.exploreQueryStore()
+            )
         }.singleton
     }
 }

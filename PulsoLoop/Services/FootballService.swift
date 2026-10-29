@@ -10,6 +10,7 @@ struct FootballService: Sendable {
     let repository: FootballRepository
     let query: FootballQueryStore
     let eventBus: FootballEventBus
+    let exploreQuery: ExploreQueryStore
 
     static let rosterPageSize = FootballQueryStore.rosterPageSize
 
@@ -44,6 +45,7 @@ struct FootballService: Sendable {
     func incrementView(eventId: String) async throws -> IncrementFootballEventViewResponse {
         let response = try await repository.incrementFootballEventView(eventId: eventId)
         await query.overlayView(eventId: eventId, view: response.view)
+        await exploreQuery.overlayView(eventId: eventId, view: response.view)
         return response
     }
 

@@ -28,7 +28,12 @@ extension Container {
 
     var pickleballService: Factory<PickleballService> {
         self {
-            PickleballService(repository: self.pickleballRepository(), query: self.pickleballQueryStore(), eventBus: self.pickleballEventBus())
+            PickleballService(
+                repository: self.pickleballRepository(),
+                query: self.pickleballQueryStore(),
+                eventBus: self.pickleballEventBus(),
+                exploreQuery: self.exploreQueryStore()
+            )
         }.singleton
     }
 }

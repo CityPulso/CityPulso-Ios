@@ -31,6 +31,8 @@ public struct PulsoShellView<Page: View>: View {
                 NavigationStack(path: navigator.path(for: destination)) {
                     page(destination)
                 }
+                // 页面用它跳到别的栈底页面（Android navigator.openExplore / openCreate 等）。
+                .environment(navigator)
                 .opacity(visible ? 1 : 0)
                 .allowsHitTesting(visible)
                 .accessibilityHidden(!visible)
@@ -51,7 +53,7 @@ public struct PulsoShellView<Page: View>: View {
                     trayDestinations: trayDestinations,
                     selection: navigator.selection,
                     appsExpanded: $navigator.appsExpanded,
-                    onOpen: navigator.open
+                    onOpen: { navigator.open($0) }
                 )
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }

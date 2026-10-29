@@ -28,7 +28,12 @@ extension Container {
 
     var footballService: Factory<FootballService> {
         self {
-            FootballService(repository: self.footballRepository(), query: self.footballQueryStore(), eventBus: self.footballEventBus())
+            FootballService(
+                repository: self.footballRepository(),
+                query: self.footballQueryStore(),
+                eventBus: self.footballEventBus(),
+                exploreQuery: self.exploreQueryStore()
+            )
         }.singleton
     }
 }

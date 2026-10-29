@@ -1,3 +1,4 @@
+import AsyncAlgorithms
 import Foundation
 
 /**
@@ -84,5 +85,23 @@ extension EventBroadcast {
             }
             continuation.onTermination = { _ in task.cancel() }
         }
+    }
+}
+
+/** 两个状态的组合流：先发两边的当前值，任一边变化再发（Kotlin `combine(a, b)`）。 */
+public func combineLatest<A: Sendable & Equatable, B: Sendable & Equatable>(
+    _ a: StateBroadcast<A>,
+    _ b: StateBroadcast<B>
+) -> AsyncStream<(A, B)> {
+    let left = a.values()
+    let right = b.values()
+    return AsyncStream { continuation in
+        let task = Task {
+            for await pair in AsyncAlgorithms.combineLatest(left, right) {
+                continuation.yield(pair)
+            }
+            continuation.finish()
+        }
+        continuation.onTermination = { _ in task.cancel() }
     }
 }

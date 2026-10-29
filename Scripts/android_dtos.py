@@ -66,8 +66,17 @@ MODULES = [
         ("Foundation",),
         ("Geometry.kt",),
     ),
-    Module(ANDROID_ROOT / "pulsoloop/src/main/java/com/citypulso/pulsoloop", IOS_ROOT / "PulsoLoop/Data/Generated"),
-    Module(ANDROID_ROOT / "pulsonear/src/main/java/com/citypulso/pulsonear", IOS_ROOT / "PulsoNear/Data/Generated"),
+    # Persisted filter shapes live in features/search.
+    Module(
+        ANDROID_ROOT / "pulsoloop/src/main/java/com/citypulso/pulsoloop",
+        IOS_ROOT / "PulsoLoop/Data/Generated",
+        patterns=("dto/*.kt", "api/*.kt", "features/search/NearbyFilters.kt"),
+    ),
+    Module(
+        ANDROID_ROOT / "pulsonear/src/main/java/com/citypulso/pulsonear",
+        IOS_ROOT / "PulsoNear/Data/Generated",
+        patterns=("dto/*.kt", "api/*.kt", "features/search/NearbyFilters.kt"),
+    ),
 ]
 
 SWIFT_KEYWORDS = {

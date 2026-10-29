@@ -74,3 +74,10 @@ extension KeyedEncodingContainer where Key == WireKey {
         try encode(value, forKey: WireKey(name))
     }
 }
+
+/** GeoJSON 点里的第 [index] 个坐标（0 = 经度，1 = 纬度）；不是点或缺值返回 nil（Android `geoCoordinate`）。 */
+public func geoCoordinate(_ geojson: WireJSON?, index: Int) -> Double? {
+    guard case let .array(coordinates)? = geojson?["coordinates"], coordinates.indices.contains(index) else { return nil }
+    if case let .number(value) = coordinates[index] { return value }
+    return nil
+}

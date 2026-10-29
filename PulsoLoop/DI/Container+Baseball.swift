@@ -28,7 +28,12 @@ extension Container {
 
     var baseballService: Factory<BaseballService> {
         self {
-            BaseballService(repository: self.baseballRepository(), query: self.baseballQueryStore(), eventBus: self.baseballEventBus())
+            BaseballService(
+                repository: self.baseballRepository(),
+                query: self.baseballQueryStore(),
+                eventBus: self.baseballEventBus(),
+                exploreQuery: self.exploreQueryStore()
+            )
         }.singleton
     }
 }

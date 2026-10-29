@@ -80,7 +80,7 @@ python3 Scripts/android_apis.py --check  # 只检查是否过期
 
 ## Linux 上测 core
 
-Swift 6.2 的 Linux 工具链里 `libswiftObservation.so` 有一个未解析符号，链接测试时要加一个参数：
+Swift 6.2 的 Linux 工具链里 `libswiftObservation.so` 有一个未解析符号，链接测试时要加一个参数（6.4 不需要）：
 
 ```sh
 swift test -Xlinker --allow-shlib-undefined

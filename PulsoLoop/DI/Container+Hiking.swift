@@ -28,7 +28,12 @@ extension Container {
 
     var hikingService: Factory<HikingService> {
         self {
-            HikingService(repository: self.hikingRepository(), query: self.hikingQueryStore(), eventBus: self.hikingEventBus())
+            HikingService(
+                repository: self.hikingRepository(),
+                query: self.hikingQueryStore(),
+                eventBus: self.hikingEventBus(),
+                exploreQuery: self.exploreQueryStore()
+            )
         }.singleton
     }
 }

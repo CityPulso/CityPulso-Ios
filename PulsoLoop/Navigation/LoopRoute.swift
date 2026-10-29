@@ -18,6 +18,10 @@ enum LoopRoute: Hashable {
     case profileEdit
     case backgrounds
     case identities
+    /** 活动详情（第 5 组接上各运动的详情页）。 */
+    case event(sport: LoopSport, eventId: String)
+    /** 选附近搜索的中心点（第 7 组接上地图选点）。 */
+    case locationPick
     /** 还没移植的页面：[title] 是文案 key。 */
     case comingSoon(title: String, systemImage: String)
 
@@ -36,6 +40,8 @@ enum LoopRoute: Hashable {
         case .profileEdit: ProfileEditView()
         case .backgrounds: ProfileBackgroundsView()
         case .identities: ProfileIdentitiesView()
+        case let .event(sport, _): PulsoComingSoonView(title: sport.labelKey, systemImage: "calendar")
+        case .locationPick: PulsoComingSoonView(title: "shell_location_pick_title", systemImage: "mappin.and.ellipse")
         case let .comingSoon(title, systemImage):
             PulsoComingSoonView(title: LocalizedStringKey(title), systemImage: systemImage)
         }

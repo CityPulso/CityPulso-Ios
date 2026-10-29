@@ -10,6 +10,7 @@ struct GolfService: Sendable {
     let repository: GolfRepository
     let query: GolfQueryStore
     let eventBus: GolfEventBus
+    let exploreQuery: ExploreQueryStore
 
     static let rosterPageSize = GolfQueryStore.rosterPageSize
 
@@ -44,6 +45,7 @@ struct GolfService: Sendable {
     func incrementView(eventId: String) async throws -> IncrementGolfEventViewResponse {
         let response = try await repository.incrementGolfEventView(eventId: eventId)
         await query.overlayView(eventId: eventId, view: response.view)
+        await exploreQuery.overlayView(eventId: eventId, view: response.view)
         return response
     }
 

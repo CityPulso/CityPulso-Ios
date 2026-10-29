@@ -28,7 +28,12 @@ extension Container {
 
     var skiService: Factory<SkiService> {
         self {
-            SkiService(repository: self.skiRepository(), query: self.skiQueryStore(), eventBus: self.skiEventBus())
+            SkiService(
+                repository: self.skiRepository(),
+                query: self.skiQueryStore(),
+                eventBus: self.skiEventBus(),
+                exploreQuery: self.exploreQueryStore()
+            )
         }.singleton
     }
 }

@@ -28,7 +28,12 @@ extension Container {
 
     var tennisService: Factory<TennisService> {
         self {
-            TennisService(repository: self.tennisRepository(), query: self.tennisQueryStore(), eventBus: self.tennisEventBus())
+            TennisService(
+                repository: self.tennisRepository(),
+                query: self.tennisQueryStore(),
+                eventBus: self.tennisEventBus(),
+                exploreQuery: self.exploreQueryStore()
+            )
         }.singleton
     }
 }

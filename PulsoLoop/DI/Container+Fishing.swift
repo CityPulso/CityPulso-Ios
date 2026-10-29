@@ -28,7 +28,12 @@ extension Container {
 
     var fishingService: Factory<FishingService> {
         self {
-            FishingService(repository: self.fishingRepository(), query: self.fishingQueryStore(), eventBus: self.fishingEventBus())
+            FishingService(
+                repository: self.fishingRepository(),
+                query: self.fishingQueryStore(),
+                eventBus: self.fishingEventBus(),
+                exploreQuery: self.exploreQueryStore()
+            )
         }.singleton
     }
 }
