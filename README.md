@@ -55,6 +55,18 @@ python3 Scripts/android_enums.py          # 写入，并列出没生成的成员
 python3 Scripts/android_enums.py --check  # 只检查是否过期
 ```
 
+## DTO
+
+接口的数据结构也以 Android 为准：各 App 的 `*/dto/*.kt` 和 core 的 communication / location / payments / resource 里每个
+`@Serializable data class` 生成一个 Swift 结构（`Data/Generated/`），读写规则和 Android `WireJson` 一样：缺字段或 null 用
+Kotlin 默认值，`@JsonNames` 的别名能读，写出时不带 nil 和等于默认值的字段。`@JsonClassDiscriminator` 的 sealed 接口生成带
+关联值的 enum。auth / social / asset 的 DTO 在 core 里手写。
+
+```sh
+python3 Scripts/android_dtos.py          # 写入，并列出没生成的部分（类体里的成员、非 Serializable 的类）
+python3 Scripts/android_dtos.py --check  # 只检查是否过期
+```
+
 ## Linux 上测 core
 
 Swift 6.2 的 Linux 工具链里 `libswiftObservation.so` 有一个未解析符号，链接测试时要加一个参数：

@@ -17,6 +17,7 @@ let package = Package(
         .package(url: "https://github.com/hmlongco/Factory.git", from: "2.4.0"),
         .package(url: "https://github.com/apple/swift-async-algorithms.git", from: "1.0.4"),
         .package(url: "https://github.com/groue/Semaphore.git", from: "0.1.0"),
+        .package(url: "https://github.com/iwill/generic-json-swift.git", from: "2.0.2"),
     ],
     targets: [
         .target(
@@ -37,6 +38,7 @@ let package = Package(
                 "Factory",
                 .product(name: "AsyncAlgorithms", package: "swift-async-algorithms"),
                 "Semaphore",
+                .product(name: "GenericJSON", package: "generic-json-swift"),
             ]
         ),
         .testTarget(name: "PulsoLinkCoreTests", dependencies: ["PulsoLinkCore"]),

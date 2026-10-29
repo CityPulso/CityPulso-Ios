@@ -192,6 +192,7 @@ class Entry:
     name: str
     args: list[str]
     doc: str | None
+    serial_name: str | None = None
 
 
 @dataclass
@@ -202,6 +203,7 @@ class KotlinEnum:
     entries: list[Entry]
     default: str | None
     skipped: list[str] = field(default_factory=list)
+    serializable: bool = False
 
 
 def swift_type(kotlin: str) -> str:
@@ -279,6 +281,7 @@ def parse_file(path: Path) -> list[KotlinEnum]:
         entries = []
         for raw in split_top(entries_text):
             entry_doc = kdoc(raw)
+            serial = re.search(r'@SerialName\("([^"]+)"\)', raw)
             cleaned = re.sub(r"/\*.*?\*/|//[^\n]*", "", raw, flags=re.S)
             cleaned = re.sub(r"@\w+(\([^)]*\))?", "", cleaned).strip()
             if not cleaned:
@@ -287,11 +290,12 @@ def parse_file(path: Path) -> list[KotlinEnum]:
             if not entry:
                 raise ValueError(f"{path.name}: {name}: unsupported entry {cleaned!r}")
             args = [a.strip() for a in split_top(entry[2])] if entry[2] and entry[2].strip() else []
-            entries.append(Entry(entry[1], ordered_args(args, params, f"{path.name}: {name}.{entry[1]}"), entry_doc))
+            entries.append(Entry(entry[1], ordered_args(args, params, f"{path.name}: {name}.{entry[1]}"), entry_doc, serial[1] if serial else None))
         default = re.search(r"val DEFAULT(?:\s*:\s*\w+)?\s*=\s*(\w+)", rest)
         members = re.findall(r"^\s*(?:(?:private|internal|override|inline|const)\s+)*(?:val|fun)\s+(?:<[^>]*>\s*)?(?:[\w.]+\.)?(\w+)", rest, re.M)
         skipped = [m for m in members if m not in ("DEFAULT", "fromWire")]
-        enums.append(KotlinEnum(name, doc, params, entries, default[1] if default else None, skipped))
+        serializable = bool(re.search(r"@Serializable\s*(?:@\w+(?:\([^)]*\))?\s*)*$", prefix))
+        enums.append(KotlinEnum(name, doc, params, entries, default[1] if default else None, skipped, serializable))
     return enums
 
 
@@ -344,19 +348,21 @@ def top_level_semicolon(body: str) -> int | None:
 def render(enum: KotlinEnum, access: str, string_type: str) -> list[str]:
     wire = next((p for p in enum.params if p.name == "wire" and p.kotlin_type == "String"), None)
     wire_index = enum.params.index(wire) if wire else None
+    # Without a `wire` property, a @Serializable enum goes on the wire by @SerialName, else by its constant name.
+    by_serial = wire is None and enum.serializable
     lines = doc_lines(enum.doc, "")
-    conformance = "String, WireEnum" if wire else "CaseIterable, Sendable, Hashable"
+    conformance = "String, WireEnum" if wire or by_serial else "CaseIterable, Sendable, Hashable"
     lines.append(f"{access}enum {enum.name}: {conformance} {{")
     for entry in enum.entries:
         lines += doc_lines(entry.doc, "    ")
         case = camel(entry.name)
-        if wire is not None:
-            raw = swift_value(entry.args[wire_index])
+        if wire is not None or by_serial:
+            raw = swift_value(entry.args[wire_index]) if wire is not None else f'"{entry.serial_name or entry.name}"'
             plain = case.strip("`")
             lines.append(f"    case {case}" if raw == f'"{plain}"' else f"    case {case} = {raw}")
         else:
             lines.append(f"    case {case}")
-    if wire is not None:
+    if wire is not None or by_serial:
         fallback = camel(enum.default) if enum.default else camel(enum.entries[0].name)
         lines += ["", f"    {access}static let fallback: {enum.name} = .{fallback}"]
     for index, param in enumerate(enum.params):

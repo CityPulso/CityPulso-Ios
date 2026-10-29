@@ -4,9 +4,11 @@ import PulsoLinkCore
 import SwiftUI
 
 /** Order of the nearby event list (API `sort`). */
-enum EventNearbySort: CaseIterable, Sendable, Hashable {
+enum EventNearbySort: String, WireEnum {
     case distance
-    case startsAt
+    case startsAt = "starts_at"
+
+    static let fallback: EventNearbySort = .distance
 
     var labelKey: LocalizedStringKey {
         switch self {
@@ -17,10 +19,12 @@ enum EventNearbySort: CaseIterable, Sendable, Hashable {
 }
 
 /** Order of the nearby venue list (API `sort`). */
-enum VenueNearbySort: CaseIterable, Sendable, Hashable {
+enum VenueNearbySort: String, WireEnum {
     case distance
     case price
     case popular
+
+    static let fallback: VenueNearbySort = .distance
 
     var labelKey: LocalizedStringKey {
         switch self {
@@ -32,12 +36,14 @@ enum VenueNearbySort: CaseIterable, Sendable, Hashable {
 }
 
 /** How far from the picked location a list reaches; [ANY] sends no radius (everything, nearest first). */
-enum NearbyDistance: CaseIterable, Sendable, Hashable {
-    case km1
-    case km5
-    case km10
-    case km25
-    case `any`
+enum NearbyDistance: String, WireEnum {
+    case km1 = "KM_1"
+    case km5 = "KM_5"
+    case km10 = "KM_10"
+    case km25 = "KM_25"
+    case `any` = "ANY"
+
+    static let fallback: NearbyDistance = .km1
 
     var km: Int? {
         switch self {
@@ -51,12 +57,14 @@ enum NearbyDistance: CaseIterable, Sendable, Hashable {
 }
 
 /** When a nearby event starts. [ANY] sends no range; [CUSTOM] uses the picked from / to. */
-enum EventDatePreset: CaseIterable, Sendable, Hashable {
-    case `any`
-    case today
-    case thisWeek
-    case thisMonth
-    case custom
+enum EventDatePreset: String, WireEnum {
+    case `any` = "ANY"
+    case today = "TODAY"
+    case thisWeek = "THIS_WEEK"
+    case thisMonth = "THIS_MONTH"
+    case custom = "CUSTOM"
+
+    static let fallback: EventDatePreset = .`any`
 
     var labelKey: LocalizedStringKey {
         switch self {
@@ -70,12 +78,14 @@ enum EventDatePreset: CaseIterable, Sendable, Hashable {
 }
 
 /** Event price cap; [FREE] is 0 (free always matches a cap). */
-enum EventPriceCap: CaseIterable, Sendable, Hashable {
-    case `any`
-    case free
-    case upTo10
-    case upTo20
-    case upTo50
+enum EventPriceCap: String, WireEnum {
+    case `any` = "ANY"
+    case free = "FREE"
+    case upTo10 = "UP_TO_10"
+    case upTo20 = "UP_TO_20"
+    case upTo50 = "UP_TO_50"
+
+    static let fallback: EventPriceCap = .`any`
 
     var max: Double? {
         switch self {
@@ -89,11 +99,13 @@ enum EventPriceCap: CaseIterable, Sendable, Hashable {
 }
 
 /** Cap on a venue's lowest hourly rate. */
-enum VenueHourlyCap: CaseIterable, Sendable, Hashable {
-    case `any`
-    case upTo20
-    case upTo40
-    case upTo60
+enum VenueHourlyCap: String, WireEnum {
+    case `any` = "ANY"
+    case upTo20 = "UP_TO_20"
+    case upTo40 = "UP_TO_40"
+    case upTo60 = "UP_TO_60"
+
+    static let fallback: VenueHourlyCap = .`any`
 
     var max: Double? {
         switch self {
@@ -106,13 +118,15 @@ enum VenueHourlyCap: CaseIterable, Sendable, Hashable {
 }
 
 /** Facilities offered as venue filter chips; [icon] is the amenity icon key the API filters on (WEB `VENUE_AMENITY_PRESET_ICONS`). */
-enum VenueAmenityPreset: CaseIterable, Sendable, Hashable {
-    case parking
-    case showers
-    case lockers
-    case racketRental
-    case proShop
-    case wheelchairAccess
+enum VenueAmenityPreset: String, WireEnum {
+    case parking = "PARKING"
+    case showers = "SHOWERS"
+    case lockers = "LOCKERS"
+    case racketRental = "RACKET_RENTAL"
+    case proShop = "PRO_SHOP"
+    case wheelchairAccess = "WHEELCHAIR_ACCESS"
+
+    static let fallback: VenueAmenityPreset = .parking
 
     var icon: String {
         switch self {

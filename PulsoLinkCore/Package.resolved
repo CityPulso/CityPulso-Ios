@@ -1,5 +1,5 @@
 {
-  "originHash" : "35bf10c0dc1e5b49b72ffa2dac9f49dfba6e0d92fd2d0ee4530a33308c99efd3",
+  "originHash" : "2b46f2fbb820dc6c737eeb1d95963b101527840a0e2890764c633eba89bdf067",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -26,6 +26,15 @@
       "state" : {
         "revision" : "ccc898f21992ebc130bc04cc197460a5ae230bcf",
         "version" : "2.5.3"
+      }
+    },
+    {
+      "identity" : "generic-json-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/iwill/generic-json-swift.git",
+      "state" : {
+        "revision" : "0a06575f4038b504e78ac330913d920f1630f510",
+        "version" : "2.0.2"
       }
     },
     {

@@ -28,15 +28,19 @@ enum ForumActivityType: String, WireEnum {
     static let fallback: ForumActivityType = .mahjong
 }
 
-enum ForumStatus: CaseIterable, Sendable, Hashable {
+enum ForumStatus: String, WireEnum {
     case active
     case archived
+
+    static let fallback: ForumStatus = .active
 }
 
-enum ForumMemberRole: CaseIterable, Sendable, Hashable {
+enum ForumMemberRole: String, WireEnum {
     case owner
     case admin
     case moderator
+
+    static let fallback: ForumMemberRole = .owner
 
     var labelKey: LocalizedStringKey {
         switch self {
@@ -47,18 +51,22 @@ enum ForumMemberRole: CaseIterable, Sendable, Hashable {
     }
 }
 
-enum ForumMemberStatus: CaseIterable, Sendable, Hashable {
+enum ForumMemberStatus: String, WireEnum {
     case pending
     case active
     case rejected
     case removed
+
+    static let fallback: ForumMemberStatus = .pending
 }
 
-enum ForumPostStatus: CaseIterable, Sendable, Hashable {
+enum ForumPostStatus: String, WireEnum {
     case pending
     case published
     case rejected
     case removed
+
+    static let fallback: ForumPostStatus = .pending
 
     var labelKey: LocalizedStringKey {
         switch self {
@@ -167,18 +175,22 @@ enum ForumManageTab: CaseIterable, Sendable, Hashable {
     }
 }
 
-enum ForumReportTarget: CaseIterable, Sendable, Hashable {
+enum ForumReportTarget: String, WireEnum {
     case post
     case comment
+
+    static let fallback: ForumReportTarget = .post
 }
 
-enum ForumReportReason: CaseIterable, Sendable, Hashable {
+enum ForumReportReason: String, WireEnum {
     case spam
     case abuse
     case harassment
     case nsfw
     case misinformation
     case other
+
+    static let fallback: ForumReportReason = .spam
 
     var labelKey: LocalizedStringKey {
         switch self {
@@ -192,10 +204,12 @@ enum ForumReportReason: CaseIterable, Sendable, Hashable {
     }
 }
 
-enum ForumReportStatus: CaseIterable, Sendable, Hashable {
+enum ForumReportStatus: String, WireEnum {
     case `open`
     case resolved
     case dismissed
+
+    static let fallback: ForumReportStatus = .`open`
 
     var labelKey: LocalizedStringKey {
         switch self {
@@ -224,11 +238,13 @@ enum ForumReportAction: String, WireEnum {
 }
 
 /** What a link section in a post body points at; the card loads the target itself. */
-enum PostLinkType: CaseIterable, Sendable, Hashable {
+enum PostLinkType: String, WireEnum {
     case post
     case activity
     case venue
     case building
+
+    static let fallback: PostLinkType = .post
 
     var labelKey: LocalizedStringKey {
         switch self {
@@ -241,14 +257,16 @@ enum PostLinkType: CaseIterable, Sendable, Hashable {
 }
 
 /** What a post is about; the card shows it as a coloured pill and feeds can filter by it. */
-enum PostKind: CaseIterable, Sendable, Hashable {
+enum PostKind: String, WireEnum {
     case discussion
-    case playersWanted
+    case playersWanted = "players_wanted"
     case match
-    case activityRecap
+    case activityRecap = "activity_recap"
     case tips
     case question
     case gear
+
+    static let fallback: PostKind = .discussion
 
     var labelKey: LocalizedStringKey {
         switch self {
