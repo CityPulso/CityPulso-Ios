@@ -1,0 +1,5 @@
+// 所有 App target 共用。每台开发机的 API 地址写在 Local.xcconfig（不入库），见 Local.xcconfig.example。
+MARKETING_VERSION = 0.1.0
+CURRENT_PROJECT_VERSION = 1
+
+#include? "Local.xcconfig"

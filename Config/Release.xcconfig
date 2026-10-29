@@ -1,0 +1,4 @@
+#include "Shared.xcconfig"
+
+// 线上走各产品自己的域名（Traefik 在 /api 上 strip 前缀）；PULSO_PUBLIC_HOST 由 project.yml 按 target 设定。
+PULSO_API_BASE_URL = https:/$()/$(PULSO_PUBLIC_HOST)/api

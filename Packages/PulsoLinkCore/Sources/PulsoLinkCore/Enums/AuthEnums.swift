@@ -1,0 +1,147 @@
+import Foundation
+
+/* 认证域闭集枚举——wire 值与 PulsoLink-Package `enums/auth.ts` 逐一对齐。 */
+
+/** profile 档位：登录/选档 `kind` 与 JWT / content `profile_scope` 共用 wire 值。 */
+public enum ProfileKind: String, WireEnum {
+    case community
+    case organization
+    case authority
+
+    public static let fallback: ProfileKind = .community
+}
+
+/** 社区档 community_roles（auth.CommunityProfiles.community_roles）。 */
+public enum AuthCommunityRole: String, WireEnum {
+    case pulser
+    case creator
+    /** 教练：申请并经平台审核后获得；与球馆合作、授课。 */
+    case coach
+
+    public static let fallback: AuthCommunityRole = .pulser
+
+    /** 通过角色申请获得的社区角色（与 Link `AuthCommunityRolesApplicable` 一致）。 */
+    public static let applicable: [AuthCommunityRole] = [.creator, .coach]
+}
+
+/** 组织档 organization_roles（auth.OrganizationProfiles.organization_roles）。 */
+public enum AuthOrganizationRole: String, WireEnum {
+    /** Venue operator（场馆运营者）. */
+    case `operator`
+    /** Sporting goods merchant（运动用品商家，预留）. */
+    case merchant
+
+    public static let fallback: AuthOrganizationRole = .operator
+}
+
+/** 组织申请 `requested_category`：场馆运营者申请开通球馆时的产品类别 key。 */
+public let organizationApplicationCategoryVenue = "venue"
+
+/** 权限档 authority_roles（auth.AuthorityProfiles.authority_roles）。 */
+public enum AuthAuthorityRole: String, WireEnum {
+    case reviewer
+    case moderator
+    case administrator
+    case owner
+
+    public static let fallback: AuthAuthorityRole = .reviewer
+}
+
+/** 注册来源平台（POST /auth/signup/with-email 的 signupPlatform）。 */
+public enum AuthSignupPlatform: String, WireEnum {
+    case pulsolink
+    case pulsoloop
+    case pulsonear
+
+    public static let fallback: AuthSignupPlatform = .pulsolink
+}
+
+/** 申请所要的东西：社区角色（创作者 / 教练）、组织身份或权限身份（Package `AuthApplicationKindEnum`）。 */
+public enum AuthApplicationKind: String, Sendable, CaseIterable {
+    case creator
+    case coach
+    case organization
+    case authority
+
+    /** 社区角色申请对应的申请种类；pulser 不经申请获得。 */
+    public static func of(communityRole role: AuthCommunityRole) -> AuthApplicationKind {
+        switch role {
+        case .creator: .creator
+        case .coach: .coach
+        case .pulser: preconditionFailure("pulser is never applied for")
+        }
+    }
+}
+
+/** 社区角色/组织/权限申请审核状态（enums.AuthApplicationStatus）。 */
+public enum AuthApplicationStatus: String, WireEnum {
+    case pending
+    case approved
+    case rejected
+
+    public static let fallback: AuthApplicationStatus = .pending
+}
+
+/** 界面/邮件语言（与后端 AuthProfileLanguage、Package LanguageEnum 一致）。 */
+public enum PulsoLanguage: String, WireEnum {
+    case en
+    /** Simplified Chinese. */
+    case zh
+    /** Traditional Chinese (Hong Kong usage); resources live in `zh-Hant.lproj`. */
+    case zhHant = "zh-Hant"
+    case fr
+
+    public static let fallback: PulsoLanguage = .zh
+}
+
+/** Device OS an account is created from (API `client_os`); the API picks the starting corner radius from it. */
+public enum ClientOS: String, WireEnum {
+    case ios
+    case android
+    case windows
+    case macos
+    case linux
+    case other
+
+    public static let fallback: ClientOS = .other
+}
+
+/** 社区身份「喜欢的运动」（Link auth.favorite_sport；最多 3 项，不重复）。 */
+public enum FavoriteSport: String, WireEnum {
+    case badminton
+    case tennis
+    case pickleball
+    case basketball
+    case football
+    case baseball
+    case golf
+    case hiking
+    case fishing
+    case ski
+    case tableTennis = "table_tennis"
+
+    public static let fallback: FavoriteSport = .badminton
+    public static let max = 3
+}
+
+/** 社区身份「喜欢的活动」（Link auth.favorite_activity；最多 3 项，不重复）。 */
+public enum FavoriteActivity: String, WireEnum {
+    case mahjong
+    case texasHoldem = "texas_holdem"
+    case boardGame = "board_game"
+    case billiards
+    case indoorSocial = "indoor_social"
+    case scriptMurder = "script_murder"
+    case bookClub = "book_club"
+    case languageExchange = "language_exchange"
+    case outdoorSocial = "outdoor_social"
+    case diy
+    case werewolf
+    case escapeRoom = "escape_room"
+    case esports
+    case barParty = "bar_party"
+    case ktv
+
+    public static let fallback: FavoriteActivity = .mahjong
+    public static let max = 3
+}
