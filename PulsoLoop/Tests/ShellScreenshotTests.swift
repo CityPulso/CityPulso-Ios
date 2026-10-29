@@ -13,6 +13,11 @@ final class ShellScreenshotTests: XCTestCase {
         try await capture(ShellPreview(), name: "loop-shell-default")
     }
 
+    /** 对照：4 个普通 Tab + 1 个 search 角色 Tab（Apple Music 的布局），看系统会不会单独画出圆形按钮。 */
+    func testFourTabsPlusDetached() async throws {
+        try await capture(FourPlusOnePreview(), name: "loop-shell-four-plus-one")
+    }
+
     private func capture(_ view: some View, name: String) async throws {
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.first as? UIWindowScene)
         let window = UIWindow(windowScene: scene)
@@ -44,6 +49,20 @@ private struct ShellPreview: View {
             selection: $selection
         ) { destination in
             PulsoComingSoonView(destination)
+        }
+    }
+}
+
+private struct FourPlusOnePreview: View {
+    @State private var selection = 0
+
+    var body: some View {
+        TabView(selection: $selection) {
+            Tab("shell_dest_explore", systemImage: "location.magnifyingglass", value: 0) { PulsoComingSoonView(.explore) }
+            Tab("shell_dest_venue_search", systemImage: "building.2", value: 1) { PulsoComingSoonView(.venueSearch) }
+            Tab("shell_dest_search", systemImage: "tennis.racket", value: 2) { PulsoComingSoonView(.search) }
+            Tab("home_nav_apps", systemImage: "square.grid.2x2", value: 3) { PulsoComingSoonView(.forum) }
+            Tab("shell_dest_create", systemImage: "plus", value: 4, role: .search) { PulsoComingSoonView(.create) }
         }
     }
 }
