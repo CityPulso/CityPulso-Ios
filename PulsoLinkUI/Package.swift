@@ -14,6 +14,7 @@ let package = Package(
         .package(path: "../PulsoLinkCore"),
         .package(url: "https://github.com/hmlongco/Factory.git", from: "2.4.0"),
         .package(url: "https://github.com/google/GoogleSignIn-iOS.git", from: "8.0.0"),
+        .package(url: "https://github.com/kean/Nuke.git", from: "12.8.0"),
     ],
     targets: [
         .target(
@@ -23,6 +24,8 @@ let package = Package(
                 "Factory",
                 .product(name: "GoogleSignIn", package: "GoogleSignIn-iOS"),
                 .product(name: "GoogleSignInSwift", package: "GoogleSignIn-iOS"),
+                "Nuke",
+                .product(name: "NukeUI", package: "Nuke"),
             ],
             resources: [.process("Resources")]
         ),

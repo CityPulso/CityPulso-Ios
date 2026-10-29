@@ -52,10 +52,6 @@ public struct AuthService: Sendable {
 
     /* ------------------------------ 邮箱 / 密码 ------------------------------ */
 
-    public func listEmails() async throws -> [EmailItem] {
-        try await auth.listEmails().items
-    }
-
     public func createEmail(_ email: String) async throws -> CreateEmailResponse {
         let response = try await auth.createEmail(CreateEmailRequest(email: email))
         invalidateEmails()
@@ -95,24 +91,6 @@ public struct AuthService: Sendable {
 
     public func sendChangePasswordVerificationCode(lang: PulsoLanguage) async throws {
         try await auth.sendChangePasswordVerificationCode(lang: lang)
-    }
-
-    /** 邮箱列表的变化流：先发一次，之后每次邮箱失效（增删改、验证、设主邮箱）再发一次。 */
-    public func emailInvalidations() -> AsyncStream<Void> {
-        let accountId = sessionStore.state.value.currentAccountId
-        let events = authEventBus.events()
-        return AsyncStream { continuation in
-            continuation.yield()
-            let task = Task {
-                for await event in events {
-                    if case let .invalidateEmails(id) = event, id == nil || id == accountId {
-                        continuation.yield()
-                    }
-                }
-                continuation.finish()
-            }
-            continuation.onTermination = { _ in task.cancel() }
-        }
     }
 
     private func invalidateEmails() {

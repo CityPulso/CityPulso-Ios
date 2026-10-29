@@ -20,24 +20,33 @@ struct PrivacySettingsTests {
     }
 }
 
-struct EmailInvalidationTests {
-    @Test func firesOnceUpFrontThenOnEveryChangeOfThisAccount() async throws {
-        let store = AuthSessionStore(persistence: AuthSessionPersistence(vault: MemoryVault()))
-        store.state.set(completeSession())
-        let events = AuthEventBus()
-        let client = APIClient(config: stubConfig(host: "unused.stub"))
-        let service = AuthService(
-            auth: AuthRepository(publicAPI: AuthPublicAPI(client: client), protectedAPI: AuthProtectedAPI(client: client)),
-            authEventBus: events,
-            sessionStore: store
-        )
-        var iterator = service.emailInvalidations().makeAsyncIterator()
-        #expect(await iterator.next() != nil)
+private let emailHost = "emails.stub"
 
-        // 订阅在 Task 里建立，给它一拍再发事件。
+@Suite(.serialized)
+struct EmailQueryTests {
+    @Test func refetchesOnEmailInvalidationAndLogout() async throws {
+        StubProtocol.reset(emailHost)
+        StubProtocol.serve(emailHost) { _ in
+            let count = StubProtocol.received(emailHost).count
+            return (200, #"{"data":{"items":[{"id":"e\#(count)","account_id":"acc-1","email":"a@b.c","is_primary":true,"created_at":"","updated_at":""}],"total":1}}"#)
+        }
+        let events = AuthEventBus()
+        let client = APIClient(config: stubConfig(host: emailHost), interceptor: nil, configuration: StubProtocol.configuration)
+        let store = AuthQueryStore(
+            auth: AuthRepository(publicAPI: AuthPublicAPI(client: client), protectedAPI: AuthProtectedAPI(client: client)),
+            authEventBus: events
+        )
+        var iterator = store.emails.stream("acc-1").makeAsyncIterator()
+        guard case .loading = await iterator.next() else { Issue.record("expected loading"); return }
+        guard case let .data(first) = await iterator.next() else { Issue.record("expected data"); return }
+        #expect(first.map(\.id) == ["e1"])
+
         try await Task.sleep(for: .milliseconds(20))
-        events.emit(.invalidateEmails(accountId: "someone-else"))
+        events.emit(.updateAccountSuccess)
         events.emit(.invalidateEmails(accountId: "acc-1"))
-        #expect(await iterator.next() != nil)
+        guard case .loading = await iterator.next() else { Issue.record("expected loading"); return }
+        guard case let .data(second) = await iterator.next() else { Issue.record("expected data"); return }
+        #expect(second.map(\.id) == ["e2"])
+        #expect(StubProtocol.received(emailHost).count == 2)
     }
 }

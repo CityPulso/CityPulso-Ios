@@ -70,3 +70,19 @@ public final class EventBroadcast<Event: Sendable>: @unchecked Sendable {
         return stream
     }
 }
+
+extension EventBroadcast {
+    /** 只取匹配的事件、去掉内容的脉冲流（查询失效用：Kotlin 的 `events.filter { … }`）。 */
+    public func signals(where matches: @escaping @Sendable (Event) -> Bool) -> AsyncStream<Void> {
+        let events = events()
+        return AsyncStream { continuation in
+            let task = Task {
+                for await event in events where matches(event) {
+                    continuation.yield()
+                }
+                continuation.finish()
+            }
+            continuation.onTermination = { _ in task.cancel() }
+        }
+    }
+}

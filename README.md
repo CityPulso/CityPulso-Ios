@@ -43,3 +43,22 @@ python3 Scripts/android_strings.py --check  # 只检查是否过期
 python3 Scripts/android_assets.py          # 写入（需要 Pillow）
 python3 Scripts/android_assets.py --check  # 只检查是否过期
 ```
+
+## 枚举
+
+闭集取值（wire 枚举、带文案的选项）也以 Android 为准：`pulsolink-core/base/enums`、`pulsoloop/enums`、`pulsonear/enums`
+里每个 `enum class` 生成一个 Swift 枚举（放在各模块的 `Enums/Generated/`）。Android 枚举里的 companion 常量和函数不生成，
+需要时在旁边的 `*+Members.swift` 里手写。
+
+```sh
+python3 Scripts/android_enums.py          # 写入，并列出没生成的成员
+python3 Scripts/android_enums.py --check  # 只检查是否过期
+```
+
+## Linux 上测 core
+
+Swift 6.2 的 Linux 工具链里 `libswiftObservation.so` 有一个未解析符号，链接测试时要加一个参数：
+
+```sh
+swift test -Xlinker --allow-shlib-undefined
+```

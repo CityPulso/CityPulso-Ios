@@ -15,7 +15,7 @@ struct ActivityPreferencesView: View {
                             Label {
                                 Text(sport.labelKey)
                             } icon: {
-                                Image(sport.imageName).resizable().frame(width: 20, height: 20)
+                                Image(sport.iconAsset).resizable().frame(width: 20, height: 20)
                             }
                             .font(.subheadline.weight(.medium))
                             .padding(.horizontal, 12)

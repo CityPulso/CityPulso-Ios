@@ -44,9 +44,9 @@ public struct LoginWithGoogleRequest: Encodable, Sendable {
     public let signupPlatform: AuthSignupPlatform
     /** 只在这次登录新建账号时使用：账号语言与设备系统。 */
     public let lang: PulsoLanguage
-    public let clientOs: ClientOS
+    public let clientOs: ClientOs
 
-    public init(idToken: String, deviceId: String, signupPlatform: AuthSignupPlatform, lang: PulsoLanguage, clientOs: ClientOS) {
+    public init(idToken: String, deviceId: String, signupPlatform: AuthSignupPlatform, lang: PulsoLanguage, clientOs: ClientOs) {
         self.idToken = idToken
         self.deviceId = deviceId
         self.signupPlatform = signupPlatform
@@ -66,7 +66,7 @@ public struct LoginWithAppleRequest: Encodable, Sendable {
     public let signupPlatform: AuthSignupPlatform
     /** 只在这次登录新建账号时使用：账号语言与设备系统。 */
     public let lang: PulsoLanguage
-    public let clientOs: ClientOS
+    public let clientOs: ClientOs
 
     public init(
         identityToken: String,
@@ -74,7 +74,7 @@ public struct LoginWithAppleRequest: Encodable, Sendable {
         deviceId: String,
         signupPlatform: AuthSignupPlatform,
         lang: PulsoLanguage,
-        clientOs: ClientOS
+        clientOs: ClientOs
     ) {
         self.identityToken = identityToken
         self.displayName = displayName
@@ -201,7 +201,7 @@ public struct SignupWithEmailRequest: Encodable, Sendable {
     public let deviceId: String
     public let signupPlatform: AuthSignupPlatform
     /** 注册时的设备系统；API 据此设定初始圆角。 */
-    public let clientOs: ClientOS
+    public let clientOs: ClientOs
 
     public init(
         email: String,
@@ -210,7 +210,7 @@ public struct SignupWithEmailRequest: Encodable, Sendable {
         lang: PulsoLanguage,
         deviceId: String,
         signupPlatform: AuthSignupPlatform,
-        clientOs: ClientOS
+        clientOs: ClientOs
     ) {
         self.email = email
         self.password = password

@@ -99,6 +99,14 @@ extension Container {
         self { AuthService(auth: self.authRepository(), authEventBus: self.authEventBus(), sessionStore: self.authSessionStore()) }.singleton
     }
 
+    public var authQueryStore: Factory<AuthQueryStore> {
+        self {
+            let store = AuthQueryStore(auth: self.authRepository(), authEventBus: self.authEventBus())
+            self.sessionTerminator().register(store)
+            return store
+        }.singleton
+    }
+
     public var startupGate: Factory<StartupGate> {
         self {
             StartupGate(
@@ -109,6 +117,12 @@ extension Container {
                 preferenceBootstrap: self.preferenceBootstrap()
             )
         }.singleton
+    }
+
+    /* ------------------------------ Asset ------------------------------ */
+
+    public var assetRepository: Factory<AssetRepository> {
+        self { AssetRepository(api: AssetAPI(client: self.protectedClient()), storage: self.publicClient()) }.singleton
     }
 
     /* ------------------------------ Social ------------------------------ */

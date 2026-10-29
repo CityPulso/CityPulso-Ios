@@ -15,6 +15,7 @@ struct PulsoLoopApp: App {
             ),
             vault: KeychainSessionVault(service: "com.citypulso.pulsoloop.session")
         )
+        PulsoUIBootstrap.start()
     }
 
     var body: some Scene {

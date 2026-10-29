@@ -55,6 +55,18 @@ public struct APIClient: Sendable {
         _ = try await perform(method, path, query: query, body: body)
     }
 
+    /** 把原始字节 PUT 到绝对地址（预签名上传）；返回 HTTP 状态码，由调用方判断。 */
+    public func upload(_ data: Data, to url: URL, contentType: String) async throws -> Int {
+        let response = await session
+            .upload(data, to: url, method: .put, headers: ["Content-Type": contentType])
+            .serializingData(emptyResponseCodes: [200, 201, 204])
+            .response
+        if let underlying = response.error?.underlyingError, response.response == nil {
+            throw underlying
+        }
+        return response.response?.statusCode ?? 0
+    }
+
     private func perform(
         _ method: HTTPMethod,
         _ path: String,
