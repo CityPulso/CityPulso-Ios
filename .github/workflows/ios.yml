@@ -1,10 +1,19 @@
 name: iOS
 
+# macOS 分钟按 10 倍计费，所以：
+# - core 测试在 Linux 上跑（每次 push）；
+# - 三个 App 在一个 macOS 任务里依次编译、共用依赖，只在手动触发时跑；
+# - 截图也只在手动触发并勾选时跑。
 on:
   push:
     branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      screenshots:
+        description: Run the simulator screenshot tests too
+        type: boolean
+        default: false
 
 concurrency:
   group: ios-${{ github.ref }}
@@ -16,24 +25,19 @@ permissions:
 jobs:
   core-tests:
     name: PulsoLinkCore tests
-    runs-on: macos-26
+    runs-on: ubuntu-latest
+    container: swift:6.2
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
-      - uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: latest-stable
       - name: swift test
-        run: swift test --package-path PulsoLinkCore
+        run: swift test --package-path PulsoLinkCore -Xlinker --allow-shlib-undefined
 
   build:
-    name: Build ${{ matrix.scheme }}
+    name: Build apps
+    if: github.event_name == 'workflow_dispatch'
     runs-on: macos-26
-    timeout-minutes: 40
-    strategy:
-      fail-fast: false
-      matrix:
-        scheme: [PulsoLink, PulsoLoop, PulsoNear]
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v5
       - uses: maxim-lobanov/setup-xcode@v1
@@ -46,26 +50,33 @@ jobs:
           cp Config/Local.xcconfig.example Config/Local.xcconfig
           xcodegen generate
       - name: Check generated Info.plist
-        if: matrix.scheme != 'PulsoLink'
         run: |
           set -euo pipefail
-          plutil -p "${{ matrix.scheme }}/Info.plist"
-          plutil -extract GIDClientID raw "${{ matrix.scheme }}/Info.plist"
-          plutil -extract CFBundleDisplayName raw "${{ matrix.scheme }}/Info.plist"
+          for app in PulsoLoop PulsoNear; do
+            plutil -extract GIDClientID raw "$app/Info.plist"
+            plutil -extract CFBundleDisplayName raw "$app/Info.plist"
+          done
       - name: Build for simulator
         run: |
           set -euo pipefail
-          xcodebuild \
-            -project CityPulso.xcodeproj \
-            -scheme "${{ matrix.scheme }}" \
-            -configuration Debug \
-            -destination 'generic/platform=iOS Simulator' \
-            -derivedDataPath build \
-            build \
-            CODE_SIGNING_ALLOWED=NO
+          status=0
+          for scheme in PulsoLoop PulsoNear PulsoLink; do
+            echo "::group::$scheme"
+            xcodebuild \
+              -project CityPulso.xcodeproj \
+              -scheme "$scheme" \
+              -configuration Debug \
+              -destination 'generic/platform=iOS Simulator' \
+              -derivedDataPath build \
+              build \
+              CODE_SIGNING_ALLOWED=NO || status=1
+            echo "::endgroup::"
+          done
+          exit $status
 
   screenshots:
     name: Shell screenshots
+    if: github.event_name == 'workflow_dispatch' && inputs.screenshots
     runs-on: macos-26
     timeout-minutes: 40
     steps:
