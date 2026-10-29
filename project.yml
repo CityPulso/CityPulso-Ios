@@ -46,6 +46,7 @@ targetTemplates:
       - path: ${target_name}
         excludes:
           - Info.plist
+          - Tests
     dependencies:
       - package: PulsoLinkCore
       - package: PulsoLinkUI
@@ -79,6 +80,8 @@ targets:
 
   PulsoLoop:
     templates: [PulsoApp]
+    scheme:
+      testTargets: [PulsoLoopTests]
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.citypulso.pulsoloop
@@ -92,3 +95,18 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.citypulso.pulsonear
         PULSO_DISPLAY_NAME: 娱邻
         PULSO_PUBLIC_HOST: pulsonear.com
+
+  # 宿主在 PulsoLoop 里跑的测试（截图等需要 UIKit 窗口的测试）。
+  PulsoLoopTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: PulsoLoop/Tests
+    dependencies:
+      - target: PulsoLoop
+      - package: PulsoLinkCore
+      - package: PulsoLinkUI
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: "YES"
+        PRODUCT_BUNDLE_IDENTIFIER: com.citypulso.pulsoloop.tests
