@@ -16,7 +16,7 @@ struct NavEditView: View {
                     trayDestinations: [],
                     selection: model.draft.slot1.destination,
                     appsExpanded: .constant(false),
-                    onOpen: model.beginPick(destination:)
+                    onOpen: { model.beginPick(destination: $0) }
                 )
                 .padding(.horizontal, -20)
                 .padding(.vertical, 8)
@@ -99,7 +99,7 @@ private struct NavSlotEditorSheet: View {
             Form {
                 if let draft = model.editingDraft {
                     Section("settings_nav_pick_destination") {
-                        Picker(selection: Binding(get: { draft.destination }, set: model.setEditingDestination)) {
+                        Picker(selection: Binding(get: { draft.destination }, set: { model.setEditingDestination($0) })) {
                             ForEach(model.destinations, id: \.self) { destination in
                                 Label(destination.labelKey, systemImage: destination.defaultIconPack.systemImage)
                                     .tag(destination)

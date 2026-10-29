@@ -59,7 +59,7 @@ enum PermissionStatus {
  */
 @MainActor
 @Observable
-final class PermissionsModel: NSObject, @preconcurrency CLLocationManagerDelegate {
+final class PermissionsModel: NSObject, CLLocationManagerDelegate {
     private(set) var statuses: [AppPermission: PermissionStatus] = [:]
 
     @ObservationIgnored private let locationManager = CLLocationManager()
