@@ -116,10 +116,10 @@ targets:
     platform: iOS
     sources:
       - path: PulsoLoop/Tests
+    # 只依赖宿主 App：包作为静态库链进 App，测试从 App 里拿符号。再单独声明包会让 Xcode 把它们改成动态框架，
+    # GoogleSignIn 的动态框架不会带上 AppAuth，链接失败。
     dependencies:
       - target: PulsoLoop
-      - package: PulsoLinkCore
-      - package: PulsoLinkUI
     settings:
       base:
         GENERATE_INFOPLIST_FILE: "YES"
