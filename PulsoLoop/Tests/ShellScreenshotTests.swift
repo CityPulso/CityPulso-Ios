@@ -10,12 +10,11 @@ import XCTest
 @MainActor
 final class ShellScreenshotTests: XCTestCase {
     func testDefaultTabBar() async throws {
-        try await capture(ShellPreview(), name: "loop-shell-default")
+        try await capture(ShellPreview(appsExpanded: false), name: "loop-shell-default")
     }
 
-    /** 对照：4 个普通 Tab + 1 个 search 角色 Tab（Apple Music 的布局），看系统会不会单独画出圆形按钮。 */
-    func testFourTabsPlusDetached() async throws {
-        try await capture(FourPlusOnePreview(), name: "loop-shell-four-plus-one")
+    func testAppsTrayExpanded() async throws {
+        try await capture(ShellPreview(appsExpanded: true), name: "loop-shell-apps")
     }
 
     private func capture(_ view: some View, name: String) async throws {
@@ -37,32 +36,27 @@ final class ShellScreenshotTests: XCTestCase {
 
 /** 默认底栏：槽 1–4 + 应用 + 槽 6（发起）。 */
 private struct ShellPreview: View {
-    @State private var selection = PulsoShellTab.destination(.explore)
+    @State private var navigator: PulsoShellNavigator
+
+    init(appsExpanded: Bool) {
+        let navigator = PulsoShellNavigator(root: .explore)
+        navigator.appsExpanded = appsExpanded
+        _navigator = State(initialValue: navigator)
+    }
 
     var body: some View {
-        PulsoShellTabView(
+        PulsoShellView(
             preference: .default,
             trayDestinations: ResolvedAndroidPreference.default.appsTrayDestinations(
                 kind: .community,
                 supported: Set(ShellDestination.allCases)
             ),
-            selection: $selection
+            navigator: navigator
         ) { destination in
-            PulsoComingSoonView(destination)
-        }
-    }
-}
-
-private struct FourPlusOnePreview: View {
-    @State private var selection = 0
-
-    var body: some View {
-        TabView(selection: $selection) {
-            Tab("shell_dest_explore", systemImage: "location.magnifyingglass", value: 0) { PulsoComingSoonView(.explore) }
-            Tab("shell_dest_venue_search", systemImage: "building.2", value: 1) { PulsoComingSoonView(.venueSearch) }
-            Tab("shell_dest_search", systemImage: "tennis.racket", value: 2) { PulsoComingSoonView(.search) }
-            Tab("home_nav_apps", systemImage: "square.grid.2x2", value: 3) { PulsoComingSoonView(.forum) }
-            Tab("shell_dest_create", systemImage: "plus", value: 4, role: .search) { PulsoComingSoonView(.create) }
+            List(1...30, id: \.self) { row in
+                Text(verbatim: "\(row)")
+            }
+            .navigationTitle(destination.labelKey)
         }
     }
 }
