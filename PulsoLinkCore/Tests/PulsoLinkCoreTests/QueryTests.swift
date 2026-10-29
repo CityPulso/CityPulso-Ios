@@ -107,6 +107,16 @@ struct MemoryQueryTests {
         #expect(responses.compactMap(value) == [1, 9])
     }
 
+    @Test func updateAllRewritesCacheAndPushes() async throws {
+        let query = MemoryQuery<String, Int> { _ in 1 }
+        let stream = query.stream("a", refresh: false)
+        let collector = Task { await take(3, from: stream) }
+        try await Task.sleep(for: .milliseconds(20))
+        await query.updateAll { $0 + 10 }
+        #expect(await collector.value.compactMap(value) == [1, 11])
+        #expect(try await query.get("a") == 11)
+    }
+
     @Test func maxSizeEvictsOldest() async throws {
         let counter = Counter()
         let query = MemoryQuery<String, Int>(maxSize: 2) { _ in await counter.next() }

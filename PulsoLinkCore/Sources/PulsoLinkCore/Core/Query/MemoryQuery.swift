@@ -61,6 +61,11 @@ public final class MemoryQuery<Key: Hashable & Sendable, Output: Sendable>: Send
         await storage.write(key, value)
     }
 
+    /** 改写所有已缓存的值（例如浏览数只增不减地叠上去），活跃的 stream 会收到改过的值。 */
+    public func updateAll(_ transform: @escaping @Sendable (Output) -> Output) async {
+        await storage.updateAll(transform)
+    }
+
     /**
      * 订阅一个 key：有缓存先发 `.data`；没有缓存、缓存过期或 [refresh] 时发 `.loading` 再拉网络。
      * 之后每次失效都重拉，直到调用方取消（随页面 `.task` 结束）。
@@ -156,6 +161,14 @@ public final class MemoryQuery<Key: Hashable & Sendable, Output: Sendable>: Send
             }
             entries[key] = Entry(value: value, writtenAt: clock.now)
             subscribers[key]?.values.forEach { $0.yield(.data(value)) }
+        }
+
+        func updateAll(_ transform: (Output) -> Output) {
+            for (key, entry) in entries {
+                let next = transform(entry.value)
+                entries[key] = Entry(value: next, writtenAt: entry.writtenAt)
+                subscribers[key]?.values.forEach { $0.yield(.data(next)) }
+            }
         }
 
         func clear() {

@@ -21,10 +21,20 @@ public struct MissingDataError: Error, Sendable, CustomStringConvertible {
 public struct ListWithTotal<T: Codable & Sendable>: Codable, Sendable {
     @DefaultEmptyArray public var items: [T]
     @DefaultZero public var total: Int
+
+    public init(items: [T], total: Int) {
+        _items = DefaultEmptyArray(wrappedValue: items)
+        _total = DefaultZero(wrappedValue: total)
+    }
 }
 
 /** 字符串游标列表（与 WEB `ListDTOWithNextCursor<T>` 一致）。 */
 public struct ListWithNextCursor<T: Codable & Sendable>: Codable, Sendable {
     @DefaultEmptyArray public var items: [T]
     public var nextCursor: String?
+
+    public init(items: [T], nextCursor: String?) {
+        _items = DefaultEmptyArray(wrappedValue: items)
+        self.nextCursor = nextCursor
+    }
 }
