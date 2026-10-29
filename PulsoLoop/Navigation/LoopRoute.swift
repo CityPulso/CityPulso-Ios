@@ -18,7 +18,7 @@ enum LoopRoute: Hashable {
     /** 还没移植的页面：[title] 是文案 key。 */
     case comingSoon(title: String, systemImage: String)
 
-    @ViewBuilder
+    @MainActor @ViewBuilder
     var page: some View {
         switch self {
         case .theme: ThemeSettingsView()
