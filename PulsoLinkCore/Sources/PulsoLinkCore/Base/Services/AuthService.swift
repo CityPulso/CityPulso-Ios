@@ -10,6 +10,35 @@ public struct AuthService: Sendable {
         self.authEventBus = authEventBus
     }
 
+    /* ------------------------------ 登录 / 注册 ------------------------------ */
+
+    public func loginWithEmail(_ body: LoginWithEmailRequest) async throws -> LoginWithEmailResponse {
+        try await auth.loginWithEmail(body)
+    }
+
+    public func loginWithGoogle(_ body: LoginWithGoogleRequest) async throws -> LoginWithEmailResponse {
+        try await auth.loginWithGoogle(body)
+    }
+
+    /** Google 登录要的 web client ID（ID token 的 audience，后端用它验 token）。 */
+    public func googleClientId() async throws -> String {
+        try await auth.getAuthEnv().env.googleClientId
+    }
+
+    public func sendVerificationCode(_ body: SendVerificationCodeRequest) async throws {
+        try await auth.sendVerificationCode(body)
+    }
+
+    public func signupWithEmail(_ body: SignupWithEmailRequest) async throws -> SignupWithEmailResponse {
+        try await auth.signupWithEmail(body)
+    }
+
+    public func selectProfile(_ body: SelectProfileRequest) async throws -> SelectProfileResponse {
+        try await auth.selectProfile(body)
+    }
+
+    /* ------------------------------ 账号 / 身份 ------------------------------ */
+
     public func getCurrentFullAccountInformationWithProfile(kind: ProfileKind) async throws -> CurrentFullAccountInformation {
         try await auth.getCurrentFullAccountInformationWithProfile(kind: kind)
     }

@@ -33,3 +33,13 @@ open CityPulso.xcodeproj
 python3 Scripts/android_strings.py          # 写入
 python3 Scripts/android_strings.py --check  # 只检查是否过期
 ```
+
+## 图片
+
+图片同样以 Android 为准：`res/drawable-nodpi`（`_light` / `_dark` 合成一张带深色版本的图，`drawable-zh-nodpi` 是中文版）
+和 `.icons/inputs/logos`（App 图标，浅色 / 深色）。改了之后重新生成：
+
+```sh
+python3 Scripts/android_assets.py          # 写入（需要 Pillow）
+python3 Scripts/android_assets.py --check  # 只检查是否过期
+```

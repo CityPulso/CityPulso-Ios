@@ -82,10 +82,15 @@ extension Container {
     public var communitySignIn: Factory<CommunitySignIn> {
         self {
             CommunitySignIn(
-                authRepository: self.authRepository(),
+                authService: self.authService(),
                 sessionStore: self.authSessionStore(),
                 deviceIdProvider: self.deviceIdProvider(),
-                authEventBus: self.authEventBus()
+                authEventBus: self.authEventBus(),
+                profileBootstrap: self.profileBootstrap(),
+                profileStore: self.profileStore(),
+                preferenceBootstrap: self.preferenceBootstrap(),
+                preferenceService: self.preferenceService(),
+                config: self.pulsoCoreConfig()
             )
         }.singleton
     }

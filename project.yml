@@ -80,6 +80,13 @@ targets:
 
   PulsoLoop:
     templates: [PulsoApp]
+    info:
+      path: PulsoLoop/Info.plist
+      properties:
+        # Google iOS OAuth client（Google Cloud 项目 129233998164，与后端 web client 同一个项目）。
+        GIDClientID: 129233998164-i2itt0ptv399f48rrm9lf25lvb4dkrml.apps.googleusercontent.com
+        CFBundleURLTypes:
+          - CFBundleURLSchemes: [com.googleusercontent.apps.129233998164-i2itt0ptv399f48rrm9lf25lvb4dkrml]
     scheme:
       testTargets: [PulsoLoopTests]
     settings:
@@ -90,6 +97,13 @@ targets:
 
   PulsoNear:
     templates: [PulsoApp]
+    info:
+      path: PulsoNear/Info.plist
+      properties:
+        # Google iOS OAuth client（Google Cloud 项目 129233998164，与后端 web client 同一个项目）。
+        GIDClientID: 129233998164-2dv2ameks492jges1pob54ka39bt86m0.apps.googleusercontent.com
+        CFBundleURLTypes:
+          - CFBundleURLSchemes: [com.googleusercontent.apps.129233998164-2dv2ameks492jges1pob54ka39bt86m0]
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.citypulso.pulsonear

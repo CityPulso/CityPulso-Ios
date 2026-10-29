@@ -1,0 +1,35 @@
+{
+  "images": [
+    {
+      "filename": "onboarding_waitlist_light.jpg",
+      "idiom": "universal"
+    },
+    {
+      "filename": "onboarding_waitlist_light_zh-Hans.jpg",
+      "idiom": "universal",
+      "locale": "zh-Hans"
+    },
+    {
+      "filename": "onboarding_waitlist_light_zh-Hant.jpg",
+      "idiom": "universal",
+      "locale": "zh-Hant"
+    },
+    {
+      "appearances": [
+        {
+          "appearance": "luminosity",
+          "value": "dark"
+        }
+      ],
+      "filename": "onboarding_waitlist_dark.jpg",
+      "idiom": "universal"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  },
+  "properties": {
+    "localizable": true
+  }
+}

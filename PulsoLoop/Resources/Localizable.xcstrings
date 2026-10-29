@@ -59234,6 +59234,35 @@
         }
       }
     },
+    "shell_social_blocked_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blocked"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bloqués"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "黑名单"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "黑名單"
+          }
+        }
+      }
+    },
     "shell_social_cancel_request": {
       "extractionState": "manual",
       "localizations": {
@@ -59317,6 +59346,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "建立聊天"
+          }
+        }
+      }
+    },
+    "shell_social_find_people": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Find people"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trouver des personnes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索用户"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜尋用户"
           }
         }
       }
@@ -59433,35 +59491,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "還沒有人關注你。別人關注後會出現在這裏。"
-          }
-        }
-      }
-    },
-    "shell_social_following_button": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Following"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Abonné"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "已关注"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "已關注"
           }
         }
       }
@@ -59611,6 +59640,35 @@
         }
       }
     },
+    "shell_social_list_total": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ (%2$@)"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ (%2$@)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@（%2$@）"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@（%2$@）"
+          }
+        }
+      }
+    },
     "shell_social_message": {
       "extractionState": "manual",
       "localizations": {
@@ -59665,6 +59723,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "%1$@ 的更多操作"
+          }
+        }
+      }
+    },
+    "shell_social_more_actions": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "More"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plus"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更多"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更多"
           }
         }
       }
@@ -60429,25 +60516,25 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Search by name, username or city"
+            "value": "Search friends, following or followers"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rechercher par nom, nom d’utilisateur ou ville"
+            "value": "Rechercher des amis, abonnements ou abonnés"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "搜索昵称、用户名或城市"
+            "value": "搜索好友、关注或粉丝"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "搜尋暱稱、用户名或城市"
+            "value": "搜尋好友、關注或粉絲"
           }
         }
       }
@@ -60506,35 +60593,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "最早關注"
-          }
-        }
-      }
-    },
-    "shell_social_stat_blocked": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Blocked"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bloqués"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "黑名单"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "黑名單"
           }
         }
       }
@@ -60622,35 +60680,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "我的好友"
-          }
-        }
-      }
-    },
-    "shell_social_tab_blocked": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Blocked"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bloqués"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "已拉黑"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "已拉黑"
           }
         }
       }

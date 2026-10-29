@@ -45,6 +45,13 @@ jobs:
         run: |
           cp Config/Local.xcconfig.example Config/Local.xcconfig
           xcodegen generate
+      - name: Check generated Info.plist
+        if: matrix.scheme != 'PulsoLink'
+        run: |
+          set -euo pipefail
+          plutil -p "${{ matrix.scheme }}/Info.plist"
+          plutil -extract GIDClientID raw "${{ matrix.scheme }}/Info.plist"
+          plutil -extract CFBundleDisplayName raw "${{ matrix.scheme }}/Info.plist"
       - name: Build for simulator
         run: |
           set -euo pipefail

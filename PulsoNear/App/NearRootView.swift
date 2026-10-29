@@ -15,12 +15,13 @@ struct NearRootView: View {
                 NearRootChrome()
                     .transition(.opacity)
             } else {
-                LoginView()
+                NearAuthStack()
                     .transition(.opacity)
             }
         }
         .animation(.easeInOut(duration: 0.2), value: session.isSignedIn)
         .environment(session)
         .pulsoTheme(theme.settings)
+        .onOpenURL { GoogleIdToken.handle($0) }
     }
 }

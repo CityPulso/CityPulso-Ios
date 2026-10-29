@@ -1,22 +1,16 @@
+import GoogleSignInSwift
 import SwiftUI
 
-/** 登录页：系统表单，提交按钮用 Liquid Glass。 */
+/** 登录页（对应 Android `LoginScreen`）：系统表单，提交按钮用 Liquid Glass，Google 用官方按钮。 */
 struct LoginView: View {
     @State private var model = LoginModel()
+    @Environment(AuthNavigator.self) private var navigator
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         Form {
             Section {
-                VStack(alignment: .leading, spacing: 16) {
-                    Image("AppLogo")
-                        .resizable()
-                        .frame(width: 64, height: 64)
-                        .accessibilityHidden(true)
-                    Text("login_title")
-                        .font(.largeTitle.bold())
-                }
-                .listRowBackground(Color.clear)
-                .listRowInsets(EdgeInsets())
+                AuthHeader(title: "login_title", subtitle: "login_subtitle")
             }
 
             Section {
@@ -36,25 +30,60 @@ struct LoginView: View {
             }
 
             Section {
-                Button {
-                    Task { await model.submit() }
-                } label: {
-                    Group {
-                        if model.loading {
-                            ProgressView()
-                        } else {
-                            Label("login_submit", systemImage: "rectangle.portrait.and.arrow.forward")
+                VStack(spacing: 12) {
+                    Button {
+                        Task { await model.submit() }
+                    } label: {
+                        Group {
+                            if model.loading {
+                                ProgressView()
+                            } else {
+                                Label("login_submit", systemImage: "rectangle.portrait.and.arrow.forward")
+                            }
                         }
+                        .frame(maxWidth: .infinity)
                     }
-                    .frame(maxWidth: .infinity)
+                    .buttonStyle(.glassProminent)
+                    .controlSize(.large)
+                    .disabled(!model.canSubmit)
+
+                    GoogleSignInButton(scheme: colorScheme == .dark ? .dark : .light, style: .wide) {
+                        Task { await model.signInWithGoogle() }
+                    }
+                    .disabled(model.loading)
+
+                    Button("login_go_signup") { navigator.openSignup() }
+                        .buttonStyle(.borderless)
+                        .padding(.top, 4)
                 }
-                .buttonStyle(.glassProminent)
-                .controlSize(.large)
-                .disabled(!model.canSubmit)
                 .listRowBackground(Color.clear)
                 .listRowInsets(EdgeInsets())
             }
         }
         .scrollDismissesKeyboard(.interactively)
+    }
+}
+
+/** 登录 / 注册页头：logo、标题、说明。 */
+struct AuthHeader: View {
+    let title: LocalizedStringKey
+    let subtitle: LocalizedStringKey
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Image("logo")
+                .resizable()
+                .frame(width: 64, height: 64)
+                .clipShape(.rect(cornerRadius: 64 / 5))
+                .accessibilityHidden(true)
+                .padding(.bottom, 8)
+            Text(title)
+                .font(.largeTitle.bold())
+            Text(subtitle)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        .listRowBackground(Color.clear)
+        .listRowInsets(EdgeInsets())
     }
 }

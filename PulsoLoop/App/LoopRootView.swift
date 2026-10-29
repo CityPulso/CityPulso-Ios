@@ -15,12 +15,13 @@ struct LoopRootView: View {
                 LoopRootChrome()
                     .transition(.opacity)
             } else {
-                LoginView()
+                LoopAuthStack()
                     .transition(.opacity)
             }
         }
         .animation(.easeInOut(duration: 0.2), value: session.isSignedIn)
         .environment(session)
         .pulsoTheme(theme.settings)
+        .onOpenURL { GoogleIdToken.handle($0) }
     }
 }

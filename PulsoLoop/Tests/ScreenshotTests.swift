@@ -2,13 +2,14 @@ import PulsoLinkCore
 import PulsoLinkUI
 import SwiftUI
 import XCTest
+@testable import PulsoLoop
 
 /**
- * 主壳底栏截图：在模拟器里把系统 TabView 画进一个窗口存成 PNG，CI 当 artifact 上传，
- * 用来看 Liquid Glass 底栏真实长什么样（没有 Mac 时唯一能看到的方式）。
+ * 页面截图：在模拟器里把页面画进一个窗口存成 PNG，CI 当 artifact 上传，
+ * 用来看页面真实长什么样（没有 Mac 时唯一能看到的方式）。
  */
 @MainActor
-final class ShellScreenshotTests: XCTestCase {
+final class ScreenshotTests: XCTestCase {
     func testDefaultTabBar() async throws {
         try await capture(ShellPreview(appsExpanded: false), name: "loop-shell-default")
     }
@@ -17,9 +18,24 @@ final class ShellScreenshotTests: XCTestCase {
         try await capture(ShellPreview(appsExpanded: true), name: "loop-shell-apps")
     }
 
-    private func capture(_ view: some View, name: String) async throws {
+    func testWelcome() async throws {
+        try await capture(LoopAuthStack(), name: "loop-welcome")
+        try await capture(LoopAuthStack().environment(\.locale, Locale(identifier: "zh-Hans")), name: "loop-welcome-zh")
+        try await capture(LoopAuthStack(), name: "loop-welcome-dark", style: .dark)
+    }
+
+    func testLogin() async throws {
+        try await capture(NavigationStack { LoginView() }.environment(AuthNavigator()), name: "loop-login")
+    }
+
+    func testSignup() async throws {
+        try await capture(NavigationStack { SignupView() }.environment(AuthNavigator()), name: "loop-signup")
+    }
+
+    private func capture(_ view: some View, name: String, style: UIUserInterfaceStyle = .light) async throws {
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.first as? UIWindowScene)
         let window = UIWindow(windowScene: scene)
+        window.overrideUserInterfaceStyle = style
         window.rootViewController = UIHostingController(rootView: view)
         window.makeKeyAndVisible()
         try await Task.sleep(for: .seconds(2))
