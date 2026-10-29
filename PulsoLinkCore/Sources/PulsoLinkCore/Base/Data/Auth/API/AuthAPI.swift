@@ -70,6 +70,10 @@ public struct AuthProtectedAPI: Sendable {
 
     /* ------------------------------ 邮箱 / 密码 ------------------------------ */
 
+    public func listEmails(limit: Int? = nil, offset: Int? = nil) async throws -> DataResponse<ListWithTotal<EmailItem>> {
+        try await client.request(.get, "auth/me/emails", query: ["limit": limit.map(String.init), "offset": offset.map(String.init)])
+    }
+
     public func createEmail(_ body: CreateEmailRequest) async throws -> DataResponse<CreateEmailResponse> {
         try await client.request(.post, "auth/me/emails", body: body)
     }

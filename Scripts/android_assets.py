@@ -148,6 +148,20 @@ def icon(logo: Path, background: tuple[int, int, int]) -> bytes:
 
 
 def app_icon(app: AppAssets) -> dict[Path, bytes]:
+    """AppIcon (light + dark appearance), the AppIcon-Dark alternate (dark everywhere, the "dark" launcher icon
+    pack), and both as plain images for the app-icon settings page."""
+    light = icon(LOGOS / app.icon_light, ICON_LIGHT_BACKGROUND)
+    dark = icon(LOGOS / app.icon_dark, app.icon_dark_background)
+    single = lambda filename: {"images": [{"filename": filename, "idiom": "universal", "platform": "ios", "size": "1024x1024"}], "info": INFO}
+    preview = lambda filename: {"images": [{"filename": filename, "idiom": "universal"}], "info": INFO}
+    files = {
+        Path("AppIcon-Dark.appiconset/icon_dark.png"): dark,
+        Path("AppIcon-Dark.appiconset/Contents.json"): dumps(single("icon_dark.png")),
+        Path("app_icon_preview.imageset/icon.png"): light,
+        Path("app_icon_preview.imageset/Contents.json"): dumps(preview("icon.png")),
+        Path("app_icon_preview_dark.imageset/icon_dark.png"): dark,
+        Path("app_icon_preview_dark.imageset/Contents.json"): dumps(preview("icon_dark.png")),
+    }
     folder = Path("AppIcon.appiconset")
     contents = {
         "images": [
@@ -162,9 +176,9 @@ def app_icon(app: AppAssets) -> dict[Path, bytes]:
         ],
         "info": INFO,
     }
-    return {
-        folder / "icon.png": icon(LOGOS / app.icon_light, ICON_LIGHT_BACKGROUND),
-        folder / "icon_dark.png": icon(LOGOS / app.icon_dark, app.icon_dark_background),
+    return files | {
+        folder / "icon.png": light,
+        folder / "icon_dark.png": dark,
         folder / "Contents.json": dumps(contents),
     }
 
@@ -178,7 +192,9 @@ def main() -> int:
     for app in APPS:
         catalog = IOS_ROOT / app.ios_dir / "Resources/Assets.xcassets"
         expected = {Path("Contents.json"): dumps({"info": INFO})}
-        expected |= app_icon(app)
+        expected |= app_icon(app) if app.android_module else {
+            path: data for path, data in app_icon(app).items() if path.parts[0] == "AppIcon.appiconset"
+        }
         if app.android_module:
             expected |= imagesets(app.android_module)
 

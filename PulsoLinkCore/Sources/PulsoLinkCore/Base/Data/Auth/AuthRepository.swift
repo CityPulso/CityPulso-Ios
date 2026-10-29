@@ -69,6 +69,10 @@ public struct AuthRepository: Sendable {
 
     /* ------------------------------ 邮箱 / 密码 ------------------------------ */
 
+    public func listEmails() async throws -> ListWithTotal<EmailItem> {
+        try await protectedAPI.listEmails().dataOrThrow("ListEmails")
+    }
+
     public func createEmail(_ body: CreateEmailRequest) async throws -> CreateEmailResponse {
         try await protectedAPI.createEmail(body).dataOrThrow("CreateEmail")
     }

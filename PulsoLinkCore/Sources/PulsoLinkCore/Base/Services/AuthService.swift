@@ -5,9 +5,12 @@ public struct AuthService: Sendable {
     private let auth: AuthRepository
     private let authEventBus: AuthEventBus
 
-    public init(auth: AuthRepository, authEventBus: AuthEventBus) {
+    private let sessionStore: AuthSessionStore
+
+    public init(auth: AuthRepository, authEventBus: AuthEventBus, sessionStore: AuthSessionStore) {
         self.auth = auth
         self.authEventBus = authEventBus
+        self.sessionStore = sessionStore
     }
 
     /* ------------------------------ 登录 / 注册 ------------------------------ */
@@ -46,6 +49,77 @@ public struct AuthService: Sendable {
     public func getCurrentFullAccountInformationWithProfile(kind: ProfileKind) async throws -> CurrentFullAccountInformation {
         try await auth.getCurrentFullAccountInformationWithProfile(kind: kind)
     }
+
+    /* ------------------------------ 邮箱 / 密码 ------------------------------ */
+
+    public func listEmails() async throws -> [EmailItem] {
+        try await auth.listEmails().items
+    }
+
+    public func createEmail(_ email: String) async throws -> CreateEmailResponse {
+        let response = try await auth.createEmail(CreateEmailRequest(email: email))
+        invalidateEmails()
+        return response
+    }
+
+    public func updateEmail(emailId: String, email: String) async throws {
+        try await auth.updateEmail(emailId: emailId, email: email)
+        invalidateEmails()
+    }
+
+    public func sendEmailVerificationCode(emailId: String, lang: PulsoLanguage) async throws {
+        try await auth.sendEmailVerificationCode(emailId: emailId, lang: lang)
+    }
+
+    public func verifyEmail(emailId: String, verificationCode: String) async throws {
+        try await auth.verifyEmail(emailId: emailId, verificationCode: verificationCode)
+        invalidateEmails()
+        authEventBus.emit(.updateAccountSuccess)
+    }
+
+    public func setPrimaryEmail(emailId: String) async throws {
+        try await auth.setPrimaryEmail(emailId: emailId)
+        invalidateEmails()
+        authEventBus.emit(.updateAccountSuccess)
+    }
+
+    public func deleteEmail(emailId: String) async throws {
+        try await auth.deleteEmail(emailId: emailId)
+        invalidateEmails()
+        authEventBus.emit(.updateAccountSuccess)
+    }
+
+    public func changePassword(newPassword: String, verificationCode: String) async throws {
+        try await auth.changePassword(ChangePasswordRequest(newPassword: newPassword, verificationCode: verificationCode))
+    }
+
+    public func sendChangePasswordVerificationCode(lang: PulsoLanguage) async throws {
+        try await auth.sendChangePasswordVerificationCode(lang: lang)
+    }
+
+    /** 邮箱列表的变化流：先发一次，之后每次邮箱失效（增删改、验证、设主邮箱）再发一次。 */
+    public func emailInvalidations() -> AsyncStream<Void> {
+        let accountId = sessionStore.state.value.currentAccountId
+        let events = authEventBus.events()
+        return AsyncStream { continuation in
+            continuation.yield()
+            let task = Task {
+                for await event in events {
+                    if case let .invalidateEmails(id) = event, id == nil || id == accountId {
+                        continuation.yield()
+                    }
+                }
+                continuation.finish()
+            }
+            continuation.onTermination = { _ in task.cancel() }
+        }
+    }
+
+    private func invalidateEmails() {
+        authEventBus.emit(.invalidateEmails(accountId: sessionStore.state.value.currentAccountId))
+    }
+
+    /* ------------------------------ 偏好 ------------------------------ */
 
     public func updatePreference(kind: ProfileKind, preference: String) async throws {
         try await auth.updatePreference(kind: kind, preference: preference)

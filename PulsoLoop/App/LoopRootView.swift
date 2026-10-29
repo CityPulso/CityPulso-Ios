@@ -21,6 +21,7 @@ struct LoopRootView: View {
         }
         .animation(.easeInOut(duration: 0.2), value: session.isSignedIn)
         .environment(session)
+        .pulsoMessageHost()
         .pulsoTheme(theme.settings)
         .onOpenURL { GoogleIdToken.handle($0) }
     }

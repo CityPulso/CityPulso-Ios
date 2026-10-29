@@ -60,6 +60,11 @@ targetTemplates:
         CFBundleLocalizations: [zh-Hans, zh-Hant, en, fr]
         PulsoApiBaseURL: $(PULSO_API_BASE_URL)
         UILaunchScreen: {}
+        # 源语言（zh-Hans）原文；其余语言由 Resources/InfoPlist.xcstrings 提供（Scripts/android_strings.py 生成）。
+        NSLocationWhenInUseUsageDescription: 用于附近活动、地图定位和你的当前位置
+        NSCameraUsageDescription: 用于聊天拍照发送图片。
+        NSPhotoLibraryUsageDescription: 用于聊天从相册选择图片发送。
+        NSMicrophoneUsageDescription: 用于聊天发送语音。
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         ITSAppUsesNonExemptEncryption: false
         NSAppTransportSecurity:
@@ -97,6 +102,9 @@ targets:
         # 「通过 Apple 登录」要付费开发者账号才能签名；Local.xcconfig 设 PULSO_APPLE_SIGN_IN = YES 后才带上权限。
         CODE_SIGN_ENTITLEMENTS: $(PULSO_ENTITLEMENTS_$(PULSO_APPLE_SIGN_IN))
         PULSO_ENTITLEMENTS_YES: PulsoLoop/PulsoLoop.entitlements
+        # 「深色」桌面图标套图（LauncherIcon.dark）用的系统备用图标。
+        ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES: AppIcon-Dark
+        ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS: "YES"
 
   PulsoNear:
     templates: [PulsoApp]
@@ -115,6 +123,9 @@ targets:
         # 「通过 Apple 登录」要付费开发者账号才能签名；Local.xcconfig 设 PULSO_APPLE_SIGN_IN = YES 后才带上权限。
         CODE_SIGN_ENTITLEMENTS: $(PULSO_ENTITLEMENTS_$(PULSO_APPLE_SIGN_IN))
         PULSO_ENTITLEMENTS_YES: PulsoNear/PulsoNear.entitlements
+        # 「深色」桌面图标套图（LauncherIcon.dark）用的系统备用图标。
+        ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES: AppIcon-Dark
+        ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS: "YES"
 
   # 宿主在 PulsoLoop 里跑的测试（截图等需要 UIKit 窗口的测试）。
   PulsoLoopTests:

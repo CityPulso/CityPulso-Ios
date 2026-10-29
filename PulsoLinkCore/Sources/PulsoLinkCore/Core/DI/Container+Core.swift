@@ -96,7 +96,7 @@ extension Container {
     }
 
     public var authService: Factory<AuthService> {
-        self { AuthService(auth: self.authRepository(), authEventBus: self.authEventBus()) }.singleton
+        self { AuthService(auth: self.authRepository(), authEventBus: self.authEventBus(), sessionStore: self.authSessionStore()) }.singleton
     }
 
     public var startupGate: Factory<StartupGate> {
@@ -109,6 +109,12 @@ extension Container {
                 preferenceBootstrap: self.preferenceBootstrap()
             )
         }.singleton
+    }
+
+    /* ------------------------------ Social ------------------------------ */
+
+    public var socialService: Factory<SocialService> {
+        self { SocialService(social: SocialRepository(api: SocialAPI(client: self.protectedClient()))) }.singleton
     }
 
     /* ------------------------------ Profile / preference ------------------------------ */

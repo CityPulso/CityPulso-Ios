@@ -32,6 +32,16 @@ final class ScreenshotTests: XCTestCase {
         try await capture(NavigationStack { SignupView() }.environment(AuthNavigator()), name: "loop-signup")
     }
 
+    func testSettings() async throws {
+        let session = PulsoSessionModel()
+        try await capture(NavigationStack { SettingsView() }.environment(session), name: "loop-settings")
+        try await capture(NavigationStack { ThemeSettingsView() }, name: "loop-settings-theme")
+        try await capture(NavigationStack { NavEditView() }, name: "loop-settings-navedit")
+        try await capture(NavigationStack { EventPreferencesView() }, name: "loop-settings-event")
+        try await capture(NavigationStack { PermissionsView() }, name: "loop-settings-permissions")
+        try await capture(NavigationStack { LauncherIconView() }, name: "loop-settings-appicon")
+    }
+
     private func capture(_ view: some View, name: String, style: UIUserInterfaceStyle = .light) async throws {
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.first as? UIWindowScene)
         let window = UIWindow(windowScene: scene)

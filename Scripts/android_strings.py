@@ -118,6 +118,15 @@ def catalog(entries: dict[str, dict[str, str | dict]]) -> str:
     return json.dumps(body, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
 
+# Info.plist 权限说明 ← Android 设置里同一项权限的说明（iOS 系统弹窗里显示）。
+INFO_PLIST_STRINGS = {
+    "NSLocationWhenInUseUsageDescription": "settings_permission_location_body",
+    "NSCameraUsageDescription": "settings_permission_camera_body",
+    "NSPhotoLibraryUsageDescription": "settings_permission_photos_body",
+    "NSMicrophoneUsageDescription": "settings_permission_microphone_body",
+}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true", help="fail when a catalog differs from Android")
@@ -130,7 +139,9 @@ def main() -> int:
         if strings:
             outputs[IOS_ROOT / out_dir / "Localizable.xcstrings"] = catalog(strings)
         if app_names:
-            outputs[IOS_ROOT / out_dir / "InfoPlist.xcstrings"] = catalog({"CFBundleDisplayName": app_names})
+            info = {"CFBundleDisplayName": app_names}
+            info |= {key: strings[source] for key, source in INFO_PLIST_STRINGS.items() if source in strings}
+            outputs[IOS_ROOT / out_dir / "InfoPlist.xcstrings"] = catalog(info)
         for path, content in outputs.items():
             current = path.read_text(encoding="utf-8") if path.exists() else None
             if current == content:

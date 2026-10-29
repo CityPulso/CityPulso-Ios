@@ -30,7 +30,8 @@ struct StartupGateTests {
         let client = APIClient(config: config, interceptor: nil, configuration: StubProtocol.configuration)
         let authService = AuthService(
             auth: AuthRepository(publicAPI: AuthPublicAPI(client: client), protectedAPI: AuthProtectedAPI(client: client)),
-            authEventBus: events
+            authEventBus: events,
+            sessionStore: store
         )
         let profiles = ProfileStore()
         let preferences = PreferenceRepository(defaults: freshDefaults())
