@@ -39,9 +39,10 @@ public struct APIClient: Sendable {
         _ method: HTTPMethod,
         _ path: String,
         query: [String: String?] = [:],
+        headers: [String: String] = [:],
         body: (some Encodable & Sendable)? = EmptyBody?.none
     ) async throws -> Response {
-        let data = try await perform(method, path, query: query, body: body)
+        let data = try await perform(method, path, query: query, headers: headers, body: body)
         return try WireCoding.decoder.decode(Response.self, from: data)
     }
 
@@ -50,9 +51,10 @@ public struct APIClient: Sendable {
         _ method: HTTPMethod,
         _ path: String,
         query: [String: String?] = [:],
+        headers: [String: String] = [:],
         body: (some Encodable & Sendable)? = EmptyBody?.none
     ) async throws {
-        _ = try await perform(method, path, query: query, body: body)
+        _ = try await perform(method, path, query: query, headers: headers, body: body)
     }
 
     /** 把原始字节 PUT 到绝对地址（预签名上传）；返回 HTTP 状态码，由调用方判断。 */
@@ -71,18 +73,21 @@ public struct APIClient: Sendable {
         _ method: HTTPMethod,
         _ path: String,
         query: [String: String?],
+        headers: [String: String],
         body: (some Encodable & Sendable)?
     ) async throws -> Data {
         let url = try makeURL(path, query: query)
+        let httpHeaders = HTTPHeaders(headers)
         let request: DataRequest = if let body {
             session.request(
                 url,
                 method: method,
                 parameters: body,
-                encoder: JSONParameterEncoder(encoder: WireCoding.encoder)
+                encoder: JSONParameterEncoder(encoder: WireCoding.encoder),
+                headers: httpHeaders
             )
         } else {
-            session.request(url, method: method)
+            session.request(url, method: method, headers: httpHeaders)
         }
         // validate() 让非 2xx 成为失败，401 才会进 [ProtectedRequestInterceptor.retry]。
         let response = await request

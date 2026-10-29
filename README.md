@@ -67,6 +67,17 @@ python3 Scripts/android_dtos.py          # 写入，并列出没生成的部分�
 python3 Scripts/android_dtos.py --check  # 只检查是否过期
 ```
 
+## API
+
+接口路径和参数也以 Android 为准：每个 Retrofit `interface`（`*/api/*.kt`）生成一个 Swift 结构（`Data/Generated/*API.swift`），
+每个端点一个方法，方法、路径、`@Path` / `@Query` / `@Header` / `@Body` 与 Android 一致；用公开还是带 Bearer 的客户端，
+在注册依赖的地方决定（和 Android 的 DI 限定符一样）。core 的 auth / social / asset 接口是手写的。
+
+```sh
+python3 Scripts/android_apis.py          # 写入，并列出没生成的端点（原始字节流）
+python3 Scripts/android_apis.py --check  # 只检查是否过期
+```
+
 ## Linux 上测 core
 
 Swift 6.2 的 Linux 工具链里 `libswiftObservation.so` 有一个未解析符号，链接测试时要加一个参数：
