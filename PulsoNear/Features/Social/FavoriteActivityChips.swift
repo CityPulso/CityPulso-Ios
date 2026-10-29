@@ -25,7 +25,7 @@ struct FavoriteActivityChips: View {
                     }
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
-                    .glassEffect(.regular, in: .capsule)
+                    .background(.fill.tertiary, in: .capsule)
                 }
             }
         }

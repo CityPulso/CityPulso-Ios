@@ -31,9 +31,9 @@ struct AvatarUploadSheet: View {
                 .background(.fill.tertiary)
                 .clipShape(.circle)
 
-                let chooseTitle: LocalizedStringKey = model.isUploading ? "avatar_upload_uploading" : "avatar_upload_choose"
+                let uploading = model.isUploading
                 PhotosPicker(selection: $selection, matching: .images) {
-                    Label(chooseTitle, systemImage: "photo.on.rectangle")
+                    Label(uploading ? "avatar_upload_uploading" : "avatar_upload_choose", systemImage: "photo.on.rectangle")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)

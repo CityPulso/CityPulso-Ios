@@ -110,7 +110,7 @@ struct ProfileOverviewView: View {
                                 .font(.caption.weight(.medium))
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 5)
-                                .glassEffect(.regular, in: .capsule)
+                                .background(.fill.tertiary, in: .capsule)
                         }
                     }
                 }
@@ -139,23 +139,27 @@ struct ProfileOverviewView: View {
         let parts: [Text] = [info.fullName.map { Text(verbatim: $0) }, Birthday.display(info.birthday).map { Text(verbatim: $0) }, gender, model.location.map { Text(verbatim: $0) }].compactMap { $0 }
         let website = info.website.flatMap { $0.trimmingCharacters(in: .whitespaces).isEmpty ? nil : $0 }
         if !parts.isEmpty || website != nil {
-            HStack(spacing: 0) {
-                ForEach(Array(parts.enumerated()), id: \.offset) { index, part in
-                    if index > 0 { Text(verbatim: " | ") }
-                    part
+            // 一整段 Text 拼起来，自然换行；网站部分是 Markdown 链接，可以点开。
+            let separator = Text(verbatim: " | ")
+            let joined = parts.enumerated().reduce(Text(verbatim: "")) { line, item in
+                item.offset == 0 ? item.element : Text("\(line)\(separator)\(item.element)")
+            }
+            let link: Text? = website.map { site in
+                if let url = normalizedWebsiteURL(site) {
+                    Text(AttributedString(site, attributes: AttributeContainer().link(url).underlineStyle(.single)))
+                } else {
+                    Text(verbatim: site)
                 }
-                if let website {
-                    if !parts.isEmpty { Text(verbatim: " | ") }
-                    if let url = normalizedWebsiteURL(website) {
-                        Link(destination: url) { Text(verbatim: website).underline() }
-                    } else {
-                        Text(verbatim: website)
-                    }
+            }
+            Group {
+                if let link {
+                    parts.isEmpty ? link : Text("\(joined)\(separator)\(link)")
+                } else {
+                    joined
                 }
             }
             .font(.footnote)
             .foregroundStyle(.secondary)
-            .lineLimit(2)
         }
     }
 
