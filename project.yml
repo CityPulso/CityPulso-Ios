@@ -37,6 +37,10 @@ packages:
   Factory:
     url: https://github.com/hmlongco/Factory.git
     from: 2.4.0
+  # 报名 / 订场占座付款、绑卡、收款账户开通（Android stripe-android + connect）。
+  Stripe:
+    url: https://github.com/stripe/stripe-ios-spm.git
+    from: 24.0.0
 
 targetTemplates:
   PulsoApp:
@@ -85,6 +89,13 @@ targets:
 
   PulsoLoop:
     templates: [PulsoApp]
+    dependencies:
+      - package: Stripe
+        product: StripePaymentSheet
+      - package: Stripe
+        product: StripePayments
+      - package: Stripe
+        product: StripeConnect
     info:
       path: PulsoLoop/Info.plist
       properties:
@@ -108,6 +119,13 @@ targets:
 
   PulsoNear:
     templates: [PulsoApp]
+    dependencies:
+      - package: Stripe
+        product: StripePaymentSheet
+      - package: Stripe
+        product: StripePayments
+      - package: Stripe
+        product: StripeConnect
     info:
       path: PulsoNear/Info.plist
       properties:

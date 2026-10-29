@@ -49867,7 +49867,7 @@
         }
       }
     },
-    "search_swipe_map_cd": {
+    "search_show_on_map_cd": {
       "extractionState": "manual",
       "localizations": {
         "en": {

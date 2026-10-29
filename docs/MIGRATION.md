@@ -4,10 +4,11 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 
 ## 下一步
 
-- **阻塞：GitHub Actions 停了**（2026-10-29：「recent account payments have failed or your spending limit needs to be increased」）。
-  从 00fb263 起的提交都没在 macOS 上编译过；SwiftUI 部分要等 CI 恢复才能验证，记为 🟦。
-- 第 4 组（活动搜索、日历 / 活动中心、日程、个人页的活动中心与发起 / 参加数）已写完：模型层在 Linux 上类型检查通过，视图待 CI。
-- 然后第 5 组：羽毛球活动详情、报名 / 候补 / 退出、发起、收款清单；深链 inbox。
+- **CI 只在手动触发时编译 App**（免费额度的 macOS 分钟用完，11 月 1 日恢复）：之后跑 `gh workflow run iOS --ref main`，
+  修掉从 00fb263 起累积的编译错误。在那之前 SwiftUI 部分记为 🟦，模型层在 Linux 上类型检查。
+- 第 5 组进行中：活动详情（11 种运动共用一页）、报名 / 候补 / 成功 / 我的报名 / 退出 / 参与者弹层、占座付款、
+  发起人改基本信息（含收款账户选择）、结束活动、加入日历已写完。
+- 第 5 组剩下：收款清单、发起活动向导、深链 inbox；社交主页入口暂时是「即将推出」（第 10 组）。
 
 ## 状态
 
@@ -111,8 +112,8 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 | OpenProfileEdit | `pages/profile/edit` | `Pages/Profile/Edit` | 3 | 🟦 |
 | OpenIdentities | `pages/identities/overview` | `Pages/Identities/Overview`（社区身份、CityPulso ID、创作者 / 教练申请） | 3 | 🟦 |
 | OpenBackgrounds | `pages/profile/backgrounds` | `Pages/Profile/Backgrounds` | 3 | 🟦 |
-| OpenEvent | `pages/event/detail/<sport>` | | 5 / 6 | ⬜ |
-| OpenCreatedEvent | `pages/event/detail/<sport>` | | 5 / 6 | ⬜ |
+| OpenEvent | `pages/event/detail/<sport>` | `Pages/Event/Detail`（所有运动共用，差别在 `SportEventDetailService` / `SportFullEvent`） | 5 / 6 | 🟦 |
+| OpenCreatedEvent | `pages/event/detail/<sport>` | `Pages/Event/Detail`（发起人视角：编辑、结束、收款清单入口） | 5 / 6 | 🟦 |
 | OpenChecklist | `pages/event/checklist/<sport>` | | 5 / 6 | ⬜ |
 | OpenMapSettings | `pages/settings/map` | | 7 | ⬜ |
 | OpenMapStyle | `pages/settings/map` | | 7 | ⬜ |

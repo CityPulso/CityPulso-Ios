@@ -118,13 +118,7 @@ struct RegistrationRow: View {
 
     private var statusLabel: Text {
         if item.isEnded { return Text("event_detail_ended_badge") }
-        return switch item.registrationStatus {
-        case .pendingExit: Text("shell_home_status_pending_exit")
-        case .waitlisted: Text("shell_home_status_waitlisted")
-        case .exited: Text("shell_home_status_exited")
-        case .awaitingPayment: Text("shell_home_status_awaiting_payment")
-        default: Text("shell_home_status_participating")
-        }
+        return Text(item.registrationStatus.labelKey)
     }
 
     private var statusTint: Color {

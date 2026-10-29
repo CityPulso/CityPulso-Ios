@@ -32,3 +32,57 @@ extension PickleballService: LoopSportService {
         )
     }
 }
+
+extension PickleballService: SportEventDetailService {
+    func detail(eventId: String) -> AsyncStream<QueryResponse<EventDetail>> {
+        query.full.stream(eventId).mapResponses { info in
+            EventDetail(event: info.event, imageIds: info.images.sorted { $0.sortOrder < $1.sortOrder }.map(\.imageId))
+        }
+    }
+
+    func roster(eventId: String) -> AsyncStream<QueryResponse<RosterPage>> {
+        query.regs.stream(PickleballRegsKey(eventId: eventId, offset: 0, limit: Self.rosterPageSize)).mapResponses {
+            RosterPage(items: $0.items, total: $0.total)
+        }
+    }
+
+    func rosterPage(eventId: String, offset: Int) async throws -> RosterPage {
+        let page = try await query.regs.get(PickleballRegsKey(eventId: eventId, offset: offset, limit: Self.rosterPageSize))
+        return RosterPage(items: page.items, total: page.total)
+    }
+
+    func recordView(eventId: String) async {
+        _ = try? await incrementView(eventId: eventId)
+    }
+
+    func join(eventId: String, waitlistHoursBeforeStart: Int?, playerNote: String?, payByCard: Bool) async throws -> JoinResult {
+        let response = try await join(eventId: eventId, JoinPickleballEventRequest(
+            waitlistLatestHoursBeforeStart: waitlistHoursBeforeStart,
+            playerNote: playerNote,
+            paymentMethod: payByCard ? .stripe : nil
+        ))
+        return JoinResult(registration: response.registration, payment: response.payment)
+    }
+
+    func exitEvent(eventId: String) async throws -> any SportRegistration {
+        try await exit(eventId: eventId)
+    }
+
+    func endEvent(eventId: String) async throws {
+        try await end(eventId: eventId)
+    }
+
+    func patchBasic(eventId: String, title: String?, venueName: String?, description: String?, payee: PayeePatch) async throws {
+        try await patchBasic(eventId: eventId, PatchPickleballEventBasicRequest(
+            title: title, venueName: venueName, description: description, payeePaymentAccountId: payee.wire
+        ))
+    }
+
+    func myRegistrationPayment(eventId: String) async throws -> PaymentHoldSession {
+        try await getMyRegistrationPayment(eventId: eventId)
+    }
+
+    func payMyRegistration(eventId: String, paymentMethodId: String) async throws -> PaymentAttempt {
+        try await payMyRegistrationPayment(eventId: eventId, paymentMethodId: paymentMethodId)
+    }
+}
