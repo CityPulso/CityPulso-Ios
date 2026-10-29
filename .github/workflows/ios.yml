@@ -16,7 +16,7 @@ permissions:
 jobs:
   core-tests:
     name: PulsoLinkCore tests
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
@@ -24,16 +24,16 @@ jobs:
         with:
           xcode-version: latest-stable
       - name: swift test
-        run: swift test --package-path Packages/PulsoLinkCore
+        run: swift test --package-path PulsoLinkCore
 
   build:
     name: Build ${{ matrix.scheme }}
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
-        scheme: [PulsoLoop, PulsoNear]
+        scheme: [PulsoLink, PulsoLoop, PulsoNear]
     steps:
       - uses: actions/checkout@v5
       - uses: maxim-lobanov/setup-xcode@v1
