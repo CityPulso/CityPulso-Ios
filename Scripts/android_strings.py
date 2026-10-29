@@ -43,18 +43,31 @@ FORMAT = re.compile(r"%(\d+\$)?([sd])")
 ESCAPES = {"\\'": "'", '\\"': '"', "\\n": "\n", "\\t": "\t", "\\@": "@", "\\?": "?"}
 
 
-def convert_text(raw: str) -> str:
+def convert_text(raw: str, plural: bool = False) -> str:
+    """Android escapes and %s/%d → iOS %@/%lld.
+
+    In a plural item the first placeholder is the count (Android writes it as %1$s and passes an Int);
+    Xcode only selects a plural form from a numeric argument, so it always becomes %lld there.
+    """
     text = raw
     if len(text) >= 2 and text[0] == text[-1] == '"':
         text = text[1:-1]
     for escaped, plain in ESCAPES.items():
         text = text.replace(escaped, plain)
-    return FORMAT.sub(lambda m: f"%{m.group(1) or ''}{'@' if m.group(2) == 's' else 'lld'}", text)
+    seen = 0
+
+    def replace(match: re.Match) -> str:
+        nonlocal seen
+        seen += 1
+        numeric = match.group(2) == "d" or (plural and seen == 1)
+        return f"%{match.group(1) or ''}{'lld' if numeric else '@'}"
+
+    return FORMAT.sub(replace, text)
 
 
-def element_text(element: ET.Element) -> str:
+def element_text(element: ET.Element, plural: bool = False) -> str:
     # Inline markup (<b>, <xliff:g>) keeps only its text.
-    return convert_text("".join(element.itertext()))
+    return convert_text("".join(element.itertext()), plural)
 
 
 def read_module(module: str) -> tuple[dict[str, dict], dict[str, str]]:
@@ -75,7 +88,7 @@ def read_module(module: str) -> tuple[dict[str, dict], dict[str, str]]:
                         continue
                     strings.setdefault(name, {})[language] = value
                 elif element.tag == "plurals":
-                    forms = {item.get("quantity"): element_text(item) for item in element.findall("item")}
+                    forms = {item.get("quantity"): element_text(item, plural=True) for item in element.findall("item")}
                     strings.setdefault(name, {})[language] = {"plural": forms}
     return strings, app_names
 

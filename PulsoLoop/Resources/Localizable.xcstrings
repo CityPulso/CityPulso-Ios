@@ -9628,13 +9628,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ court"
+                  "value": "%1$lld court"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ courts"
+                  "value": "%1$lld courts"
                 }
               }
             }
@@ -9646,13 +9646,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ terrain"
+                  "value": "%1$lld terrain"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ terrains"
+                  "value": "%1$lld terrains"
                 }
               }
             }
@@ -9664,13 +9664,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 块场地"
+                  "value": "%1$lld 块场地"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 块场地"
+                  "value": "%1$lld 块场地"
                 }
               }
             }
@@ -9682,13 +9682,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 塊場地"
+                  "value": "%1$lld 塊場地"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 塊場地"
+                  "value": "%1$lld 塊場地"
                 }
               }
             }
@@ -36653,13 +36653,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ court free today"
+                  "value": "%1$lld court free today"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ courts free today"
+                  "value": "%1$lld courts free today"
                 }
               }
             }
@@ -36671,13 +36671,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ terrain libre aujourd’hui"
+                  "value": "%1$lld terrain libre aujourd’hui"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ terrains libres aujourd’hui"
+                  "value": "%1$lld terrains libres aujourd’hui"
                 }
               }
             }
@@ -36689,13 +36689,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "今日 %1$@ 块空场"
+                  "value": "今日 %1$lld 块空场"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "今日 %1$@ 块空场"
+                  "value": "今日 %1$lld 块空场"
                 }
               }
             }
@@ -36707,13 +36707,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "今日 %1$@ 塊空場"
+                  "value": "今日 %1$lld 塊空場"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "今日 %1$@ 塊空場"
+                  "value": "今日 %1$lld 塊空場"
                 }
               }
             }
@@ -37078,13 +37078,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ month"
+                  "value": "%1$lld month"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ months"
+                  "value": "%1$lld months"
                 }
               }
             }
@@ -37096,13 +37096,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ mois"
+                  "value": "%1$lld mois"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ mois"
+                  "value": "%1$lld mois"
                 }
               }
             }
@@ -37114,13 +37114,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 个月"
+                  "value": "%1$lld 个月"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 个月"
+                  "value": "%1$lld 个月"
                 }
               }
             }
@@ -37132,13 +37132,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 個月"
+                  "value": "%1$lld 個月"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 個月"
+                  "value": "%1$lld 個月"
                 }
               }
             }
@@ -60983,13 +60983,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ view"
+                  "value": "%1$lld view"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ views"
+                  "value": "%1$lld views"
                 }
               }
             }
@@ -61001,13 +61001,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ vue"
+                  "value": "%1$lld vue"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ vues"
+                  "value": "%1$lld vues"
                 }
               }
             }
@@ -61019,13 +61019,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 次浏览"
+                  "value": "%1$lld 次浏览"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 次浏览"
+                  "value": "%1$lld 次浏览"
                 }
               }
             }
@@ -61037,13 +61037,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 次瀏覽"
+                  "value": "%1$lld 次瀏覽"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 次瀏覽"
+                  "value": "%1$lld 次瀏覽"
                 }
               }
             }
@@ -67440,13 +67440,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ court · %2$@"
+                  "value": "%1$lld court · %2$@"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ courts · %2$@"
+                  "value": "%1$lld courts · %2$@"
                 }
               }
             }
@@ -67458,13 +67458,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ terrain · %2$@"
+                  "value": "%1$lld terrain · %2$@"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ terrains · %2$@"
+                  "value": "%1$lld terrains · %2$@"
                 }
               }
             }
@@ -67476,13 +67476,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 块场地 · %2$@"
+                  "value": "%1$lld 块场地 · %2$@"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 块场地 · %2$@"
+                  "value": "%1$lld 块场地 · %2$@"
                 }
               }
             }
@@ -67494,13 +67494,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 塊場地 · %2$@"
+                  "value": "%1$lld 塊場地 · %2$@"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 塊場地 · %2$@"
+                  "value": "%1$lld 塊場地 · %2$@"
                 }
               }
             }
@@ -69921,13 +69921,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ court"
+                  "value": "%1$lld court"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ courts"
+                  "value": "%1$lld courts"
                 }
               }
             }
@@ -69939,13 +69939,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ terrain"
+                  "value": "%1$lld terrain"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ terrains"
+                  "value": "%1$lld terrains"
                 }
               }
             }
@@ -69957,13 +69957,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 块场地"
+                  "value": "%1$lld 块场地"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 块场地"
+                  "value": "%1$lld 块场地"
                 }
               }
             }
@@ -69975,13 +69975,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 塊場地"
+                  "value": "%1$lld 塊場地"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 塊場地"
+                  "value": "%1$lld 塊場地"
                 }
               }
             }
@@ -71245,13 +71245,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ court"
+                  "value": "%1$lld court"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ courts"
+                  "value": "%1$lld courts"
                 }
               }
             }
@@ -71263,13 +71263,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ terrain"
+                  "value": "%1$lld terrain"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ terrains"
+                  "value": "%1$lld terrains"
                 }
               }
             }
@@ -71281,13 +71281,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 片场地"
+                  "value": "%1$lld 片场地"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 片场地"
+                  "value": "%1$lld 片场地"
                 }
               }
             }
@@ -71299,13 +71299,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 片場地"
+                  "value": "%1$lld 片場地"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 片場地"
+                  "value": "%1$lld 片場地"
                 }
               }
             }
@@ -71322,13 +71322,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ pending"
+                  "value": "%1$lld pending"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ pending"
+                  "value": "%1$lld pending"
                 }
               }
             }
@@ -71340,13 +71340,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ en attente"
+                  "value": "%1$lld en attente"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ en attente"
+                  "value": "%1$lld en attente"
                 }
               }
             }
@@ -71358,13 +71358,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 个待处理"
+                  "value": "%1$lld 个待处理"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 个待处理"
+                  "value": "%1$lld 个待处理"
                 }
               }
             }
@@ -71376,13 +71376,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 個待處理"
+                  "value": "%1$lld 個待處理"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 個待處理"
+                  "value": "%1$lld 個待處理"
                 }
               }
             }
@@ -71457,13 +71457,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Pays off after %1$@ booking"
+                  "value": "Pays off after %1$lld booking"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Pays off after %1$@ bookings"
+                  "value": "Pays off after %1$lld bookings"
                 }
               }
             }
@@ -71475,13 +71475,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Rentabilisée après %1$@ réservation"
+                  "value": "Rentabilisée après %1$lld réservation"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "Rentabilisée après %1$@ réservations"
+                  "value": "Rentabilisée après %1$lld réservations"
                 }
               }
             }
@@ -71493,13 +71493,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "打满 %1$@ 场即回本"
+                  "value": "打满 %1$lld 场即回本"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "打满 %1$@ 场即回本"
+                  "value": "打满 %1$lld 场即回本"
                 }
               }
             }
@@ -71511,13 +71511,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "打滿 %1$@ 場即回本"
+                  "value": "打滿 %1$lld 場即回本"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "打滿 %1$@ 場即回本"
+                  "value": "打滿 %1$lld 場即回本"
                 }
               }
             }
@@ -73506,13 +73506,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ min"
+                  "value": "%1$lld min"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ min"
+                  "value": "%1$lld min"
                 }
               }
             }
@@ -73524,13 +73524,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ min"
+                  "value": "%1$lld min"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ min"
+                  "value": "%1$lld min"
                 }
               }
             }
@@ -73542,13 +73542,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 分钟"
+                  "value": "%1$lld 分钟"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 分钟"
+                  "value": "%1$lld 分钟"
                 }
               }
             }
@@ -73560,13 +73560,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 分鐘"
+                  "value": "%1$lld 分鐘"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 分鐘"
+                  "value": "%1$lld 分鐘"
                 }
               }
             }
@@ -73583,13 +73583,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ court"
+                  "value": "%1$lld court"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ courts"
+                  "value": "%1$lld courts"
                 }
               }
             }
@@ -73601,13 +73601,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ terrain"
+                  "value": "%1$lld terrain"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ terrains"
+                  "value": "%1$lld terrains"
                 }
               }
             }
@@ -73619,13 +73619,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 片场地"
+                  "value": "%1$lld 片场地"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 片场地"
+                  "value": "%1$lld 片场地"
                 }
               }
             }
@@ -73637,13 +73637,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 片場地"
+                  "value": "%1$lld 片場地"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 片場地"
+                  "value": "%1$lld 片場地"
                 }
               }
             }
@@ -73660,13 +73660,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ court has no price plan yet. Assign every court before saving."
+                  "value": "%1$lld court has no price plan yet. Assign every court before saving."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ courts have no price plan yet. Assign every court before saving."
+                  "value": "%1$lld courts have no price plan yet. Assign every court before saving."
                 }
               }
             }
@@ -73678,13 +73678,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ terrain n’a pas encore de plan tarifaire. Attribuez tous les terrains avant d’enregistrer."
+                  "value": "%1$lld terrain n’a pas encore de plan tarifaire. Attribuez tous les terrains avant d’enregistrer."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ terrains n’ont pas encore de plan tarifaire. Attribuez tous les terrains avant d’enregistrer."
+                  "value": "%1$lld terrains n’ont pas encore de plan tarifaire. Attribuez tous les terrains avant d’enregistrer."
                 }
               }
             }
@@ -73696,13 +73696,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "还有 %1$@ 块场地没有分配价格方案，全部分配后才能保存。"
+                  "value": "还有 %1$lld 块场地没有分配价格方案，全部分配后才能保存。"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "还有 %1$@ 块场地没有分配价格方案，全部分配后才能保存。"
+                  "value": "还有 %1$lld 块场地没有分配价格方案，全部分配后才能保存。"
                 }
               }
             }
@@ -73714,13 +73714,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "還有 %1$@ 塊場地沒有分配價格方案，全部分配後才能儲存。"
+                  "value": "還有 %1$lld 塊場地沒有分配價格方案，全部分配後才能儲存。"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "還有 %1$@ 塊場地沒有分配價格方案，全部分配後才能儲存。"
+                  "value": "還有 %1$lld 塊場地沒有分配價格方案，全部分配後才能儲存。"
                 }
               }
             }
@@ -73737,13 +73737,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ plan"
+                  "value": "%1$lld plan"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ plans"
+                  "value": "%1$lld plans"
                 }
               }
             }
@@ -73755,13 +73755,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ plan"
+                  "value": "%1$lld plan"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ plans"
+                  "value": "%1$lld plans"
                 }
               }
             }
@@ -73773,13 +73773,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 个方案"
+                  "value": "%1$lld 个方案"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 个方案"
+                  "value": "%1$lld 个方案"
                 }
               }
             }
@@ -73791,13 +73791,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 個方案"
+                  "value": "%1$lld 個方案"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 個方案"
+                  "value": "%1$lld 個方案"
                 }
               }
             }
@@ -73814,13 +73814,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ price rule"
+                  "value": "%1$lld price rule"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ price rules"
+                  "value": "%1$lld price rules"
                 }
               }
             }
@@ -73832,13 +73832,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ règle de prix"
+                  "value": "%1$lld règle de prix"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ règles de prix"
+                  "value": "%1$lld règles de prix"
                 }
               }
             }
@@ -73850,13 +73850,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 条价格规则"
+                  "value": "%1$lld 条价格规则"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 条价格规则"
+                  "value": "%1$lld 条价格规则"
                 }
               }
             }
@@ -73868,13 +73868,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 條價格規則"
+                  "value": "%1$lld 條價格規則"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 條價格規則"
+                  "value": "%1$lld 條價格規則"
                 }
               }
             }
@@ -73891,13 +73891,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ court selected"
+                  "value": "%1$lld court selected"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ courts selected"
+                  "value": "%1$lld courts selected"
                 }
               }
             }
@@ -73909,13 +73909,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ terrain sélectionné"
+                  "value": "%1$lld terrain sélectionné"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ terrains sélectionnés"
+                  "value": "%1$lld terrains sélectionnés"
                 }
               }
             }
@@ -73927,13 +73927,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "已选 %1$@ 块"
+                  "value": "已选 %1$lld 块"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "已选 %1$@ 块"
+                  "value": "已选 %1$lld 块"
                 }
               }
             }
@@ -73945,13 +73945,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "已選 %1$@ 塊"
+                  "value": "已選 %1$lld 塊"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "已選 %1$@ 塊"
+                  "value": "已選 %1$lld 塊"
                 }
               }
             }
@@ -73968,13 +73968,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ court has no price plan and can’t be booked."
+                  "value": "%1$lld court has no price plan and can’t be booked."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ courts have no price plan and can’t be booked."
+                  "value": "%1$lld courts have no price plan and can’t be booked."
                 }
               }
             }
@@ -73986,13 +73986,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ terrain n’a pas de plan tarifaire et ne peut pas être réservé."
+                  "value": "%1$lld terrain n’a pas de plan tarifaire et ne peut pas être réservé."
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ terrains n’ont pas de plan tarifaire et ne peuvent pas être réservés."
+                  "value": "%1$lld terrains n’ont pas de plan tarifaire et ne peuvent pas être réservés."
                 }
               }
             }
@@ -74004,13 +74004,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 块场地还没有价格方案，无法被预约。"
+                  "value": "%1$lld 块场地还没有价格方案，无法被预约。"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 块场地还没有价格方案，无法被预约。"
+                  "value": "%1$lld 块场地还没有价格方案，无法被预约。"
                 }
               }
             }
@@ -74022,13 +74022,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 塊場地還沒有價格方案，無法被預約。"
+                  "value": "%1$lld 塊場地還沒有價格方案，無法被預約。"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 塊場地還沒有價格方案，無法被預約。"
+                  "value": "%1$lld 塊場地還沒有價格方案，無法被預約。"
                 }
               }
             }
@@ -74045,13 +74045,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ member"
+                  "value": "%1$lld member"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ members"
+                  "value": "%1$lld members"
                 }
               }
             }
@@ -74063,13 +74063,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ membre"
+                  "value": "%1$lld membre"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ membres"
+                  "value": "%1$lld membres"
                 }
               }
             }
@@ -74081,13 +74081,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 名成员"
+                  "value": "%1$lld 名成员"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 名成员"
+                  "value": "%1$lld 名成员"
                 }
               }
             }
@@ -74099,13 +74099,13 @@
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 名成員"
+                  "value": "%1$lld 名成員"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "%1$@ 名成員"
+                  "value": "%1$lld 名成員"
                 }
               }
             }
