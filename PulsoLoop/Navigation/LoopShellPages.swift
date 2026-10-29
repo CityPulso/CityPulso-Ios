@@ -14,6 +14,8 @@ enum LoopShellPages {
         switch destination {
         case .settings:
             SettingsView()
+        case .profile:
+            ProfileOverviewView()
         default:
             PulsoComingSoonView(destination)
         }

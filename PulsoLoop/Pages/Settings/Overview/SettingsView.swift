@@ -42,10 +42,10 @@ struct SettingsView: View {
             }
 
             Section("settings_section_account") {
-                NavigationLink(value: LoopRoute.comingSoon(title: "profile_edit_title", systemImage: "pencil")) {
+                NavigationLink(value: LoopRoute.profileEdit) {
                     Label("profile_edit_title", systemImage: "pencil")
                 }
-                NavigationLink(value: LoopRoute.comingSoon(title: "profile_identities_title", systemImage: "person.text.rectangle")) {
+                NavigationLink(value: LoopRoute.identities) {
                     Label("profile_identities_title", systemImage: "person.text.rectangle")
                 }
                 NavigationLink(value: LoopRoute.accountSecurity) {

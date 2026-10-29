@@ -68,6 +68,51 @@ public struct AuthProtectedAPI: Sendable {
         try await client.request(.get, "auth/me/full-account-information-with-authority-profile")
     }
 
+    public func patchProfile(kind: ProfileKind, _ body: PatchProfileRequest) async throws {
+        try await client.send(.patch, "auth/me/\(kind.rawValue)-profile", body: body)
+    }
+
+    public func confirmProfileBackgrounds(kind: ProfileKind, _ body: ConfirmProfileBackgroundsRequest) async throws {
+        try await client.send(.put, "auth/me/\(kind.rawValue)-profile/backgrounds", body: body)
+    }
+
+    public func listCommunityProfiles(limit: Int? = nil, offset: Int? = nil) async throws
+        -> DataResponse<ListWithTotal<CommunityProfileItem>> {
+        try await client.request(.get, "auth/me/profiles", query: ["limit": limit.map(String.init), "offset": offset.map(String.init)])
+    }
+
+    public func listOrganizationProfiles(limit: Int? = nil, offset: Int? = nil) async throws
+        -> DataResponse<ListWithTotal<OrganizationProfileItem>> {
+        try await client.request(.get, "auth/me/organization-profiles", query: ["limit": limit.map(String.init), "offset": offset.map(String.init)])
+    }
+
+    public func listAuthorityProfiles(limit: Int? = nil, offset: Int? = nil) async throws
+        -> DataResponse<ListWithTotal<AuthorityProfileItem>> {
+        try await client.request(.get, "auth/me/authority-profiles", query: ["limit": limit.map(String.init), "offset": offset.map(String.init)])
+    }
+
+    public func lookupProfiles(_ body: LookupProfilesRequest) async throws -> DataResponse<LookupProfilesResponse> {
+        try await client.request(.post, "auth/profiles/lookup", body: body)
+    }
+
+    public func updateCitypulsoId(_ body: UpdateCitypulsoIdRequest) async throws {
+        try await client.send(.put, "auth/me/citypulso-id", body: body)
+    }
+
+    public func getPublicProfileCard(profileId: String) async throws -> DataResponse<CommunityProfileItem> {
+        try await client.request(.get, "auth/me/profiles/\(profileId)/public-card")
+    }
+
+    /* ------------------------------ 申请 ------------------------------ */
+
+    public func submitCommunityRoleApplication(_ body: SubmitCommunityRoleApplicationRequest) async throws {
+        try await client.send(.post, "auth/me/community-role-applications", body: body)
+    }
+
+    public func getMyCommunityRoleApplication(role: AuthCommunityRole) async throws -> DataResponse<CommunityRoleApplicationItem> {
+        try await client.request(.get, "auth/me/community-role-applications/\(role.rawValue)")
+    }
+
     /* ------------------------------ 邮箱 / 密码 ------------------------------ */
 
     public func listEmails(limit: Int? = nil, offset: Int? = nil) async throws -> DataResponse<ListWithTotal<EmailItem>> {

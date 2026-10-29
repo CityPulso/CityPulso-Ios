@@ -67,6 +67,48 @@ public struct AuthRepository: Sendable {
         }
     }
 
+    public func patchProfile(kind: ProfileKind, _ body: PatchProfileRequest) async throws {
+        try await protectedAPI.patchProfile(kind: kind, body)
+    }
+
+    public func confirmProfileBackgrounds(kind: ProfileKind, _ body: ConfirmProfileBackgroundsRequest) async throws {
+        try await protectedAPI.confirmProfileBackgrounds(kind: kind, body)
+    }
+
+    public func listProfiles(kind: ProfileKind, limit: Int? = nil, offset: Int? = nil) async throws -> ProfileItemsByKind {
+        switch kind {
+        case .community:
+            .community(try await protectedAPI.listCommunityProfiles(limit: limit, offset: offset).dataOrThrow("ListProfiles"))
+        case .organization:
+            .organization(try await protectedAPI.listOrganizationProfiles(limit: limit, offset: offset).dataOrThrow("ListProfiles"))
+        case .authority:
+            .authority(try await protectedAPI.listAuthorityProfiles(limit: limit, offset: offset).dataOrThrow("ListProfiles"))
+        }
+    }
+
+    public func lookupProfiles(_ body: LookupProfilesRequest) async throws -> [LookupProfileItem] {
+        try await protectedAPI.lookupProfiles(body).dataOrThrow("LookupProfiles").items
+    }
+
+    public func updateCitypulsoId(_ body: UpdateCitypulsoIdRequest) async throws {
+        try await protectedAPI.updateCitypulsoId(body)
+    }
+
+    public func getPublicProfileCard(profileId: String) async throws -> CommunityProfileItem {
+        try await protectedAPI.getPublicProfileCard(profileId: profileId).dataOrThrow("GetPublicProfileCard")
+    }
+
+    /* ------------------------------ 申请 ------------------------------ */
+
+    public func submitCommunityRoleApplication(_ body: SubmitCommunityRoleApplicationRequest) async throws {
+        try await protectedAPI.submitCommunityRoleApplication(body)
+    }
+
+    /** 没申请过时 data 为空，返回 nil。 */
+    public func getMyCommunityRoleApplication(role: AuthCommunityRole) async throws -> CommunityRoleApplicationItem? {
+        try await protectedAPI.getMyCommunityRoleApplication(role: role).data
+    }
+
     /* ------------------------------ 邮箱 / 密码 ------------------------------ */
 
     public func listEmails() async throws -> ListWithTotal<EmailItem> {
@@ -109,4 +151,11 @@ public struct AuthRepository: Sendable {
     public func updatePreference(kind: ProfileKind, preference: String) async throws {
         try await protectedAPI.updatePreference(kind: kind, UpdatePreferenceRequest(preference: preference))
     }
+}
+
+/** 按档位区分的身份列表（对应 Android / WEB `ProfileItemsByKind`）。 */
+public enum ProfileItemsByKind: Sendable {
+    case community(ListWithTotal<CommunityProfileItem>)
+    case organization(ListWithTotal<OrganizationProfileItem>)
+    case authority(ListWithTotal<AuthorityProfileItem>)
 }

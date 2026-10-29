@@ -15,6 +15,9 @@ enum LoopRoute: Hashable {
     case accountSecurity
     case emails
     case changePassword
+    case profileEdit
+    case backgrounds
+    case identities
     /** 还没移植的页面：[title] 是文案 key。 */
     case comingSoon(title: String, systemImage: String)
 
@@ -30,6 +33,9 @@ enum LoopRoute: Hashable {
         case .accountSecurity: AccountSecurityView()
         case .emails: EmailAddressesView()
         case .changePassword: ChangePasswordView()
+        case .profileEdit: ProfileEditView()
+        case .backgrounds: ProfileBackgroundsView()
+        case .identities: ProfileIdentitiesView()
         case let .comingSoon(title, systemImage):
             PulsoComingSoonView(title: LocalizedStringKey(title), systemImage: systemImage)
         }

@@ -4,8 +4,9 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 
 ## 下一步
 
-- 第 0 组（地基）已写完，等 CI。
-- 然后第 3 组（个人页）：profile/*、identities/overview、backgrounds。
+- 第 0 组（地基）CI 全绿（run 40835297704）。
+- 第 3 组（个人页、编辑资料、背景图、身份）已写完，等 CI。个人页上「发起 / 参加」两个数字和下面的活动中心要等活动数据（第 4–6 组）。
+- 然后第 4 组：活动列表（羽毛球查询链）。
 - GRDB 本地库放到第 10 组（只有聊天 / 通知 / 好友用），深链 inbox 放到第 5 组（第一个深链目标是活动详情），不提前写没人用的代码。
 
 ## 状态
@@ -36,6 +37,8 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 | Material 底栏 | 自己的 Liquid Glass 底栏（系统 `.glassEffect`），5 格 + 独立第 6 格 | 原生 TabView 放 6 格会折进 More（截图验证过），用户确认 |
 | 应用内语言选择 | 跳 iOS 设置里的 per-app 语言，再把当前语言回写到账号 | iOS 系统管理 App 语言 |
 | 字体 / 字号设置 | 不显示，用 Dynamic Type | iOS 系统设置 |
+| 编辑资料逐项弹窗 | 行内直接编辑的系统表单；离开时自动保存，改错时不能返回 | iOS 表单习惯 |
+| Loop 喜欢的运动不限个数 | 最多 3 个（与 Near 和 `FavoriteSport.MAX` 一致） | Android Loop 漏了上限，后端只收 3 个 |
 | 换图标要重启 | 备用图标立即生效，不显示「需要重启」 | iOS 行为 |
 | Firebase messaging | 不接 APNs | Android 只有 Gradle 依赖，Kotlin 里没有用到；通知走 Centrifugo + 通知列表 |
 | Stripe Android | stripe-ios（PaymentSheet / Connect） | 都是线下服务（订场、课程、赛事、会员），App Store 3.1.3(e) 允许，不用 IAP |
@@ -74,7 +77,7 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 | BILLING | `pages/billing` | | 9 | ⬜ |
 | NOTIFICATIONS | `pages/social/notifications` | | 10 | ⬜ |
 | CHAT_HUB | `pages/social/chat/hub` | | 10 | ⬜ |
-| PROFILE | `pages/profile/overview` | | 3 | ⬜ |
+| PROFILE | `pages/profile/overview` | `Pages/Profile/Overview`（头部、头像、分享、复制 ID；活动中心和发起 / 参加数第 4–6 组补） | 3 | 🟦 部分 |
 | WALLET | `pages/wallet` | | 9 | ⬜ |
 | COURSES | `pages/program/mine` | | 12 | ⬜ |
 | COACHING | `pages/program/mine` | | 12 | ⬜ |
@@ -100,9 +103,9 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 | OpenAccountSecurity | `pages/account/overview` | `Pages/Account/Overview` | 2 | 🟩 |
 | OpenEmails | `pages/account/email` | `Pages/Account/Email` | 2 | 🟩 |
 | OpenChangePassword | `pages/account/password` | `Pages/Account/Password` | 2 | 🟩 |
-| OpenProfileEdit | `pages/profile/edit` | | 3 | ⬜ |
-| OpenIdentities | `pages/identities/overview` | | 3 | ⬜ |
-| OpenBackgrounds | `pages/profile/backgrounds` | | 3 | ⬜ |
+| OpenProfileEdit | `pages/profile/edit` | `Pages/Profile/Edit` | 3 | 🟦 |
+| OpenIdentities | `pages/identities/overview` | `Pages/Identities/Overview`（社区身份、CityPulso ID、创作者 / 教练申请） | 3 | 🟦 |
+| OpenBackgrounds | `pages/profile/backgrounds` | `Pages/Profile/Backgrounds` | 3 | 🟦 |
 | OpenEvent | `pages/event/detail/<sport>` | | 5 / 6 | ⬜ |
 | OpenCreatedEvent | `pages/event/detail/<sport>` | | 5 / 6 | ⬜ |
 | OpenChecklist | `pages/event/checklist/<sport>` | | 5 / 6 | ⬜ |
@@ -159,6 +162,7 @@ Near 是 Loop 的分叉：活动换成 15 种 Near 活动，球馆换成门店�
 | 命令 / 页面 | Android | 状态 |
 |---|---|---|
 | 设置 + 账号（同 Loop 第 2 组），活动偏好 | `pages/settings`、`pages/account` | 🟩 |
+| 个人页 / 编辑资料（喜欢的活动，最多 3 个）/ 背景图 / 身份（无角色申请） | `pages/profile`、`pages/identities/overview` | 🟦 |
 | 欢迎 / 登录 / 注册 | `pages/welcome`、`pages/identities` | 🟩 |
 | OpenActivity / OpenCreatedActivity / OpenChecklist | `pages/activity/*` | ⬜ |
 | OpenSessionConfirm（密室 / 剧本杀场次） | `pages/venue/confirm` | ⬜ |

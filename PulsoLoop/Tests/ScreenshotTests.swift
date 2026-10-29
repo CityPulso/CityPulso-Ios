@@ -1,3 +1,4 @@
+import Factory
 import PulsoLinkCore
 import PulsoLinkUI
 import SwiftUI
@@ -40,6 +41,32 @@ final class ScreenshotTests: XCTestCase {
         try await capture(NavigationStack { EventPreferencesView() }, name: "loop-settings-event")
         try await capture(NavigationStack { PermissionsView() }, name: "loop-settings-permissions")
         try await capture(NavigationStack { LauncherIconView() }, name: "loop-settings-appicon")
+    }
+
+    func testProfile() async throws {
+        Container.shared.profileStore().set(.community(try sampleAccount()))
+        let session = PulsoSessionModel()
+        try await capture(NavigationStack { ProfileOverviewView().loopRoutes() }.environment(session), name: "loop-profile")
+        try await capture(NavigationStack { ProfileEditView() }, name: "loop-profile-edit")
+        try await capture(NavigationStack { ProfileBackgroundsView() }, name: "loop-profile-backgrounds")
+        try await capture(NavigationStack { ProfileIdentitiesView() }, name: "loop-identities")
+    }
+
+    /** 资料页用的示例账号（不连网；背景图地址取不到时显示占位）。 */
+    private func sampleAccount() throws -> FullAccountInformationWithCommunityProfile {
+        let json = #"""
+        {"account":{"id":"acc-1","account_status":"active","signup_platform":"pulsoloop",
+         "created_at":"2026-01-01T00:00:00Z","updated_at":"2026-01-01T00:00:00Z"},
+         "emails":[{"id":"e1","account_id":"acc-1","email":"lin@example.com","is_primary":true,
+           "verified_at":"2026-01-01T00:00:00Z","created_at":"","updated_at":""}],
+         "community_profile":{"profile_id":"prof-1","account_id":"acc-1","citypulso_id":"lin_badminton",
+          "profile_language":"zh","display_name":"林小羽","first_name":"小羽","last_name":"林",
+          "city":"Toronto","country":"Canada","gender":"female","birthday":"1996-05-20T00:00:00Z",
+          "website":"citypulso.com","bio":"周三晚上打双打，周末偶尔网球。",
+          "created_at":"2026-01-01T00:00:00Z","updated_at":"2026-01-01T00:00:00Z",
+          "community_roles":["pulser","creator"],"favorite_sports":["badminton","tennis"]}}
+        """#
+        return try WireCoding.decoder.decode(FullAccountInformationWithCommunityProfile.self, from: Data(json.utf8))
     }
 
     private func capture(_ view: some View, name: String, style: UIUserInterfaceStyle = .light) async throws {

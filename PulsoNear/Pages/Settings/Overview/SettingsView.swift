@@ -42,10 +42,10 @@ struct SettingsView: View {
             }
 
             Section("settings_section_account") {
-                NavigationLink(value: NearRoute.comingSoon(title: "profile_edit_title", systemImage: "pencil")) {
+                NavigationLink(value: NearRoute.profileEdit) {
                     Label("profile_edit_title", systemImage: "pencil")
                 }
-                NavigationLink(value: NearRoute.comingSoon(title: "profile_identities_title", systemImage: "person.text.rectangle")) {
+                NavigationLink(value: NearRoute.identities) {
                     Label("profile_identities_title", systemImage: "person.text.rectangle")
                 }
                 NavigationLink(value: NearRoute.accountSecurity) {

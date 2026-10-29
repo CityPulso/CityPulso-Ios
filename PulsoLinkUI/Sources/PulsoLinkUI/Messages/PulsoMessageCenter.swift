@@ -31,6 +31,11 @@ public final class PulsoMessageCenter {
         show(.error, UiError(error).text(fallback: String(localized: fallback)))
     }
 
+    /** 查询层已经归类好的失败（[QueryResponse.error]）。 */
+    public func error(_ error: UiError, fallback: String.LocalizationValue) {
+        show(.error, error.text(fallback: String(localized: fallback)))
+    }
+
     /** 本地校验或规则提示（没有网络失败）。 */
     public func error(_ key: String.LocalizationValue) {
         show(.error, String(localized: key))

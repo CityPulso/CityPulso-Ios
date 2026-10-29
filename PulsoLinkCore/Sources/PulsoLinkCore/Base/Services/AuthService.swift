@@ -50,6 +50,34 @@ public struct AuthService: Sendable {
         try await auth.getCurrentFullAccountInformationWithProfile(kind: kind)
     }
 
+    public func patchProfile(kind: ProfileKind, _ body: PatchProfileRequest) async throws {
+        try await auth.patchProfile(kind: kind, body)
+        authEventBus.emit(.updateAccountSuccess)
+    }
+
+    public func confirmProfileBackgrounds(kind: ProfileKind, _ body: ConfirmProfileBackgroundsRequest) async throws {
+        try await auth.confirmProfileBackgrounds(kind: kind, body)
+        authEventBus.emit(.updateAccountSuccess)
+    }
+
+    /** 改当前身份的 CityPulso ID（字母 / 数字 / _!-.，只在同类身份里唯一）。 */
+    public func updateCitypulsoId(_ citypulsoId: String) async throws {
+        try await auth.updateCitypulsoId(UpdateCitypulsoIdRequest(citypulsoId: citypulsoId))
+        let session = sessionStore.state.value
+        authEventBus.emit(.invalidateProfiles(accountId: session.currentAccountId, kind: session.currentProfileKind))
+        authEventBus.emit(.updateAccountSuccess)
+    }
+
+    public func submitCommunityRoleApplication(_ body: SubmitCommunityRoleApplicationRequest) async throws {
+        try await auth.submitCommunityRoleApplication(body)
+        authEventBus.emit(.invalidateModerationApplications)
+    }
+
+    /** 头像等确认成功后广播账号更新，[ProfileBootstrap] 会重拉。 */
+    public func notifyAccountUpdated() {
+        authEventBus.emit(.updateAccountSuccess)
+    }
+
     /* ------------------------------ 邮箱 / 密码 ------------------------------ */
 
     public func createEmail(_ email: String) async throws -> CreateEmailResponse {
