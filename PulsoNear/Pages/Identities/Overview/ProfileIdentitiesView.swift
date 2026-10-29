@@ -87,7 +87,7 @@ struct ProfileIdentitiesView: View {
         }
         if isCurrent, let draft = model.citypulsoIdDraft, draft.profileId == profile.profileId {
             VStack(alignment: .leading, spacing: 6) {
-                TextField("profile_identities_citypulso_id_label", text: Binding(get: { draft.value }, set: model.setCitypulsoIdDraft))
+                TextField("profile_identities_citypulso_id_label", text: Binding(get: { draft.value }, set: { model.setCitypulsoIdDraft($0) }))
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
                 Text("profile_identities_citypulso_id_rule")

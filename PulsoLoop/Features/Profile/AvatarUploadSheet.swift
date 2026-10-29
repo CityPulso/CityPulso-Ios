@@ -31,8 +31,9 @@ struct AvatarUploadSheet: View {
                 .background(.fill.tertiary)
                 .clipShape(.circle)
 
+                let chooseTitle: LocalizedStringKey = model.isUploading ? "avatar_upload_uploading" : "avatar_upload_choose"
                 PhotosPicker(selection: $selection, matching: .images) {
-                    Label(model.isUploading ? "avatar_upload_uploading" : "avatar_upload_choose", systemImage: "photo.on.rectangle")
+                    Label(chooseTitle, systemImage: "photo.on.rectangle")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
@@ -71,7 +72,7 @@ struct AvatarUploadSheet: View {
 extension View {
     /** 挂上头像弹层。 */
     func avatarUploadSheet(_ model: AvatarUploadModel) -> some View {
-        sheet(isPresented: Bindable(model).isPresented, onDismiss: model.dismissed) {
+        sheet(isPresented: Bindable(model).isPresented, onDismiss: { model.dismissed() }) {
             AvatarUploadSheet(model: model)
         }
     }

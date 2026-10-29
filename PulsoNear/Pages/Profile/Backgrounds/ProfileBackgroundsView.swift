@@ -16,9 +16,9 @@ struct ProfileBackgroundsView: View {
                 ForEach(model.items) { item in
                     row(item)
                 }
-                .onMove(perform: model.move)
+                .onMove { model.move(from: $0, to: $1) }
                 .onDelete { offsets in
-                    offsets.map { model.items[$0].imageId }.forEach(model.remove)
+                    offsets.map { model.items[$0].imageId }.forEach { model.remove($0) }
                 }
             } footer: {
                 Text(verbatim: localizedFormat("profile_backgrounds_quota", model.items.count, ProfileBackgroundsModel.maxBackgrounds))
