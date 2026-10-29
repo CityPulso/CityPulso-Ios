@@ -20,6 +20,8 @@ enum LoopRoute: Hashable {
     case identities
     /** 活动详情（所有运动共用一页）。 */
     case event(sport: LoopSport, eventId: String)
+    /** 一场活动的收款清单。 */
+    case checklist(sport: LoopSport, eventId: String)
     /** 一条订场（第 8 组接上订场详情）。 */
     case courtBooking(sport: VenueSport, bookingId: String)
     case paymentMethods
@@ -44,6 +46,7 @@ enum LoopRoute: Hashable {
         case .backgrounds: ProfileBackgroundsView()
         case .identities: ProfileIdentitiesView()
         case let .event(sport, eventId): EventDetailView(sport: sport, eventId: eventId)
+        case let .checklist(sport, eventId): ChecklistView(sport: sport, eventId: eventId)
         case let .courtBooking(sport, _): PulsoComingSoonView(title: sport.loopSport.labelKey, systemImage: "sportscourt")
         case .paymentMethods: PaymentMethodsView()
         case .locationPick: PulsoComingSoonView(title: "shell_location_pick_title", systemImage: "mappin.and.ellipse")

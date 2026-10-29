@@ -136,9 +136,8 @@ struct EventDetailView: View {
         shell?.push(LoopRoute.comingSoon(title: "event_detail_participants_view_profile", systemImage: "person.crop.circle"))
     }
 
-    /** 收款清单在本组稍后接上。 */
     private func openChecklist() {
-        shell?.push(LoopRoute.comingSoon(title: "checklist_title", systemImage: "checklist"))
+        shell?.push(LoopRoute.checklist(sport: model.sport, eventId: model.eventId))
     }
 }
 

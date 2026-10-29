@@ -86,3 +86,36 @@ extension BaseballService: SportEventDetailService {
         try await payMyRegistrationPayment(eventId: eventId, paymentMethodId: paymentMethodId)
     }
 }
+
+extension BaseballService: SportChecklistService {
+    func checklist(eventId: String) -> AsyncStream<QueryResponse<EventChecklist>> {
+        query.checklist.stream(eventId).mapResponses { response in
+            EventChecklist(
+                hostProfileId: response.checklist.hostProfileId,
+                isAllSettled: response.checklist.isAllSettled,
+                items: response.items.map {
+                    EventChecklistEntry(
+                        id: $0.id, profileId: $0.profileId, paid: $0.paid, lastRemindedAt: $0.lastRemindedAt,
+                        displayName: $0.displayName, avatarImageId: $0.avatarImageId
+                    )
+                }
+            )
+        }
+    }
+
+    func markChecklistItem(itemId: String, paid: Bool) async throws {
+        if paid {
+            try await markPaymentItemPaid(itemId: itemId)
+        } else {
+            try await markPaymentItemUnpaid(itemId: itemId)
+        }
+    }
+
+    func settleChecklist(eventId: String) async throws {
+        _ = try await settleAll(eventId: eventId)
+    }
+
+    func remindChecklist(eventId: String, itemIds: [String]) async throws {
+        try await remindItems(eventId: eventId, itemIds: itemIds)
+    }
+}

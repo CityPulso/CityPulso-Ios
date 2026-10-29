@@ -7,8 +7,8 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 - **CI 只在手动触发时编译 App**（免费额度的 macOS 分钟用完，11 月 1 日恢复）：之后跑 `gh workflow run iOS --ref main`，
   修掉从 00fb263 起累积的编译错误。在那之前 SwiftUI 部分记为 🟦，模型层在 Linux 上类型检查。
 - 第 5 组进行中：活动详情（11 种运动共用一页）、报名 / 候补 / 成功 / 我的报名 / 退出 / 参与者弹层、占座付款、
-  发起人改基本信息（含收款账户选择）、结束活动、加入日历已写完。
-- 第 5 组剩下：收款清单、发起活动向导、深链 inbox；社交主页入口暂时是「即将推出」（第 10 组）。
+  发起人改基本信息（含收款账户选择）、结束活动、加入日历、收款清单已写完。
+- 第 5 组剩下：发起活动向导、深链 inbox；社交主页入口暂时是「即将推出」（第 10 组）。
 
 ## 状态
 
@@ -114,7 +114,7 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 | OpenBackgrounds | `pages/profile/backgrounds` | `Pages/Profile/Backgrounds` | 3 | 🟦 |
 | OpenEvent | `pages/event/detail/<sport>` | `Pages/Event/Detail`（所有运动共用，差别在 `SportEventDetailService` / `SportFullEvent`） | 5 / 6 | 🟦 |
 | OpenCreatedEvent | `pages/event/detail/<sport>` | `Pages/Event/Detail`（发起人视角：编辑、结束、收款清单入口） | 5 / 6 | 🟦 |
-| OpenChecklist | `pages/event/checklist/<sport>` | | 5 / 6 | ⬜ |
+| OpenChecklist | `pages/event/checklist/<sport>` | `Pages/Event/Checklist`（所有运动共用，`SportChecklistService`） | 5 / 6 | 🟦 |
 | OpenMapSettings | `pages/settings/map` | | 7 | ⬜ |
 | OpenMapStyle | `pages/settings/map` | | 7 | ⬜ |
 | OpenLocationMarker | `pages/settings/map` | | 7 | ⬜ |
