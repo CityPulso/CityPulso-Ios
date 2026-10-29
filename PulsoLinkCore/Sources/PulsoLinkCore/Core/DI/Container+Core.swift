@@ -131,6 +131,10 @@ extension Container {
         self { BuildingService(buildings: BuildingRepository(api: BuildingAPI(client: self.publicClient()))) }.singleton
     }
 
+    public var locationService: Factory<LocationService> {
+        self { LocationService(location: LocationRepository(api: LocationAPI(client: self.protectedClient()))) }.singleton
+    }
+
     /* ------------------------------ Payments ------------------------------ */
 
     public var paymentsEventBus: Factory<PaymentsEventBus> {

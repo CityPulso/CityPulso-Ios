@@ -8,9 +8,10 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
   修掉从 00fb263 起累积的编译错误。在那之前 SwiftUI 部分记为 🟦，模型层在 Linux 上类型检查。
 - 第 5、6 组的代码已写完：活动详情（11 种运动共用）、报名 / 候补 / 退出 / 参与者 / 占座付款、发起人改信息和结束、
   加入日历、收款清单、发起活动向导（选运动、四步、照片上传、附近场馆自动关联、草稿、各运动自己的选项）。
-- 还差：深链 inbox；向导里的「在地图上选点」要等第 7 组的选点页（现在弹出的是「即将推出」，所以还发不了活动）；
-  发布后的「发个帖子」等第 11 组；社交主页入口等第 10 组。
-- 下一步：第 7 组地图 + 选点（MapLibre / OpenFreeMap），先做选点页，让发起活动能走通。
+- 第 7 组开始：MapLibre（OpenFreeMap 样式、3D 建筑、半径圈）的 `LoopMapView`、核心 `LocationService`、选点页已写完，
+  发起活动的「在地图上选点」接上了，发布流程可以走通（待 CI 编译 + 真机验收）。
+- 还差：深链 inbox；发布后的「发个帖子」等第 11 组；社交主页入口等第 10 组。
+- 下一步：第 7 组剩下的 Explore 地图（活动 / 球馆 / 建筑 / 赛事针、聚合、我的位置）、地点、地图设置。
 
 ## 状态
 
@@ -120,7 +121,7 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 | OpenMapSettings | `pages/settings/map` | | 7 | ⬜ |
 | OpenMapStyle | `pages/settings/map` | | 7 | ⬜ |
 | OpenLocationMarker | `pages/settings/map` | | 7 | ⬜ |
-| OpenLocationPick | `pages/location` | | 7 | ⬜ |
+| OpenLocationPick | `pages/location` | `Pages/Location`（`LoopMapView` + MapLibre；搜索 / 反查走核心 `LocationService`） | 7 | 🟦 |
 | OpenPlaceRequests | `pages/place/requests` | | 7 | ⬜ |
 | OpenMarkPlace | `pages/place/mark` | | 7 | ⬜ |
 | OpenVenue | `pages/venue/detail` | | 8 | ⬜ |

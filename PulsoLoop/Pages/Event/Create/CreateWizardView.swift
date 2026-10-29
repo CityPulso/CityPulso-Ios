@@ -41,7 +41,9 @@ struct CreateWizardView: View {
         }
         .safeAreaInset(edge: .bottom) { bottomBar }
         .sheet(isPresented: $pickingLocation) {
-            NavigationStack { LoopRoute.locationPick.page }
+            NavigationStack {
+                LocationPickView(showsClose: true, onConfirmed: { Task { await model.applyPickedLocation() } })
+            }
         }
     }
 

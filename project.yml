@@ -41,6 +41,10 @@ packages:
   Stripe:
     url: https://github.com/stripe/stripe-ios-spm.git
     from: 24.0.0
+  # 地图：OpenFreeMap 矢量样式（Android maplibre-android-sdk，WEB maplibre-gl）。
+  MapLibre:
+    url: https://github.com/maplibre/maplibre-gl-native-distribution.git
+    from: 6.0.0
 
 targetTemplates:
   PulsoApp:
@@ -96,6 +100,8 @@ targets:
         product: StripePayments
       - package: Stripe
         product: StripeConnect
+      - package: MapLibre
+        product: MapLibre
     info:
       path: PulsoLoop/Info.plist
       properties:
@@ -126,6 +132,8 @@ targets:
         product: StripePayments
       - package: Stripe
         product: StripeConnect
+      - package: MapLibre
+        product: MapLibre
     info:
       path: PulsoNear/Info.plist
       properties:

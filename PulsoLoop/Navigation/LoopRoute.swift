@@ -25,7 +25,7 @@ enum LoopRoute: Hashable {
     /** 一条订场（第 8 组接上订场详情）。 */
     case courtBooking(sport: VenueSport, bookingId: String)
     case paymentMethods
-    /** 选附近搜索的中心点（第 7 组接上地图选点）。 */
+    /** 选附近搜索的中心点。 */
     case locationPick
     /** 还没移植的页面：[title] 是文案 key。 */
     case comingSoon(title: String, systemImage: String)
@@ -49,7 +49,7 @@ enum LoopRoute: Hashable {
         case let .checklist(sport, eventId): ChecklistView(sport: sport, eventId: eventId)
         case let .courtBooking(sport, _): PulsoComingSoonView(title: sport.loopSport.labelKey, systemImage: "sportscourt")
         case .paymentMethods: PaymentMethodsView()
-        case .locationPick: PulsoComingSoonView(title: "shell_location_pick_title", systemImage: "mappin.and.ellipse")
+        case .locationPick: LocationPickView()
         case let .comingSoon(title, systemImage):
             PulsoComingSoonView(title: LocalizedStringKey(title), systemImage: systemImage)
         }
