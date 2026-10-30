@@ -19,11 +19,13 @@ final class CentrifugeWebSocketTransport: RealtimeTransport, CentrifugeClientDel
     func connect() {
         let getToken = params.getToken
         let config = CentrifugeClientConfig(token: params.token, tokenGetter: { _, completion in
+            // centrifuge-swift 只调一次回调，回调本身不是 Sendable。
+            let reply = TokenReply(completion)
             Task {
                 do {
-                    completion(.success(try await getToken()))
+                    reply.send(.success(try await getToken()))
                 } catch {
-                    completion(.failure(error))
+                    reply.send(.failure(error))
                 }
             }
         })
@@ -57,6 +59,18 @@ final class CentrifugeWebSocketTransport: RealtimeTransport, CentrifugeClientDel
     func onPublication(_ client: CentrifugeClient, _ event: CentrifugeServerPublicationEvent) {
         guard event.channel == params.channel else { return }
         listener.onPublication(event.data)
+    }
+}
+/** 把令牌回调带进 Task（库保证只调一次）。 */
+private final class TokenReply: @unchecked Sendable {
+    private let completion: (Result<String, Error>) -> Void
+
+    init(_ completion: @escaping (Result<String, Error>) -> Void) {
+        self.completion = completion
+    }
+
+    func send(_ result: Result<String, Error>) {
+        completion(result)
     }
 }
 #endif

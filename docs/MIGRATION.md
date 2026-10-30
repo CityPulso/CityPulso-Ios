@@ -13,8 +13,15 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
   - 等 Android 做完：设置 → 清除本地数据（iOS 对应 GRDB 表、Nuke 缓存、聊天壁纸、草稿、筛选、内存查询缓存）。
   - Near 资料页的「活动」数要等 Near 活动移植后才有，现在一直是 `-`。
 - 第 9 组写完：钱包、我的会员 / 会员购买记录 / 时长包详情、收款账户（Stripe Connect 开通）、付款方式、账单（我主持的 / 我的付款）。
-- 第 10 组开始：GRDB 本地库（`PulsoDatabase`、`PersistedQuery`）、社交 DTO / API 改成生成、`SocialRepository` / `SocialLocalStore` /
-  `SocialQueryStore` / `SocialService` 全量移植（Linux 测试通过）。还差：好友请求红点（`InboxIndicatorStore`）、聊天、通知、社交页面。
+- 第 10 组进行中：
+  - core：GRDB 本地库（`PulsoDatabase`：社交关系、好友请求、会话、通知、资料卡；登出清空）、`PersistedQuery`、`MediatedList`
+    （本地库为准的分页，对应 Android RemoteMediator）、社交 / 通信 DTO 和 API 改成生成、`SocialService` / `CommunicationService` /
+    `InboxIndicatorStore` 全量移植、实时推送（centrifuge-swift WebSocket，swift-eventsource SSE 兜底，`RealtimeConnectionManager`
+    在 Loop / Near 启动时连）。Linux 测试 77 个全过。
+  - Loop 页面：社交（好友 / 关注 / 粉丝、搜索、排序、心形、菜单、按住确认）、好友请求、黑名单、添加好友、公开主页、
+    消息（私聊 / 群聊列表，铃铛红点 → 通知，+ → 社交）、通知收件箱（全部 / 未读、全部已读、点开对应页面）。
+  - 还差：聊天室（消息、发送、图片 / 视频 / 语音 / 文件 / 位置 / 卡片、撤回、转发）、会话设置、群成员、聊天壁纸、
+    分享卡片选择器；Near 的社交 / 消息页（随 Near 分叉）。
 - 地图设置（样式、定位标记）写完。
 - **iPad（用户要求，2026-10-30）**：三个 App 改成通用（`TARGETED_DEVICE_FAMILY = 1,2`，iPad 四个方向、分屏 / 台前调度）。
   页面用系统 List / Form / sheet，宽屏下自动加阅读边距、sheet 变表单弹窗；还要逐页看 iPad 截图，修固定宽度的地方，
