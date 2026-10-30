@@ -43,7 +43,7 @@ struct CalendarActivityEditor: UIViewControllerRepresentable {
         activity.notes = draft.notes
         let controller = EKEventEditViewController()
         controller.eventStore = store
-        controller.activity = activity
+        controller.event = activity
         controller.editViewDelegate = context.coordinator
         return controller
     }
@@ -58,7 +58,7 @@ struct CalendarActivityEditor: UIViewControllerRepresentable {
             self.onDone = onDone
         }
 
-        func activityEditViewController(_: EKEventEditViewController, didCompleteWith _: EKEventEditViewAction) {
+        func eventEditViewController(_: EKEventEditViewController, didCompleteWith _: EKEventEditViewAction) {
             onDone()
         }
     }
