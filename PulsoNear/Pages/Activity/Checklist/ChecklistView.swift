@@ -2,11 +2,18 @@ import PulsoLinkCore
 import PulsoLinkUI
 import SwiftUI
 
-/** 收款清单页（Android `<ActivityType>ChecklistScreen`）：总数 / 已付 / 未付，主办可全部结清、催缴、逐个勾选已付。 */
+/**
+ * 收款清单页（Android `<ActivityType>ChecklistScreen`）：总数 / 已付 / 未付，主办可全部结清、催缴；每人一行，
+ * 主办右滑标记已付 / 未付、左滑提醒，或者用 ⋯ 菜单。右上角回到活动。
+ */
 struct ChecklistView: View {
+    let activityType: NearActivityKind
+    let activityId: String
     @State private var model: ChecklistModel
 
     init(activityType: NearActivityKind, activityId: String) {
+        self.activityType = activityType
+        self.activityId = activityId
         _model = State(initialValue: ChecklistModel(activityType: activityType, activityId: activityId))
     }
 
@@ -14,6 +21,12 @@ struct ChecklistView: View {
         content
             .navigationTitle(Text("checklist_title"))
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    NavigationLink(value: NearRoute.activity(activityType: activityType, activityId: activityId)) { Image(systemName: "calendar") }
+                        .accessibilityLabel(Text("checklist_open_event"))
+                }
+            }
             .task { await model.observe() }
             .refreshable { model.refresh() }
     }
@@ -45,6 +58,8 @@ struct ChecklistView: View {
                         ForEach(model.items) { item in
                             ChecklistRow(model: model, item: item)
                         }
+                    } header: {
+                        if model.isHost { Text("checklist_swipe_hint").textCase(nil) }
                     }
                 }
             }
@@ -72,7 +87,7 @@ struct ChecklistView: View {
             }
             HStack(spacing: 8) {
                 stat(localizedFormat("checklist_stat_total", model.items.count), tint: .primary, background: AnyShapeStyle(.fill.tertiary))
-                stat(localizedFormat("checklist_stat_paid", model.paidCount), tint: .accentColor, background: AnyShapeStyle(Color.accentColor.opacity(0.15)))
+                stat(localizedFormat("checklist_stat_paid", model.paidCount), tint: paidGreen, background: AnyShapeStyle(paidGreen.opacity(0.15)))
                 stat(
                     localizedFormat("checklist_stat_unpaid", model.unpaidCount),
                     tint: model.unpaidCount > 0 ? .red : .primary,
@@ -115,42 +130,60 @@ struct ChecklistView: View {
     }
 }
 
+/** 已付一直是绿色（主题色可能是红 / 橙，看起来像欠款）。 */
+private let paidGreen = RadixScale.green.lightStep(11)
+
+/** 一个付款人，像聊天列表一样一行（Android `ChecklistRow`）：主办右滑标记已付 / 未付，左滑提醒，也可以用 ⋯ 菜单。 */
 private struct ChecklistRow: View {
     let model: ChecklistModel
     let item: ActivityChecklistEntry
 
     var body: some View {
-        HStack(spacing: 10) {
+        let ready = item.canRemind()
+        HStack(spacing: 12) {
+            PulsoAvatar(url: model.imageURL(item.avatarImageId), size: 40, systemImage: "person", fallbackText: item.displayName)
+            Text(verbatim: item.displayName.flatMap { $0.isEmpty ? nil : $0 } ?? String(localized: "explore_pin_untitled"))
+                .font(.subheadline.weight(.semibold))
+                .lineLimit(1)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Text((item.paid ? "checklist_status_paid" : "checklist_status_unpaid") as LocalizedStringKey)
+                .font(.caption.weight(.medium))
+                .foregroundStyle(item.paid ? paidGreen : Color.red)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 2)
+                .background(item.paid ? paidGreen.opacity(0.15) : Color.red.opacity(0.12), in: .capsule)
+            if model.isHost {
+                Menu {
+                    Button { Task { await model.togglePaid(item) } } label: {
+                        Label((item.paid ? "checklist_mark_unpaid" : "checklist_mark_paid") as LocalizedStringKey, systemImage: item.paid ? "circle" : "checkmark.circle")
+                    }
+                    if !item.paid {
+                        Button { Task { await model.remind(item) } } label: {
+                            Label((ready ? "checklist_remind" : "checklist_remind_cooldown") as LocalizedStringKey, systemImage: "bell")
+                        }
+                        .disabled(!ready)
+                    }
+                } label: {
+                    Image(systemName: "ellipsis").frame(width: 32, height: 32)
+                }
+                .disabled(model.isActionInProgress)
+                .accessibilityLabel(Text("checklist_more"))
+            }
+        }
+        .swipeActions(edge: .leading, allowsFullSwipe: true) {
             if model.isHost {
                 Button { Task { await model.togglePaid(item) } } label: {
-                    Image(systemName: item.paid ? "checkmark.square.fill" : "square")
-                        .font(.title3)
-                        .foregroundStyle(item.paid ? Color.accentColor : Color.secondary)
+                    Text((item.paid ? "checklist_mark_unpaid" : "checklist_mark_paid") as LocalizedStringKey)
                 }
-                .buttonStyle(.plain)
+                .tint(item.paid ? Color.gray : paidGreen)
                 .disabled(model.isActionInProgress)
             }
-            PulsoAvatar(url: model.imageURL(item.avatarImageId), size: 40, systemImage: "person", fallbackText: item.displayName)
-            VStack(alignment: .leading, spacing: 4) {
-                Text(verbatim: item.displayName.flatMap { $0.isEmpty ? nil : $0 } ?? String(localized: "explore_pin_untitled"))
-                    .font(.subheadline.weight(.semibold))
-                    .lineLimit(1)
-                Text((item.paid ? "checklist_status_paid" : "checklist_status_unpaid") as LocalizedStringKey)
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(item.paid ? Color.accentColor : Color.red)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 2)
-                    .background(item.paid ? Color.accentColor.opacity(0.15) : Color.red.opacity(0.12), in: .capsule)
-            }
-            Spacer(minLength: 0)
-            if model.isHost, !item.paid {
-                let ready = item.canRemind()
-                Button { Task { await model.remind(item) } } label: {
-                    Label((ready ? "checklist_remind" : "checklist_remind_cooldown") as LocalizedStringKey, systemImage: "bell")
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
-                .disabled(model.isActionInProgress || !ready)
+        }
+        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+            if model.isHost, !item.paid, ready {
+                Button { Task { await model.remind(item) } } label: { Text("checklist_remind") }
+                    .tint(.accentColor)
+                    .disabled(model.isActionInProgress)
             }
         }
     }
