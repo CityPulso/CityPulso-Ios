@@ -6,7 +6,7 @@ private let host = "api-client.stub"
 private let config = stubConfig(host: host)
 
 /** 这组测试共用一个假主机，串行跑。 */
-@Suite(.serialized)
+@Suite(.serialized, .timeLimit(.minutes(1)))
 struct APIClientTests {
     init() {
         StubProtocol.reset(host)

@@ -5,7 +5,7 @@ import Testing
 private let host = "startup-gate.stub"
 
 /** 共用一个假主机，串行跑。 */
-@Suite(.serialized)
+@Suite(.serialized, .timeLimit(.minutes(1)))
 struct StartupGateTests {
     private struct Harness {
         let gate: StartupGate
