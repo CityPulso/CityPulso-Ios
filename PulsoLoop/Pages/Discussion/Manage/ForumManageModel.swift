@@ -93,7 +93,7 @@ final class ForumManageModel {
             let keepForm = !resetForm && formDirty
             let keepPictures = !resetForm && forum.data != nil && (avatarChanged || backgroundsChanged)
             forum = Loadable(data: saved, isLoading: false)
-            if !keepForm { resetForm(saved) }
+            if !keepForm { applySaved(saved) }
             if !keepPictures { pictures.reset(avatarImageId: saved.avatarImageId, images: saved.images) }
             announcements = (try? await discussion.announcements(forumId)) ?? []
             await loadTopics()
@@ -102,7 +102,7 @@ final class ForumManageModel {
         }
     }
 
-    private func resetForm(_ saved: ForumDetail) {
+    private func applySaved(_ saved: ForumDetail) {
         name = saved.name
         description = saved.description
         sports = saved.sports
@@ -115,7 +115,7 @@ final class ForumManageModel {
 
     func discard() {
         guard let saved = forum.data else { return }
-        resetForm(saved)
+        applySaved(saved)
         pictures.reset(avatarImageId: saved.avatarImageId, images: saved.images)
     }
 
