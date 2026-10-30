@@ -68,7 +68,7 @@ struct CourtBookingView: View {
                 ContentUnavailableView {
                     Label("court_booking_not_found", systemImage: "calendar.badge.exclamationmark")
                 } actions: {
-                    Button("court_booking_back") { shell?.push(LoopRoute.courtBookings) }
+                    Button("court_booking_back") { shell?.push(LoopRoute.calendar(tab: .courtBookings)) }
                 }
             } else {
                 PulsoLoadErrorView(error) { model.refresh() }

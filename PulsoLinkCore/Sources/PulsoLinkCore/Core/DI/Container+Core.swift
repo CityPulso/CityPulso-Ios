@@ -160,8 +160,45 @@ extension Container {
 
     /* ------------------------------ Social ------------------------------ */
 
+    /** 本地库（Android `PulsoLinkDatabase`）；登出时清空。打不开就起不来。 */
+    public var pulsoDatabase: Factory<PulsoDatabase> {
+        self {
+            let database = try! PulsoDatabase(name: "pulsolink")
+            self.sessionTerminator().register(LocalDatabaseClearable(database: database))
+            return database
+        }.singleton
+    }
+
+    public var socialEventBus: Factory<SocialEventBus> {
+        self { SocialEventBus() }.singleton
+    }
+
+    public var socialRepository: Factory<SocialRepository> {
+        self { SocialRepository(api: SocialAPI(client: self.protectedClient())) }.singleton
+    }
+
+    public var socialLocalStore: Factory<SocialLocalStore> {
+        self { SocialLocalStore(database: self.pulsoDatabase()) }.singleton
+    }
+
+    public var socialQueryStore: Factory<SocialQueryStore> {
+        self {
+            let store = SocialQueryStore(social: self.socialRepository(), local: self.socialLocalStore(), bus: self.socialEventBus())
+            self.sessionTerminator().register(store)
+            return store
+        }.singleton
+    }
+
     public var socialService: Factory<SocialService> {
-        self { SocialService(social: SocialRepository(api: SocialAPI(client: self.protectedClient()))) }.singleton
+        self {
+            SocialService(
+                social: self.socialRepository(),
+                query: self.socialQueryStore(),
+                bus: self.socialEventBus(),
+                local: self.socialLocalStore(),
+                sessionStore: self.authSessionStore()
+            )
+        }.singleton
     }
 
     /* ------------------------------ Profile / preference ------------------------------ */

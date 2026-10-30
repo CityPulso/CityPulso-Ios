@@ -13,13 +13,15 @@ final class PrivacySettingsModel {
     private(set) var saving = false
 
     @ObservationIgnored @Injected(\.socialService) private var socialService
+    @ObservationIgnored @Injected(\.authSessionStore) private var sessionStore
 
     var isDirty: Bool { draft != nil && draft != saved }
 
     func load() async {
         loadError = nil
         do {
-            let settings = try await socialService.getPrivacy()
+            let session = sessionStore.state.value
+            let settings = try await socialService.getPrivacy(SocialPrivacyKey(accountId: session.currentAccountId, profileId: session.currentProfileId))
             draft = settings
             saved = settings
         } catch {
@@ -38,7 +40,15 @@ final class PrivacySettingsModel {
         saving = true
         defer { saving = false }
         do {
-            let result = try await socialService.updatePrivacy(next)
+            let result = try await socialService.updatePrivacy(UpdatePrivacySettingsRequest(
+                friendRequestPolicy: next.friendRequestPolicy,
+                directMessagePolicy: next.directMessagePolicy,
+                groupInvitePolicy: next.groupInvitePolicy,
+                showFriendList: next.showFriendList,
+                showBlockList: next.showBlockList,
+                showFollowingList: next.showFollowingList,
+                showFollowerList: next.showFollowerList
+            ))
             draft = result
             saved = result
             PulsoMessageCenter.shared.success("shell_privacy_saved")

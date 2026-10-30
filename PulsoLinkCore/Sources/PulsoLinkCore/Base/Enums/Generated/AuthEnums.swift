@@ -91,7 +91,7 @@ public enum ClientOs: String, WireEnum {
     public static let fallback: ClientOs = .ios
 }
 
-/** 社区身份「喜欢的运动」（Link auth.favorite_sport；最多 3 项，不重复）。 */
+/** 社区身份「喜欢的运动」（Link auth.favorite_sport；可多选，不重复）。 */
 public enum FavoriteSport: String, WireEnum {
     case badminton
     case tennis
@@ -108,7 +108,7 @@ public enum FavoriteSport: String, WireEnum {
     public static let fallback: FavoriteSport = .badminton
 }
 
-/** 社区身份「喜欢的活动」（Link auth.favorite_activity；最多 3 项，不重复）。 */
+/** 社区身份「喜欢的活动」（Link auth.favorite_activity；可多选，不重复）。 */
 public enum FavoriteActivity: String, WireEnum {
     case mahjong
     case texasHoldem = "texas_holdem"

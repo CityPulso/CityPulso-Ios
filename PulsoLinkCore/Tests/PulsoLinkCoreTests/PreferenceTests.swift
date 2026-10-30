@@ -13,17 +13,17 @@ struct ResolvedNavPreferenceTests {
 
         let organization = ResolvedAndroidPreference.resolve(wire, kind: .organization, supported: loopPages)
 
-        // forum 占了槽 1，槽 4 回落非社区默认（聊天）；钱包只属于社区档，槽 6 回落通知
+        // forum 占了槽 1，槽 4 回落非社区默认（聊天）；钱包只属于社区档，槽 6 回落设置
         #expect(organization.slot1 == ResolvedAndroidNavSlot(.forum, iconPack: .chat))
         #expect(organization.slot4 == ResolvedAndroidNavSlot(.chatHub))
-        #expect(organization.slot6 == ResolvedAndroidNavSlot(.notifications))
+        #expect(organization.slot6 == ResolvedAndroidNavSlot(.settings))
         #expect(Set(organization.capsuleSlots.map(\.destination) + [organization.slot6.destination]).count == 5)
     }
 
     @Test func pagesThisAppLacksAreReplaced() {
         var wire = AndroidPreference()
-        wire.slot2 = AndroidNavSlot(destination: .courtBookings)
-        let near = Set(ShellDestination.allCases).subtracting([.courses, .coaching, .tournaments, .courtBookings])
+        wire.slot2 = AndroidNavSlot(destination: .courses)
+        let near = Set(ShellDestination.allCases).subtracting([.courses, .coaching, .tournaments])
 
         #expect(ResolvedAndroidPreference.resolve(wire, kind: .community, supported: near).slot2 == ResolvedAndroidNavSlot(.venueSearch, iconPack: .place))
     }

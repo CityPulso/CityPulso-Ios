@@ -4,21 +4,20 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 
 ## 下一步
 
-- **仓库已公开（2026-10-30）**：标准 runner 不计分钟，macOS 每次 push 都编译三个 App。PulsoNear、PulsoLink 已编译通过；
-  PulsoLoop 正在逐轮修自 00fb263 以来累积的编译错误（看 Actions 最新一次）。
-- 第 5、6 组的代码已写完：活动详情（11 种运动共用）、报名 / 候补 / 退出 / 参与者 / 占座付款、发起人改信息和结束、
-  加入日历、收款清单、发起活动向导（选运动、四步、照片上传、附近场馆自动关联、草稿、各运动自己的选项）。
-- 第 7 组：`LoopMapView`（MapLibre + OpenFreeMap、3D 建筑、两个范围圈、长按、手势回调）、选点页、Explore 地图已写完：
-  活动 / 球馆 / 建筑 / 赛事针、屏幕聚合（弹出面板）、我的位置、底部面板（卡片 → 附近列表）、选了运动时的预览卡、
-  地址搜索、筛选（活动 + 球馆，共用已保存的筛选）、地图设置（平面 / 范围 / 卡片 / 图层 / 球馆搜索距离）、从搜索页聚焦。
-- 为 Explore 先补了第 8 / 12 组的数据层：`VenueRepository` / `VenueService` / `VenueQueryStore`（详情、附近、浏览数）、
-  `TournamentRepository` / `TournamentService`、`ExploreLayerStore`、`VenueNearbyFilterStore`、营业时间。
-- 标记地点、我标记的地点也写完了（`PlaceRequestService`，设置页入口接上）。
-- 还差：深链 inbox；发布后的「发个帖子」等第 11 组；
-  社交主页入口等第 10 组。球馆 / 建筑 / 赛事 / 订场 / 社交主页的路由已经有了，先进占位页。
-- 第 8 组球馆写完：详情、选场（点选 / 长按拖选）、确认（会员价、时长包）、订场详情（付款 / 取消 / 退款预估）、我的订场、
-  建筑、附近球馆、收藏（球馆 / 建筑）。会员和时长包的数据层、购买面板也已写好（第 9 组的「我的会员」「钱包」页还没做）。
-- 下一步：第 9 组钱包、账单、我的会员 / 时长包详情、收款账户（Stripe Connect）。
+- **2026-10-30 跟进 Android 新计划（壳 / 消息 / 社交 / 资料 / 订场 / 收藏 / 本地数据）**，iOS 同步改（用户要求）：
+  - 已做：`ShellDestination` 去掉 SOCIAL / NOTIFICATIONS / COURT_BOOKINGS（非社区默认槽 6 → 设置）；
+    「我的订场」并进日历（活动与订场，订场标签下即将开始 / 已结束，订场页的「我的订场」打开日历订场标签）；
+    资料页头部改成 关注 / 粉丝 / 活动（未回来显示 `-`，关注 / 粉丝进社交对应标签）、去掉角色胶囊、创作者徽标、
+    喜欢的运动 / 活动一行横滑 + 点开选择面板保存；编辑资料页喜欢的运动 / 活动改成一行 + 选择面板，不限个数，身份入口移到编辑页。
+  - 等第 10 组：消息页（铃铛 → 通知、+ → 社交）、社交页（顶栏聊天图标，`social(tab:)` 路由现在是占位页）、不再有「新聊天」页。
+  - 等 Android 做完：设置 → 清除本地数据（iOS 对应 GRDB 表、Nuke 缓存、聊天壁纸、草稿、筛选、内存查询缓存）。
+  - Near 资料页的「活动」数要等 Near 活动移植后才有，现在一直是 `-`。
+- 第 9 组写完：钱包、我的会员 / 会员购买记录 / 时长包详情、收款账户（Stripe Connect 开通）、付款方式、账单（我主持的 / 我的付款）。
+- 第 12 组进行中：课程详情、教练主页、我的课程、我的私教已写（页面路由还没接）；赛事详情 / 报名 / 我的赛事、教练面板没写。
+- 第 10 组开始：GRDB 本地库（`PulsoDatabase`、`PersistedQuery`）、社交 DTO / API 改成生成、`SocialRepository` / `SocialLocalStore` /
+  `SocialQueryStore` / `SocialService` 全量移植（Linux 测试通过）。还差：好友请求红点（`InboxIndicatorStore`）、聊天、通知、社交页面。
+- 地图设置（样式、定位标记）写完。
+- 还差：深链 inbox；第 11 组论坛；Near 全部分叉；最后 `screenshots/` 截图。
 
 ## 状态
 
@@ -49,13 +48,12 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 | 应用内语言选择 | 跳 iOS 设置里的 per-app 语言，再把当前语言回写到账号 | iOS 系统管理 App 语言 |
 | 字体 / 字号设置 | 不显示，用 Dynamic Type | iOS 系统设置 |
 | 编辑资料逐项弹窗 | 行内直接编辑的系统表单；离开时自动保存，改错时不能返回 | iOS 表单习惯 |
-| Loop 喜欢的运动不限个数 | 最多 3 个（与 Near 和 `FavoriteSport.MAX` 一致） | Android Loop 漏了上限，后端只收 3 个 |
 | 日程侧栏（左侧滑出） | 系统 sheet，同样从栈底页面左边缘右滑打开 | iOS 没有原生的左侧抽屉 |
 | 搜索页运动标签下划线 Tab | 横向胶囊 + 系统分页 TabView | iOS 习惯 |
 | 换图标要重启 | 备用图标立即生效，不显示「需要重启」 | iOS 行为 |
 | Firebase messaging | 不接 APNs | Android 只有 Gradle 依赖，Kotlin 里没有用到；通知走 Centrifugo + 通知列表 |
 | Stripe Android | stripe-ios（PaymentSheet / Connect） | 都是线下服务（订场、课程、赛事、会员），App Store 3.1.3(e) 允许，不用 IAP |
-| Room | GRDB | |
+| Room | GRDB（`PulsoDatabase`，登出清空） | |
 | Explore 常驻底部面板（自己画的三段拖拽） | 系统 sheet：卡片高度 + 全屏两档，卡片高度以下地图仍可操作；推进别的页面时先收起，回来再弹出 | iOS 原生 sheet 已有分档和背景交互 |
 | Explore 聚合针原地放大成面板 | 系统 popover（手机上也保持 popover） | iOS 原生 |
 | Explore 筛选里的胶囊 / 滑杆 | 系统表单：Picker、Toggle、设施多选子页 | iOS 表单习惯 |

@@ -24,14 +24,14 @@ enum LoopShellPages {
             CreateEventView()
         case .explore:
             ExploreView()
-        case .courtBookings:
-            CourtBookingsView()
         case .venueSearch:
             VenueSearchView()
         case .favorites:
             FavoritesView()
         case .wallet:
             WalletView()
+        case .billing:
+            BillingView()
         default:
             PulsoComingSoonView(destination)
         }

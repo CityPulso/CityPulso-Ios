@@ -104,14 +104,14 @@ public struct ResolvedAndroidPreference: Codable, Sendable, Hashable {
 
     public static let `default` = ResolvedAndroidPreference()
 
-    /** organization / authority 无活动页：底栏默认换成主页 / 地图 / 社交 / 聊天，槽 6 为通知。 */
+    /** organization / authority 无活动页：底栏默认换成主页 / 地图 / 球馆 / 消息，槽 6 为设置。 */
     private static let nonCommunityDefault: ResolvedAndroidPreference = {
         var preference = ResolvedAndroidPreference()
         preference.slot1 = ResolvedAndroidNavSlot(.profile)
         preference.slot2 = ResolvedAndroidNavSlot(.explore)
         preference.slot3 = ResolvedAndroidNavSlot(.venueSearch)
         preference.slot4 = ResolvedAndroidNavSlot(.chatHub)
-        preference.slot6 = ResolvedAndroidNavSlot(.notifications)
+        preference.slot6 = ResolvedAndroidNavSlot(.settings)
         return preference
     }()
 

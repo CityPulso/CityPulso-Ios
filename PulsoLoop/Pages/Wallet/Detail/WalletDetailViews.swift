@@ -239,11 +239,7 @@ struct MyBundleView: View {
                         Section {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("my_bundle_pending_title").font(.subheadline.weight(.semibold))
-                                Text(verbatim: switch bundle.paymentMethod {
-                                case .phone: localizedFormat("my_bundle_pending_body_phone", bundle.venueName)
-                                case .offline: localizedFormat("my_bundle_pending_body_offline", bundle.venueName)
-                                case .platform: String(localized: "my_bundle_pending_body_platform")
-                                })
+                                Text(verbatim: pendingBody(bundle))
                                 .font(.footnote)
                                 .foregroundStyle(.secondary)
                             }
@@ -333,6 +329,14 @@ struct MyBundleView: View {
             Text("my_bundle_cancel_body")
         }
         .task { await model.observe() }
+    }
+
+    private func pendingBody(_ bundle: MyBundleDetail) -> String {
+        switch bundle.paymentMethod {
+        case .phone: localizedFormat("my_bundle_pending_body_phone", bundle.venueName)
+        case .offline: localizedFormat("my_bundle_pending_body_offline", bundle.venueName)
+        case .platform: String(localized: "my_bundle_pending_body_platform")
+        }
     }
 }
 

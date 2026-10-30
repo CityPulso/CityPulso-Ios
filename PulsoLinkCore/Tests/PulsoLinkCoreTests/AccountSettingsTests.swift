@@ -14,7 +14,11 @@ struct PrivacySettingsTests {
         #expect(settings.directMessagePolicy == [.friends, .peopleFollowingMe, .friends])
         #expect(settings.groupInvitePolicy.isEmpty)
 
-        let body = String(decoding: try WireCoding.encoder.encode(UpdatePrivacySettingsRequest(settings)), as: UTF8.self)
+        let body = String(decoding: try WireCoding.encoder.encode(UpdatePrivacySettingsRequest(
+            friendRequestPolicy: settings.friendRequestPolicy, directMessagePolicy: settings.directMessagePolicy,
+            groupInvitePolicy: settings.groupInvitePolicy, showFriendList: settings.showFriendList, showBlockList: settings.showBlockList,
+            showFollowingList: settings.showFollowingList, showFollowerList: settings.showFollowerList
+        )), as: UTF8.self)
         #expect(body.contains(#""friend_request_policy":"mutual_follows""#))
         #expect(body.contains(#""group_invite_policy":[]"#))
     }

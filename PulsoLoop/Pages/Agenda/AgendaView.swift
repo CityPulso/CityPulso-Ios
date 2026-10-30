@@ -72,7 +72,7 @@ struct AgendaView: View {
                 HStack {
                     Text("home_agenda_upcoming_bookings")
                     Spacer()
-                    Button("home_agenda_see_all") { open(root: .courtBookings) }.font(.footnote)
+                    Button("home_agenda_see_all") { open(.calendar(tab: .courtBookings)) }.font(.footnote)
                 }
             }
             if !past.isEmpty {
@@ -122,11 +122,16 @@ struct AgendaView: View {
     private var footer: some View {
         Section {
             Button { open(root: .profile) } label: { Label("home_agenda_footer_profile", systemImage: "person.crop.circle") }
-            Button { open(root: .courtBookings) } label: { Label("home_agenda_footer_court_bookings", systemImage: "sportscourt") }
+            Button { open(.calendar(tab: .courtBookings)) } label: { Label("home_agenda_footer_court_bookings", systemImage: "sportscourt") }
             Button { open(root: .wallet) } label: { Label("home_agenda_footer_memberships", systemImage: "creditcard") }
             Button { open(root: .settings) } label: { Label("home_agenda_footer_settings", systemImage: "gearshape") }
         }
         .foregroundStyle(.primary)
+    }
+
+    private func open(_ route: LoopRoute) {
+        dismiss()
+        onOpen(route)
     }
 
     private func open(root: ShellDestination) {

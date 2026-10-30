@@ -28,6 +28,14 @@ protocol LoopSportService: SportEventDetailService, SportChecklistService, Sport
 
     /** 在 [buildingId] 这栋建筑办的活动；[endedOnly] 时只要已结束的（球馆详情的「活动」分段）。 */
     func buildingEvents(accountId: String, profileId: String, buildingId: String, endedOnly: Bool) -> AsyncStream<QueryResponse<[any SportEventItem]>>
+
+    /** 账单「我主持的」：我主持的活动的收款清单，分页。 */
+    @MainActor
+    func pageHostedChecklists(isAllSettled: Bool) -> PagedList<HostedChecklistRowUi, Int>
+
+    /** 账单「我的付款」：我自己的收款行，分页。 */
+    @MainActor
+    func pageMyPaymentItems(paid: Bool) -> PagedList<MyChecklistItemRowUi, Int>
 }
 
 extension AsyncStream {

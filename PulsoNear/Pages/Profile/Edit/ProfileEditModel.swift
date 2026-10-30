@@ -123,12 +123,6 @@ final class ProfileEditModel {
         }
     }
 
-    /** 加一项或去掉一项，按固定顺序；已选满 [FavoriteActivity.max] 时不能再加。 */
-    func toggleFavoriteActivity(_ activity: FavoriteActivity) {
-        guard form.favoriteActivities.contains(activity) || form.favoriteActivities.count < FavoriteActivity.max else { return }
-        form.favoriteActivities = toggled(form.favoriteActivities, activity, order: FavoriteActivity.allCases)
-    }
-
     /** 离开时保存；返回 false 表示有错没保存（已经提示过）。 */
     @discardableResult
     func saveIfNeeded() async -> Bool {

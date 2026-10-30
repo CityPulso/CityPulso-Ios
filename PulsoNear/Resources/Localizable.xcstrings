@@ -37920,6 +37920,35 @@
         }
       }
     },
+    "profile_favorite_activities_add": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add favorite activities"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter vos activités préférées"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加喜欢的活动"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加喜歡的活動"
+          }
+        }
+      }
+    },
     "profile_favorite_activities_empty": {
       "extractionState": "manual",
       "localizations": {
@@ -37955,25 +37984,25 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pick up to 3. They show on your profile and in other people’s connection lists."
+            "value": "Pick as many as you like. They show on your profile and in other people’s social lists."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Jusqu’à 3. Elles s’affichent sur votre profil et dans les listes de relations des autres."
+            "value": "Choisissez-en autant que vous voulez. Elles s’affichent sur votre profil et dans les listes sociales des autres."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "最多选 3 个，会显示在你的资料页和别人的社交列表里"
+            "value": "选几个都行，会显示在你的资料页和别人的社交列表里"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "最多選 3 個，會顯示在你的資料頁和別人的社交列表裏"
+            "value": "選幾個都行，會顯示在你的資料頁和別人的社交列表裏"
           }
         }
       }
@@ -39022,35 +39051,6 @@
         }
       }
     },
-    "profile_overview_open_identities": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Identities"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Identités"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "身份"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "身份"
-          }
-        }
-      }
-    },
     "profile_overview_refresh_failed": {
       "extractionState": "manual",
       "localizations": {
@@ -39370,118 +39370,89 @@
         }
       }
     },
-    "profile_stat_emails": {
+    "profile_stat_activities": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Emails"
+            "value": "activities"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "E-mails"
+            "value": "activités"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "邮箱"
+            "value": "活动"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "電郵"
+            "value": "活動"
           }
         }
       }
     },
-    "profile_stat_hosted": {
+    "profile_stat_followers": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hosted"
+            "value": "followers"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Organisés"
+            "value": "abonnés"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "发起"
+            "value": "粉丝"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "發起"
+            "value": "粉絲"
           }
         }
       }
     },
-    "profile_stat_joined": {
+    "profile_stat_following": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Joined"
+            "value": "following"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rejoints"
+            "value": "abonnements"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "参加"
+            "value": "关注"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "參加"
-          }
-        }
-      }
-    },
-    "profile_stat_phones": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Phones"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Téléphones"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "手机"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "手機"
+            "value": "關注"
           }
         }
       }
@@ -40845,6 +40816,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "隱私與授權"
+          }
+        }
+      }
+    },
+    "settings_storage": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear local data"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Effacer les données locales"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除本地数据"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除本地資料"
           }
         }
       }
@@ -42270,35 +42270,6 @@
         }
       }
     },
-    "shell_chat_create_no_friends": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Add friends first to start a direct chat"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ajoutez des amis pour démarrer une discussion"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "还没有好友可发起私聊"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "還沒有好友可發起私聊"
-          }
-        }
-      }
-    },
     "shell_chat_emoji": {
       "extractionState": "manual",
       "localizations": {
@@ -43078,6 +43049,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "沒有可以打開這個檔案的應用"
+          }
+        }
+      }
+    },
+    "shell_chat_open_social": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Find someone to chat with"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trouver quelqu’un à qui écrire"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找朋友聊天"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找朋友聊天"
           }
         }
       }
@@ -44074,25 +44074,25 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Calendar"
+            "value": "Activities & bookings"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Calendrier"
+            "value": "Activités et réservations"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "日历"
+            "value": "活动与预约"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "日曆"
+            "value": "活動與預約"
           }
         }
       }
@@ -44103,25 +44103,25 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Chat"
+            "value": "Messages"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Chat"
+            "value": "Messages"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "聊天"
+            "value": "消息"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "聊天"
+            "value": "訊息"
           }
         }
       }
@@ -44412,35 +44412,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "社交"
-          }
-        }
-      }
-    },
-    "shell_dest_space_bookings": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "My bookings"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mes réservations"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "我的预约"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "我的預約"
           }
         }
       }
@@ -48273,35 +48244,6 @@
         }
       }
     },
-    "shell_social_create_chat": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "New chat"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nouveau chat"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "创建聊天"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "建立聊天"
-          }
-        }
-      }
-    },
     "shell_social_find_people": {
       "extractionState": "manual",
       "localizations": {
@@ -48704,35 +48646,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "更多"
-          }
-        }
-      }
-    },
-    "shell_social_notifications": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Notifications"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Notifications"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "通知消息"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "通知訊息"
           }
         }
       }
@@ -52516,31 +52429,624 @@
         }
       }
     },
-    "space_bookings_title": {
+    "storage_clear_all": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "My bookings"
+            "value": "Clear all"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mes réservations"
+            "value": "Tout effacer"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "我的预约"
+            "value": "全部清除"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "我的預約"
+            "value": "全部清除"
+          }
+        }
+      }
+    },
+    "storage_clear_all_text": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clears every cache, chat background and draft on this phone. You stay signed in."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Efface tous les caches, fonds de discussion et brouillons de ce téléphone. Vous restez connecté."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除这台手机上的全部缓存、聊天背景和草稿。你不会被退出登录。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除這台手機上的全部快取、聊天背景和草稿。你不會被登出。"
+          }
+        }
+      }
+    },
+    "storage_clear_confirm": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Effacer"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除"
+          }
+        }
+      }
+    },
+    "storage_clear_failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn’t clear local data. Try again later."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible d’effacer les données locales. Réessayez plus tard."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法清除本地数据，请稍后再试"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法清除本地資料，請稍後再試"
+          }
+        }
+      }
+    },
+    "storage_clear_permanent": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This can’t be recovered"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de les récupérer ensuite"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除后无法找回"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除後無法找回"
+          }
+        }
+      }
+    },
+    "storage_clear_refetch": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "It loads again from the server when needed"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les données se rechargent depuis le serveur si besoin"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除后会在需要时重新从服务器加载"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除後會在需要時重新從伺服器載入"
+          }
+        }
+      }
+    },
+    "storage_clear_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear %1$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Effacer : %1$@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除%1$@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除%1$@"
+          }
+        }
+      }
+    },
+    "storage_cleared": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Local data cleared"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Données locales effacées"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本地数据已清除"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本地資料已清除"
+          }
+        }
+      }
+    },
+    "storage_intro": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This data is kept only on this phone. After you clear it, chats, notifications and lists load again when you open them. Chat backgrounds and drafts can’t be recovered. You stay signed in."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ces données sont gardées uniquement sur ce téléphone. Une fois effacées, les discussions, notifications et listes se rechargent quand vous les ouvrez. Les fonds de discussion et les brouillons ne peuvent pas être récupérés. Vous restez connecté."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这些数据只存在这台手机上。清除后，聊天、通知和列表会在你打开时重新加载；聊天背景和草稿清除后无法找回。清除不会退出登录。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這些資料只存在這台手機上。清除後，聊天、通知和列表會在你打開時重新載入；聊天背景和草稿清除後無法找回。清除不會登出。"
+          }
+        }
+      }
+    },
+    "storage_kind_chat_messages": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chat messages"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Messages des discussions"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "聊天消息"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "聊天訊息"
+          }
+        }
+      }
+    },
+    "storage_kind_chat_wallpapers": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chat backgrounds"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fonds de discussion"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "聊天背景"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "聊天背景"
+          }
+        }
+      }
+    },
+    "storage_kind_conversations": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conversation list"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liste des discussions"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "会话列表"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "會話列表"
+          }
+        }
+      }
+    },
+    "storage_kind_drafts": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unpublished activity draft"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brouillon d’activité non publié"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未发布的活动草稿"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未發佈的活動草稿"
+          }
+        }
+      }
+    },
+    "storage_kind_friend_requests": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Friend requests"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demandes d’ami"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "好友请求"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "好友請求"
+          }
+        }
+      }
+    },
+    "storage_kind_images": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Image cache"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cache des images"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "图片缓存"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "圖片快取"
+          }
+        }
+      }
+    },
+    "storage_kind_notifications": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifications"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifications"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "通知"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "通知"
+          }
+        }
+      }
+    },
+    "storage_kind_profile_cards": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other people’s profile cards"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fiches de profil des autres"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "他人资料卡"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "他人資料卡"
+          }
+        }
+      }
+    },
+    "storage_kind_social_connections": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Friends and follows"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amis et abonnements"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "好友与关注列表"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "好友與關注列表"
+          }
+        }
+      }
+    },
+    "storage_usage_empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empty"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vide"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "空"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "空"
+          }
+        }
+      }
+    },
+    "storage_usage_items": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld item"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld items"
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "plural": {
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld éléments"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld élément"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld éléments"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld 项"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hant": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld 項"
+                }
+              }
+            }
           }
         }
       }

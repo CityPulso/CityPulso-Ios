@@ -1,3 +1,4 @@
+import PulsoLinkCore
 import PulsoLinkUI
 import SwiftUI
 
@@ -18,6 +19,8 @@ enum NearRoute: Hashable {
     case profileEdit
     case backgrounds
     case identities
+    /** 社交：好友 / 关注 / 粉丝，停在 [tab]。 */
+    case social(tab: SocialConnectionsTab)
     /** 还没移植的页面：[title] 是文案 key。 */
     case comingSoon(title: String, systemImage: String)
 
@@ -36,6 +39,7 @@ enum NearRoute: Hashable {
         case .profileEdit: ProfileEditView()
         case .backgrounds: ProfileBackgroundsView()
         case .identities: ProfileIdentitiesView()
+        case .social: PulsoComingSoonView(title: "shell_dest_social", systemImage: "person.2")
         case let .comingSoon(title, systemImage):
             PulsoComingSoonView(title: LocalizedStringKey(title), systemImage: systemImage)
         }

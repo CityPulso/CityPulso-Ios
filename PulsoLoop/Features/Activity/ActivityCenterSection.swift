@@ -61,6 +61,15 @@ struct ActivityCenterSection: View {
                     .accessibilityLabel(Text("activity_filter_title"))
                 }
                 .padding(.horizontal)
+                // 我的订场在这里（不再有单独的订场页）：即将开始或已结束。
+                if model.tab == .courtBookings {
+                    Picker("court_bookings_title", selection: $model.bookingTab) {
+                        Text("court_bookings_tabs_upcoming").tag(CourtBookingListTab.upcoming)
+                        Text("court_bookings_tabs_past").tag(CourtBookingListTab.past)
+                    }
+                    .pickerStyle(.segmented)
+                    .padding(.horizontal)
+                }
             }
         }
         .padding(.vertical, 8)
@@ -136,7 +145,7 @@ struct ActivityCenterSection: View {
             }
         case .courtBookings:
             ContentUnavailableView {
-                Label(model.filter.showEnded ? "court_bookings_empty_past" : "court_bookings_empty_upcoming", systemImage: "sportscourt")
+                Label(model.bookingTab == .past ? "court_bookings_empty_past" : "court_bookings_empty_upcoming", systemImage: "sportscourt")
             } description: {
                 Text("court_bookings_empty_body")
             } actions: {

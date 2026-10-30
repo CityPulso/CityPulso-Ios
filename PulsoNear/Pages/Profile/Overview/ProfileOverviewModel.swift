@@ -18,6 +18,12 @@ final class ProfileOverviewModel {
     @ObservationIgnored @Injected(\.profileStore) private var profileStore
     @ObservationIgnored @Injected(\.profileBootstrap) private var profileBootstrap
     @ObservationIgnored @Injected(\.pulsoCoreConfig) private var config
+    @ObservationIgnored @Injected(\.socialService) private var socialService
+    @ObservationIgnored @Injected(\.authService) private var authService
+    /** 头部数字；没回来之前是 nil（显示 `-`）。活动 = 发起 + 参加，等 Near 活动移植后填上。 */
+    private(set) var followingCount: Int?
+    private(set) var followerCount: Int?
+    private(set) var activityCount: Int?
 
     var avatarURL: URL? { ImageURLs.image(info?.avatarImageId, base: config.apiBaseURL) }
 
@@ -25,7 +31,8 @@ final class ProfileOverviewModel {
         (info?.backgrounds ?? []).compactMap { ImageURLs.image($0.imageId, base: config.apiBaseURL) }
     }
 
-    var roles: [String] { ProfileRoleVisuals.sorted(info?.roleLabels ?? []) }
+    /** 有创作者角色：账号状态旁边一个小徽标。 */
+    var isCreator: Bool { info?.roleLabels.contains(AuthCommunityRole.creator.rawValue) == true }
 
     var location: String? {
         let parts = [info?.city, info?.country].compactMap { $0?.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
@@ -39,6 +46,26 @@ final class ProfileOverviewModel {
     }
 
     /** 跟着 [ProfileStore]；页面消失时随 `.task` 取消。 */
+    /** 关注 / 粉丝数，各自填上；每次数字失效都重拉。 */
+    func observeRelationCounts() async {
+        await concurrently([
+            { for await count in self.socialService.relationCount(.following) { self.followingCount = count } },
+            { for await count in self.socialService.relationCount(.followers) { self.followerCount = count } },
+        ])
+    }
+
+    /** 资料页选完喜欢的活动：保存到资料，资料重拉后头部跟着变。 */
+    func saveFavoriteActivities(_ next: [FavoriteActivity]) async {
+        guard next != info?.favoriteActivities else { return }
+        var patch = PatchProfileRequest()
+        patch.favoriteActivities = next
+        do {
+            try await authService.patchProfile(kind: .community, patch)
+        } catch {
+            PulsoMessageCenter.shared.error(error, fallback: "profile_edit_save_failed")
+        }
+    }
+
     func observe() async {
         for await current in profileStore.current.values() {
             if let current { info = current }

@@ -7,6 +7,7 @@ struct ProfileEditView: View {
     @State private var model = ProfileEditModel()
     /** 性别选了「自定义」（或服务端存的是自定义原文）。 */
     @State private var customGender = false
+    @State private var pickingActivities = false
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -23,7 +24,15 @@ struct ProfileEditView: View {
         .navigationBarTitleDisplayMode(.inline)
         // 改了但无效时不能返回（Android 同样留在页面上），先改对；有效的修改在离开时自动保存。
         .navigationBarBackButtonHidden(model.isDirty && !model.canSave)
+        .sheet(isPresented: $pickingActivities) {
+            FavoriteActivityPicker(selected: $model.form.favoriteActivities) { pickingActivities = false }
+        }
         .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                NavigationLink(value: NearRoute.identities) {
+                    Label("profile_overview_open_identities", systemImage: "person.text.rectangle")
+                }
+            }
             if model.isDirty {
                 ToolbarItem(placement: .confirmationAction) {
                     Button(model.saving ? "profile_edit_saving" : "profile_edit_save", role: .confirm) {
@@ -61,27 +70,23 @@ struct ProfileEditView: View {
                 Text("profile_edit_hint")
             }
 
+            // 喜欢的活动：选了的显示成小标签（还没选显示提示），点这一行打开选择面板。
             Section {
-                ForEach(FavoriteActivity.ordered, id: \.self) { activity in
-                    let on = model.form.favoriteActivities.contains(activity)
-                    Button { model.toggleFavoriteActivity(activity) } label: {
-                        HStack {
-                            Label {
-                                Text(activity.kind.labelKey)
-                            } icon: {
-                                Image(activity.kind.iconAsset).resizable().frame(width: 22, height: 22)
+                Button { pickingActivities = true } label: {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("profile_field_favorite_activities").font(.subheadline.weight(.semibold))
+                            if model.form.favoriteActivities.isEmpty {
+                                Text("profile_favorite_activities_empty").foregroundStyle(.secondary)
+                            } else {
+                                FavoriteActivityChips(activities: model.form.favoriteActivities)
                             }
-                            Spacer()
-                            if on { Image(systemName: "checkmark").foregroundStyle(.tint) }
                         }
+                        Spacer(minLength: 0)
+                        Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(.tertiary)
                     }
-                    .foregroundStyle(.primary)
-                    .disabled(!on && model.form.favoriteActivities.count >= FavoriteActivity.max)
                 }
-            } header: {
-                Text("profile_field_favorite_activities")
-            } footer: {
-                Text("profile_favorite_activities_hint")
+                .foregroundStyle(.primary)
             }
 
             Section {

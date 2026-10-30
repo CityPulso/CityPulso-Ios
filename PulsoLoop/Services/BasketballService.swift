@@ -16,25 +16,25 @@ struct BasketballService: Sendable {
 
     /** 我主持的活动的收款清单，分页；这个运动的任何写操作都会让它重拉。 */
     @MainActor
-    func pageHostedChecklists(isAllSettled: Bool) -> PagedList<BasketballHostedPaymentChecklistItem, Int> {
+    func pageHostedChecklists(isAllSettled: Bool) -> PagedList<HostedChecklistRowUi, Int> {
         let repository = repository
         return .offset(invalidates: { eventBus.signals { _ in true } }) { offset, limit in
             let page = try await repository.listHostedPaymentChecklists(
                 BasketballListHostedPaymentChecklistsRequest(offset: offset, limit: limit, isAllSettled: isAllSettled)
             )
-            return ListWithTotal(items: page.items, total: page.total)
+            return ListWithTotal(items: page.items.map(HostedChecklistRowUi.init), total: page.total)
         }
     }
 
     /** 我自己欠的收款行，分页。 */
     @MainActor
-    func pageMyPaymentItems(paid: Bool) -> PagedList<BasketballMyPaymentChecklistItem, Int> {
+    func pageMyPaymentItems(paid: Bool) -> PagedList<MyChecklistItemRowUi, Int> {
         let repository = repository
         return .offset(invalidates: { eventBus.signals { _ in true } }) { offset, limit in
             let page = try await repository.listMyPaymentChecklistItems(
                 BasketballListMyPaymentChecklistItemsRequest(offset: offset, limit: limit, paid: paid)
             )
-            return ListWithTotal(items: page.items, total: page.total)
+            return ListWithTotal(items: page.items.map(MyChecklistItemRowUi.init), total: page.total)
         }
     }
 
@@ -111,5 +111,33 @@ struct BasketballService: Sendable {
     func remindItems(eventId: String, itemIds: [String]) async throws {
         try await repository.remindPaymentChecklistItems(eventId: eventId, itemIds: itemIds)
         eventBus.invalidate()
+    }
+}
+
+extension HostedChecklistRowUi {
+    init(_ item: BasketballHostedPaymentChecklistItem) {
+        self.init(
+            checklistId: item.id,
+            eventId: item.basketballEventId,
+            title: item.title.isEmpty ? String(item.basketballEventId.prefix(8)) : item.title,
+            venueName: item.venueName ?? item.address,
+            startsAt: item.startsAt,
+            isAllSettled: item.isAllSettled
+        )
+    }
+}
+
+extension MyChecklistItemRowUi {
+    init(_ item: BasketballMyPaymentChecklistItem) {
+        self.init(
+            itemId: item.id,
+            eventId: item.basketballEventId,
+            title: item.title.isEmpty ? String(item.basketballEventId.prefix(8)) : item.title,
+            venueName: item.venueName ?? item.address,
+            startsAt: item.startsAt,
+            paid: item.paid,
+            priceAmount: item.priceAmount,
+            currency: item.currency
+        )
     }
 }

@@ -7,17 +7,16 @@ import Foundation
 public enum ShellDestination: String, Codable, CaseIterable, Sendable {
     /** 地图探索。 */
     case explore = "EXPLORE"
-    /** 我的活动 / 我的排队。 */
+    /** 活动与订场：我发起的、我参加的、我的订场（Near：活动与预约）。 */
     case calendar = "CALENDAR"
     /** 附近活动搜索列表。 */
     case search = "SEARCH"
     /** 附近球馆搜索列表。 */
     case venueSearch = "VENUE_SEARCH"
-    case social = "SOCIAL"
     case create = "CREATE"
     case settings = "SETTINGS"
     case billing = "BILLING"
-    case notifications = "NOTIFICATIONS"
+    /** 消息：会话列表，右上角进通知与社交。 */
     case chatHub = "CHAT_HUB"
     case profile = "PROFILE"
     /** 钱包：会员卡 + 时长包，付款方式 / 收款账户入口。 */
@@ -28,16 +27,14 @@ public enum ShellDestination: String, Codable, CaseIterable, Sendable {
     case coaching = "COACHING"
     /** 我的赛事报名。 */
     case tournaments = "TOURNAMENTS"
-    /** 我的场地预定。 */
-    case courtBookings = "COURT_BOOKINGS"
     /** 收藏的球馆与建筑。 */
     case favorites = "FAVORITES"
     /** 论坛：帖子信息流、论坛搜索与我的论坛。 */
     case forum = "FORUM"
 
-    /** 活动页与球馆消费页（钱包 / 课程 / 私教 / 赛事 / 场地预定）只属于 community 身份。 */
+    /** 活动页与球馆消费页（钱包 / 课程 / 私教 / 赛事）只属于 community 身份。 */
     private static let communityOnly: Set<ShellDestination> = [
-        .calendar, .search, .create, .wallet, .courses, .coaching, .tournaments, .courtBookings,
+        .calendar, .search, .create, .wallet, .courses, .coaching, .tournaments,
     ]
 
     /** 与 Android 一致：按名字大小写不敏感匹配（底栏偏好 JSON 跨端共用）。 */

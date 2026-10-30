@@ -55,7 +55,7 @@ MODULES = [
         CORE_BASE,
         IOS_ROOT / "PulsoLinkCore/Sources/PulsoLinkCore/Base/Data/Generated",
         "public ",
-        ("data/communication", "data/location", "data/payments", "data/resource", "realtime"),
+        ("data/communication", "data/location", "data/payments", "data/resource", "data/social", "realtime"),
         ("Foundation",),
     ),
     Module(

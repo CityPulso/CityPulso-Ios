@@ -16,8 +16,10 @@ final class ActivityCenterModel {
     private static let seatStatuses: Set<RegistrationStatus> = [.participating, .pendingExit, .awaitingPayment]
 
     var sport: LoopSport = .badminton { didSet { if sport != oldValue { reloadEvents(); reloadBookings() } } }
-    var tab: ActivityCenterTab = .hosted
-    var filter = ActivityFilter() { didSet { if filter.showEnded != oldValue.showEnded { reloadBookings() } } }
+    var tab: ActivityCenterTab
+    var filter = ActivityFilter()
+    /** 「我的订场」下面：即将开始 / 已结束。 */
+    var bookingTab = CourtBookingListTab.upcoming { didSet { if bookingTab != oldValue { reloadBookings() } } }
     private(set) var isPulser = false
     private(set) var loading = false
     private(set) var error: UiError?
@@ -35,6 +37,11 @@ final class ActivityCenterModel {
     @ObservationIgnored private var hostedAnswer: QueryResponse<[any SportEventItem]> = .loading
     @ObservationIgnored private var joinedAnswer: QueryResponse<[any SportRegistrationItem]> = .loading
     @ObservationIgnored private var bookingsTask: Task<Void, Never>?
+
+    /** [initialTab]：从订场页「我的订场」进来时直接停在订场。 */
+    init(initialTab: ActivityCenterTab = .hosted) {
+        tab = initialTab
+    }
 
     /** 要发起活动得有 pulser 角色；所有人都能看自己参加的和订场。 */
     var tabs: [ActivityCenterTab] {
@@ -177,7 +184,7 @@ final class ActivityCenterModel {
         bookings = Loadable()
         guard let scope = scope(), let venueSport else { return }
         let stream = venueServices[venueSport]!.myBookings(
-            MyCourtBookingsKey(accountId: scope.accountId, profileId: scope.profileId, upcoming: !filter.showEnded, limit: Self.pageSize)
+            MyCourtBookingsKey(accountId: scope.accountId, profileId: scope.profileId, upcoming: bookingTab == .upcoming, limit: Self.pageSize)
         )
         bookingsTask = Task {
             for await response in stream {

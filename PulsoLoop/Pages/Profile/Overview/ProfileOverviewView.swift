@@ -4,10 +4,12 @@ import SwiftUI
 
 /**
  * 我的资料（对应 Android `ProfileOverviewScreen`）：背景图铺到状态栏下面，可左右滑并自动轮播；
- * 右上角分享 / 编辑 / 身份 / 账号安全。
+ * 右上角分享 / 编辑 / 账号安全（身份从编辑资料页进）。
  */
 struct ProfileOverviewView: View {
     @State private var model = ProfileOverviewModel()
+    @State private var pickingFavorites = false
+    @State private var creatorTip = false
 
     var body: some View {
         Group {
@@ -42,6 +44,13 @@ struct ProfileOverviewView: View {
             _ = await (profile, activity)
         }
         .task { await model.observeCounts() }
+        .task { await model.observeRelationCounts() }
+        .sheet(isPresented: $pickingFavorites) {
+            FavoritesPickerSheet(initial: info.favoriteSports) { next in
+                pickingFavorites = false
+                Task { await model.saveFavoriteSports(next) }
+            }
+        }
         .task { await model.activity.observe() }
         .toolbar { toolbar(info) }
         .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
@@ -79,6 +88,17 @@ struct ProfileOverviewView: View {
                             .padding(.vertical, 2)
                             .glassEffect(.regular, in: .capsule)
                     }
+                    if model.isCreator {
+                        Button { creatorTip = true } label: {
+                            Image(systemName: "star.circle.fill").font(.subheadline)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(Text("profile_role_creator"))
+                        .popover(isPresented: $creatorTip) {
+                            Text("profile_role_creator").font(.footnote).padding(.horizontal, 12).padding(.vertical, 8)
+                                .presentationCompactAdaptation(.popover)
+                        }
+                    }
                 }
                 if let id = info.citypulsoId, !id.isEmpty {
                     Button { model.copyCitypulsoId() } label: {
@@ -101,41 +121,44 @@ struct ProfileOverviewView: View {
 
     private func details(_ info: CurrentFullAccountInformation) -> some View {
         VStack(alignment: .leading, spacing: 16) {
+            // 关注 / 粉丝 / 活动：数字 + 名称；关注和粉丝点开社交的对应标签，活动不能点。
             HStack(spacing: 20) {
-                stat("calendar", model.hostedCount, "profile_stat_hosted")
-                stat("person.3.fill", model.joinedCount, "profile_stat_joined")
-                stat("envelope.fill", info.emails.count, "profile_stat_emails")
-                stat("phone.fill", info.phones.count, "profile_stat_phones")
+                NavigationLink(value: LoopRoute.social(tab: .following)) { stat(model.followingCount, "profile_stat_following") }
+                    .buttonStyle(.plain)
+                NavigationLink(value: LoopRoute.social(tab: .followers)) { stat(model.followerCount, "profile_stat_followers") }
+                    .buttonStyle(.plain)
+                stat(model.activityCount, "profile_stat_activities")
             }
             if let bio = info.bio, !bio.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 Text(verbatim: bio)
             }
-            FavoriteSportChips(sports: info.favoriteSports)
-            if !model.roles.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        ForEach(model.roles, id: \.self) { role in
-                            ProfileRoleLabel(role: role)
-                                .font(.caption.weight(.medium))
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 5)
-                                .background(.fill.tertiary, in: .capsule)
-                        }
-                    }
+            // 喜欢的运动：点这一行打开选择面板；还没选时是一个「添加」小标签。
+            if info.favoriteSports.isEmpty {
+                Button { pickingFavorites = true } label: {
+                    Label("profile_favorite_sports_add", systemImage: "plus")
+                        .font(.caption.weight(.medium))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(.fill.tertiary, in: .capsule)
                 }
+                .buttonStyle(.plain)
+            } else {
+                FavoriteSportChips(sports: info.favoriteSports)
+                    .contentShape(.rect)
+                    .onTapGesture { pickingFavorites = true }
+                    .accessibilityAddTraits(.isButton)
             }
             metaLine(info)
         }
     }
 
-    private func stat(_ systemImage: String, _ value: Int, _ label: LocalizedStringKey) -> some View {
-        Label {
-            Text(value, format: .number).bold()
-        } icon: {
-            Image(systemName: systemImage).foregroundStyle(.tint)
+    /** 还没回来的数字显示 `-`，不显示 0。 */
+    private func stat(_ value: Int?, _ label: LocalizedStringKey) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 4) {
+            if let value { Text(value, format: .number).bold() } else { Text(verbatim: "-").bold() }
+            Text(label).font(.footnote).foregroundStyle(.secondary)
         }
-        .accessibilityLabel(Text(label))
-        .accessibilityValue(Text(value, format: .number))
+        .accessibilityElement(children: .combine)
     }
 
     /** `全名 | 生日 | 性别 | 城市 | 网站`，只显示填了的部分；网站可以点开。 */
@@ -183,9 +206,6 @@ struct ProfileOverviewView: View {
             NavigationLink(value: LoopRoute.profileEdit) {
                 Label("profile_edit_title", systemImage: "pencil")
             }
-            NavigationLink(value: LoopRoute.identities) {
-                Label("profile_overview_open_identities", systemImage: "person.text.rectangle")
-            }
             NavigationLink(value: LoopRoute.accountSecurity) {
                 Label("profile_overview_open_account_security", systemImage: "lock.shield")
             }
@@ -226,5 +246,20 @@ private struct ProfileHero: View {
                 withAnimation { page = (page + 1) % urls.count }
             }
         }
+    }
+}
+
+/** 资料页的喜欢的运动：本地选好，点完成才保存；下滑关掉保留原来的（Android `FavoriteSportsSheet`）。 */
+private struct FavoritesPickerSheet: View {
+    let onDone: ([FavoriteSport]) -> Void
+    @State private var picked: [FavoriteSport]
+
+    init(initial: [FavoriteSport], onDone: @escaping ([FavoriteSport]) -> Void) {
+        self.onDone = onDone
+        _picked = State(initialValue: initial)
+    }
+
+    var body: some View {
+        FavoriteSportPicker(selected: $picked) { onDone(picked) }
     }
 }

@@ -18,6 +18,8 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-async-algorithms.git", from: "1.0.4"),
         .package(url: "https://github.com/groue/Semaphore.git", from: "0.1.0"),
         .package(url: "https://github.com/iwill/generic-json-swift.git", from: "2.0.2"),
+        // 本地库（Android Room）：社交列表、好友请求、聊天的离线缓存。
+        .package(url: "https://github.com/groue/GRDB.swift.git", from: "7.4.0"),
     ],
     targets: [
         .target(
@@ -39,6 +41,7 @@ let package = Package(
                 .product(name: "AsyncAlgorithms", package: "swift-async-algorithms"),
                 "Semaphore",
                 .product(name: "GenericJSON", package: "generic-json-swift"),
+                .product(name: "GRDB", package: "GRDB.swift"),
             ]
         ),
         .testTarget(name: "PulsoLinkCoreTests", dependencies: ["PulsoLinkCore"]),

@@ -43,18 +43,15 @@ extension ShellDestination {
         case .calendar: .calendar
         case .search: .sports
         case .venueSearch: .place
-        case .social: .social
         case .create: .create
         case .settings: .settings
         case .billing: .billing
-        case .notifications: .notifications
         case .chatHub: .chat
         case .profile: .profile
         case .wallet: .wallet
         case .courses: .book
         case .coaching: .school
         case .tournaments: .trophy
-        case .courtBookings: .booking
         case .favorites: .favorite
         case .forum: .forum
         }

@@ -21,7 +21,9 @@ struct ActivityFilterSheet: View {
                     Text("shell_home_sort_earliest").tag(true)
                     Text("shell_home_sort_latest").tag(false)
                 }
-                Toggle("activity_filter_show_ended", isOn: $draft.showEnded)
+                if tab != .courtBookings {
+                    Toggle("activity_filter_show_ended", isOn: $draft.showEnded)
+                }
             }
             .navigationTitle("activity_filter_title")
             .navigationBarTitleDisplayMode(.inline)
