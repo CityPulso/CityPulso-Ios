@@ -77,10 +77,10 @@ extension ShellDestination {
         case .profile: "shell_dest_profile"
         case .wallet: "shell_dest_wallet"
         case .courses: "shell_dest_courses"
-        case .coaching: "shell_dest_coaching"
         case .tournaments: "shell_dest_tournaments"
         case .favorites: "shell_dest_favorites"
         case .forum: "shell_dest_forum"
+        case .placeRequests: "place_requests_title"
         }
     }
 }

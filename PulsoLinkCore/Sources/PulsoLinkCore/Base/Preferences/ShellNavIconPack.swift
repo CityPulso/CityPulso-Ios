@@ -50,10 +50,10 @@ extension ShellDestination {
         case .profile: .profile
         case .wallet: .wallet
         case .courses: .book
-        case .coaching: .school
         case .tournaments: .trophy
         case .favorites: .favorite
         case .forum: .forum
+        case .placeRequests: .place
         }
     }
 }

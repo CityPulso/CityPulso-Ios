@@ -23,7 +23,7 @@ struct ResolvedNavPreferenceTests {
     @Test func pagesThisAppLacksAreReplaced() {
         var wire = AndroidPreference()
         wire.slot2 = AndroidNavSlot(destination: .courses)
-        let near = Set(ShellDestination.allCases).subtracting([.courses, .coaching, .tournaments])
+        let near = Set(ShellDestination.allCases).subtracting([.courses, .tournaments])
 
         #expect(ResolvedAndroidPreference.resolve(wire, kind: .community, supported: near).slot2 == ResolvedAndroidNavSlot(.venueSearch, iconPack: .place))
     }

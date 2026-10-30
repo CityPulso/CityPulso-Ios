@@ -59,6 +59,12 @@ struct MyCoursesView: View {
             .overlay(alignment: .trailing) { if model.busyId == enrollment.id { ProgressView() } }
         }
         .navigationTitle("my_courses_title")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                NavigationLink(value: LoopRoute.myCoaching) { Image(systemName: "graduationcap") }
+                    .accessibilityLabel(Text("my_coaching_title"))
+            }
+        }
         .sheet(item: $canceling) { enrollment in
             // 按住确认（Android `holdConfirm`）。
             VStack(alignment: .leading, spacing: 16) {

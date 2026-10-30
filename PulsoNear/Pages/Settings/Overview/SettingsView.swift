@@ -51,9 +51,6 @@ struct SettingsView: View {
                 NavigationLink(value: NearRoute.accountSecurity) {
                     Label("account_security_title", systemImage: "lock.shield")
                 }
-                NavigationLink(value: NearRoute.placeRequests) {
-                    Label("place_requests_title", systemImage: "mappin.and.ellipse")
-                }
             }
 
             Section("settings_section_privacy") {

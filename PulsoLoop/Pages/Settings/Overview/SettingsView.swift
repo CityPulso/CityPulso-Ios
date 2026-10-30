@@ -51,9 +51,6 @@ struct SettingsView: View {
                 NavigationLink(value: LoopRoute.accountSecurity) {
                     Label("account_security_title", systemImage: "lock.shield")
                 }
-                NavigationLink(value: LoopRoute.placeRequests) {
-                    Label("place_requests_title", systemImage: "mappin.and.ellipse")
-                }
             }
 
             Section("settings_section_privacy") {

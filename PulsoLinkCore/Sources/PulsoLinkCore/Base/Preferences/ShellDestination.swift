@@ -21,20 +21,20 @@ public enum ShellDestination: String, Codable, CaseIterable, Sendable {
     case profile = "PROFILE"
     /** 钱包：会员卡 + 时长包，付款方式 / 收款账户入口。 */
     case wallet = "WALLET"
-    /** 我的课程报名。 */
+    /** 课程与私教：我的课程报名，右上角进我的私教（教练面板在私教页里）。 */
     case courses = "COURSES"
-    /** 我的私教（学员侧；教练另有教练面板入口）。 */
-    case coaching = "COACHING"
-    /** 我的赛事报名。 */
+    /** 赛事：公开赛事列表与搜索，右上角进我的赛事。 */
     case tournaments = "TOURNAMENTS"
     /** 收藏的球馆与建筑。 */
     case favorites = "FAVORITES"
     /** 论坛：帖子信息流、论坛搜索与我的论坛。 */
     case forum = "FORUM"
+    /** 我的地点：我标记的地点申请（原在设置里）。 */
+    case placeRequests = "PLACE_REQUESTS"
 
-    /** 活动页与球馆消费页（钱包 / 课程 / 私教 / 赛事）只属于 community 身份。 */
+    /** 活动页与球馆消费页（钱包 / 课程与私教 / 赛事）只属于 community 身份。 */
     private static let communityOnly: Set<ShellDestination> = [
-        .calendar, .search, .create, .wallet, .courses, .coaching, .tournaments,
+        .calendar, .search, .create, .wallet, .courses, .tournaments,
     ]
 
     /** 与 Android 一致：按名字大小写不敏感匹配（底栏偏好 JSON 跨端共用）。 */

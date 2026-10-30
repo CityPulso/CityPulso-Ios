@@ -11,7 +11,7 @@ struct PulsoNearApp: App {
                 apiBaseURL: PulsoAppInfo.apiBaseURL,
                 signupPlatform: .pulsonear,
                 appName: "YouNeary",
-                shellDestinations: Set(ShellDestination.allCases).subtracting([.courses, .coaching, .tournaments]),
+                shellDestinations: Set(ShellDestination.allCases).subtracting([.courses, .tournaments]),
                 debugHttpLogging: PulsoAppInfo.isDebug
             ),
             vault: KeychainSessionVault(service: "com.citypulso.pulsonear.session")

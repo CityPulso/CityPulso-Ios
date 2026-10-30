@@ -36,6 +36,8 @@ enum NearShellPages {
             ForumFeedView().postLinkCards()
         case .chatHub:
             ChatHubView()
+        case .placeRequests:
+            PlaceRequestsView()
         default:
             PulsoComingSoonView(destination)
         }

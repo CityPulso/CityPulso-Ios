@@ -89,6 +89,8 @@ enum LoopRoute: Hashable {
     case coach(profileId: String)
     /** 教练面板（第 12 组）。 */
     case coachPanel
+    /** 我的私教（课程页右上角进）。 */
+    case myCoaching
     /** 我的一张会员卡（第 9 组）。 */
     case myMembership(membershipId: String)
     /** 钱包，打开时停在 [tab]。 */
@@ -170,6 +172,7 @@ enum LoopRoute: Hashable {
         case let .course(courseId): CourseDetailView(courseId: courseId)
         case .myCourses: MyCoursesView()
         case let .coach(profileId): CoachDetailView(profileId: profileId)
+        case .myCoaching: MyCoachingView()
         case .coachPanel: CoachPanelView()
         case let .myMembership(membershipId): MyMembershipView(membershipId: membershipId)
         case let .wallet(tab): WalletView(tab: tab)
