@@ -36990,6 +36990,35 @@
         }
       }
     },
+    "login_no_community_profile": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This account doesn’t have a profile you can use here yet. Try again later."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce compte n’a pas encore de profil utilisable ici. Réessayez plus tard."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这个账号还没有可以使用的身份，请稍后再试"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這個帳戶還沒有可以使用的身份，請稍後再試"
+          }
+        }
+      }
+    },
     "login_password": {
       "extractionState": "manual",
       "localizations": {
@@ -37015,35 +37044,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "密碼"
-          }
-        }
-      }
-    },
-    "login_remember_me": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Remember me"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Se souvenir de moi"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "记住我"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "記住我"
           }
         }
       }

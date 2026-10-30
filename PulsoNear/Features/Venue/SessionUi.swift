@@ -85,3 +85,16 @@ protocol SessionVenueService: VenueBookingService {
     func availability(venueId: String, date: String) -> AsyncStream<QueryResponse<SessionDayUi>>
     func checkout(venueId: String, _ input: SessionCheckoutInput, idempotencyKey: String) async throws -> SpaceCheckoutResultUi
 }
+
+/** 选好的一场（Android `VenueSessionPick`）：主题 / 剧本、开始时间和人数。 */
+struct VenueSessionPick: Hashable, Sendable, Codable {
+    let optionId: String
+    let startsAt: String
+    let partySize: Int
+}
+
+/** [partySize] 个人一场的价格：底价加上超出最少人数的每人加价（WEB `escapeRoomSessionPriceCents`）。 */
+func sessionPriceCents(_ basePriceCents: Int, extraPlayerAmount: Double?, playersMin: Int, partySize: Int) -> Int {
+    let extraCents = extraPlayerAmount.map { Int(($0 * 100).rounded()) } ?? 0
+    return basePriceCents + max(0, partySize - playersMin) * extraCents
+}

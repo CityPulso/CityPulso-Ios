@@ -60,8 +60,8 @@ public struct AuthService: Sendable {
 
     /* ------------------------------ 账号 / 身份 ------------------------------ */
 
-    public func getCurrentFullAccountInformationWithProfile(kind: ProfileKind) async throws -> CurrentFullAccountInformation {
-        try await auth.getCurrentFullAccountInformationWithProfile(kind: kind)
+    public func getCurrentFullAccountInformationWithProfile(kind: ProfileKind, accessToken: String? = nil) async throws -> CurrentFullAccountInformation {
+        try await auth.getCurrentFullAccountInformationWithProfile(kind: kind, accessToken: accessToken)
     }
 
     public func patchProfile(kind: ProfileKind, _ body: PatchProfileRequest) async throws {

@@ -3,12 +3,12 @@ import PulsoLinkUI
 import SwiftUI
 
 /**
- * 场地 × 时段的可订表（Android `SpaceAvailabilityBoard`，WEB `*AvailabilityBoard`，所有球场类活动类型共用）：行是所有场地
- * 时段开始时间的并集，列是场地。
+ * 桌台 × 时段的可订表（Android `SpaceAvailabilityBoard`，WEB `*AvailabilityBoard`，按桌台订的类型共用）：行是所有桌台
+ * 时段开始时间的并集，列是桌台。
  *
  * - 点一格：只切换那一格（两次点之间不会自动补满）。
  * - 长按后往任意方向拖：手指经过的空格都加上。
- * 可以选多块场地、每块场地多段。
+ * 可以选多张桌台、每张桌台多段。
  */
 struct SpaceAvailabilityBoard: View {
     let day: SpaceDayUi
@@ -128,14 +128,13 @@ struct SpaceAvailabilityBoard: View {
         .frame(width: Self.cellWidth, height: Self.cellHeight)
     }
 
-    /** 课程 / 赛事 / 私教占的格子显示名字，订场的人知道那时在干什么。 */
+    /** 忙的格子说明原因（WEB `board.occupancy.*`）：已被预约、到店开台在用，或门店锁了。 */
     private func occupancyLabel(_ slot: SpaceSlotUi) -> String? {
-        if let title = slot.title, !title.trimmingCharacters(in: .whitespaces).isEmpty { return title }
         switch slot.occupancy {
-        case .course: return String(localized: "venue_board_occupancy_course")
-        case .tournament: return String(localized: "venue_board_occupancy_tournament")
-        case .coaching: return String(localized: "venue_board_occupancy_coaching")
-        default: return nil
+        case .booking: String(localized: "venue_board_legend_taken")
+        case .open: String(localized: "venue_board_slot_open")
+        case .manual: String(localized: "venue_board_slot_manual")
+        case nil: nil
         }
     }
 

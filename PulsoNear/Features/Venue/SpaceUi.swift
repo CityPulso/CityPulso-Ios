@@ -303,8 +303,8 @@ struct SpaceCheckoutResultUi: Sendable {
 }
 
 /**
- * 订场要付多少（Android `spaceCheckoutPricing`，WEB `CheckoutPanel`）：有效会员付标价的 `100 - discountPercent`%；
- * 时长包按标价整单抵掉（扣分钟，不扣钱），不和会员折扣叠加。整单一起打折，不是各行四舍五入后相加。
+ * 预约要付多少（Android `spaceCheckoutPricing`，WEB `CheckoutPanel`）：有效会员付标价的 `100 - discountPercent`%。
+ * 整单一起打折，不是各行四舍五入后相加。
  */
 struct SpaceCheckoutPricing: Sendable {
     let linePayCents: [Int]
@@ -312,26 +312,21 @@ struct SpaceCheckoutPricing: Sendable {
     let totalPayCents: Int
     /** 标价划掉，下面显示要付的。 */
     let struck: Bool
-    /** 打折用的会员卡；不是会员或用时长包付时 nil。 */
+    /** 打折用的会员卡；不是会员时 nil。 */
     let member: MyMembership?
-    let coveredByBundle: Bool
 
-    init(linePriceCents: [Int], membership: MyMembership?, payWithBundle: Bool = false, hasBundle: Bool = false) {
+    init(linePriceCents: [Int], membership: MyMembership?) {
         let active = membership?.status == .active ? membership : nil
-        let memberOff = payWithBundle ? 0 : (active?.discountPercent ?? 0).clamped(to: 0 ... 100)
-        let covered = payWithBundle && hasBundle
+        let memberOff = (active?.discountPercent ?? 0).clamped(to: 0 ... 100)
         func pay(_ cents: Int) -> Int {
-            if covered { return 0 }
-            if memberOff > 0 { return Int((Double(cents) * Double(100 - memberOff) / 100).rounded()) }
-            return cents
+            memberOff > 0 ? Int((Double(cents) * Double(100 - memberOff) / 100).rounded()) : cents
         }
         let total = linePriceCents.reduce(0, +)
         linePayCents = linePriceCents.map(pay)
         totalListCents = total
         totalPayCents = pay(total)
-        struck = covered || memberOff > 0
+        struck = memberOff > 0
         member = memberOff > 0 ? active : nil
-        coveredByBundle = covered
     }
 }
 

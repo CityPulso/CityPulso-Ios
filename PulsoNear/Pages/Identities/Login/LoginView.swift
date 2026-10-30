@@ -24,7 +24,6 @@ struct LoginView: View {
                 SecureField("login_password", text: $model.password)
                     .textContentType(.password)
                     .onSubmit { Task { await model.submit() } }
-                Toggle("login_remember_me", isOn: $model.rememberMe)
             } footer: {
                 if let errorText = model.errorText {
                     Text(errorText).foregroundStyle(.red)

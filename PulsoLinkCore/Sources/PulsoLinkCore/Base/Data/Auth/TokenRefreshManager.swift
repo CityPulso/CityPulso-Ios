@@ -11,7 +11,8 @@ public enum TokenRefreshSource: String, Sendable {
  * 1. 单飞：同一个 refresh token 只发一次 POST，并发调用方等同一个结果。
  * 2. rejected 门闩：硬失败过的 refresh token 在换票/清空前不再重试。
  * 3. 主动刷新：access token 总寿命剩 10% 时刷新；10% 缓冲 > 1h 则跳过，只靠 401 兜底。
- * 4. 硬失败（REFRESH_TOKEN_NOT_FOUND / INVALID_REFRESH_TOKEN / HTTP 404）→ [SessionTerminator]。
+ * 4. 硬失败（REFRESH_TOKEN_NOT_FOUND / INVALID_REFRESH_TOKEN / HTTP 404）→ [SessionTerminator]；但被拒的若已不是会话里的
+ *    refresh token（登录 / 选身份在服务端作废了旧票、会话已换新票），只是输掉竞态的旧刷新，不登出。
  */
 public actor TokenRefreshManager {
     public typealias RefreshCall = @Sendable (RefreshTokensRequest) async throws -> TokensResponse
@@ -98,6 +99,13 @@ public actor TokenRefreshManager {
         } catch {
             debugLog("Auth token refresh failed (\(source.rawValue)): \(error)")
             if Self.isHardRefreshFailure(error) {
+                sessionStore.markRejectedRefreshToken(refreshToken)
+                // 只有会话还拿着的那张票被拒才结束会话。登录 / 选身份会在服务端作废这台设备之前的 refresh token，
+                // 和它赛跑输掉的旧刷新不能把新会话登出。
+                guard sessionStore.state.value.refreshToken == refreshToken else {
+                    debugLog("Stale refresh token rejected after the session moved on (\(source.rawValue))")
+                    return true
+                }
                 clearScheduledRefresh()
                 await sessionTerminator.terminate(.refreshFailed)
             }

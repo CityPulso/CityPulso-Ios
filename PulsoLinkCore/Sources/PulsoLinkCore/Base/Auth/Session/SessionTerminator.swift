@@ -15,6 +15,8 @@ public enum LogoutReason: Sendable {
     case unauthorized
     /** 启动时发现本 App 用不了的会话（如非 community 身份）。 */
     case startupGate
+    /** 登录第一步之后失败了：清掉做了一半的会话，下次从头来。 */
+    case signInFailed
 }
 
 /**

@@ -3,7 +3,7 @@ import Foundation
 
 /**
  * protected 客户端的拦截器（对应 Android `AuthTokenInterceptor` + `AuthTokenAuthenticator`）：
- * - adapt：追加 `Authorization: Bearer <accessToken>`。
+ * - adapt：追加 `Authorization: Bearer <accessToken>`；请求自己带了 Authorization（登录时用刚选好的身份读档案）就不动。
  * - retry：401 → 单飞刷新 → 带新 token 重放；每个请求只重放一次，刷新失败或二次 401 → 登出（仅在已选 profile 的完整会话下）。
  * - 两步登录选 profile 前的 401 属预期，不清 session。
  */
@@ -28,7 +28,7 @@ public final class ProtectedRequestInterceptor: RequestInterceptor, @unchecked S
         completion: @escaping @Sendable (Result<URLRequest, Error>) -> Void
     ) {
         var request = urlRequest
-        if let token = sessionStore.state.value.accessToken, !token.isEmpty {
+        if request.headers.value(for: "Authorization") == nil, let token = sessionStore.state.value.accessToken, !token.isEmpty {
             request.headers.add(.authorization(bearerToken: token))
         }
         completion(.success(request))

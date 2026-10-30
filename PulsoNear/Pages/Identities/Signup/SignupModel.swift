@@ -96,7 +96,7 @@ final class SignupModel {
         do {
             let serverClientID = try await authService.googleClientId()
             guard let idToken = try await GoogleIdToken.request(serverClientID: serverClientID) else { return }
-            try await signIn.loginWithGoogle(idToken: idToken, rememberMe: true)
+            try await signIn.loginWithGoogle(idToken: idToken)
         } catch {
             errorText = signInErrorText(error, fallback: "google_sign_in_failed")
         }
@@ -109,7 +109,7 @@ final class SignupModel {
         defer { loading = false }
         do {
             guard let apple = try AppleIdToken.from(result) else { return }
-            try await signIn.loginWithApple(identityToken: apple.identityToken, displayName: apple.displayName, rememberMe: true)
+            try await signIn.loginWithApple(identityToken: apple.identityToken, displayName: apple.displayName)
         } catch {
             errorText = signInErrorText(error, fallback: "login_failed_retry")
         }

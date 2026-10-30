@@ -8,6 +8,9 @@ private let googleEmailTakenUnverified = "GOOGLE_EMAIL_TAKEN_UNVERIFIED"
  * Google 自己的结果有专门文案，其余按通用规则：后端文案 → 类别短句 → [fallback]。
  */
 func signInErrorText(_ error: any Error, fallback: String.LocalizationValue) -> String {
+    if error is MissingCommunityProfileError {
+        return String(localized: "login_no_community_profile")
+    }
     if error is GoogleIdTokenMissingError || error is GoogleSignInNotConfiguredError {
         return String(localized: "google_sign_in_failed")
     }

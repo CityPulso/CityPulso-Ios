@@ -105,7 +105,7 @@ extension OfferingAvailability {
 }
 
 extension SessionDifficulty {
-    var labelKey: LocalizedStringKey {
+    var labelResource: String.LocalizationValue {
         switch self {
         case .easy: "venue_session_difficulty_easy"
         case .normal: "venue_session_difficulty_normal"

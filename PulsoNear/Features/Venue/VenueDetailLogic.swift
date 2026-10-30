@@ -7,6 +7,8 @@ extension VenueDetail {
         activityTypeEntries.filter { $0.status == .published }.map(\.activityType)
     }
 
+    var displayName: String { building.name }
+
     /** 所有入口的桌台总数。 */
     var totalSpaceCount: Int { activityTypeEntries.reduce(0) { $0 + $1.spaceCount } }
 

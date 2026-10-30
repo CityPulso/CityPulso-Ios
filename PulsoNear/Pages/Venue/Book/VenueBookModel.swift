@@ -45,7 +45,7 @@ final class VenueBookModel {
 
     /** 门店已上线的活动类型；超过一个才显示切换。 */
     var activityTypes: [VenueActivityType] { venue.data?.publishedActivityTypes ?? [] }
-    /** 表头带上价格方案名和场地照片。 */
+    /** 表头带上价格方案名和桌台照片。 */
     var board: SpaceDayUi? { day.data?.withMeta(spaces: spaces, plans: ratePlans.sorted { $0.sortOrder < $1.sortOrder }, imageURL: imageURL) }
     var lines: [SpaceLineUi] { selection.lines(day.data) }
     var totalCents: Int { lines.reduce(0) { $0 + $1.priceCents } }
@@ -104,7 +104,7 @@ final class VenueBookModel {
         dayTask?.cancel()
     }
 
-    /** 当前活动类型的规则、场地和价格方案；规则回来后定日期范围。 */
+    /** 当前活动类型的规则、桌台和价格方案；规则回来后定日期范围。 */
     private func loadActivityType() {
         activityTypeTask?.cancel()
         entry = Loadable()
@@ -193,6 +193,6 @@ final class VenueBookModel {
     /** 去确认页要带的路由；还不能去时 nil。 */
     var confirmRoute: NearRoute? {
         guard canGoToConfirm, let dateKey else { return nil }
-        return .venueConfirm(venueId: venueId, activityType: activityType, date: dateKey, ranges: selection.confirmRanges)
+        return .venueConfirm(venueId: venueId, activityType: activityType, date: dateKey, target: .spaces(selection.confirmRanges))
     }
 }

@@ -64,7 +64,6 @@ struct CommunitySignInTests {
             deviceIdProvider: DeviceIdProvider(defaults: freshDefaults()),
             authEventBus: events,
             profileBootstrap: profileBootstrap,
-            profileStore: profiles,
             preferenceBootstrap: PreferenceBootstrap(profileStore: profiles, preferenceRepository: preferences, config: config),
             preferenceService: PreferenceService(
                 preferenceRepository: preferences,
@@ -72,6 +71,7 @@ struct CommunitySignInTests {
                 sessionStore: store,
                 config: config
             ),
+            sessionTerminator: SessionTerminator(sessionStore: store, authEventBus: events),
             config: config
         )
         return Harness(signIn: signIn, store: store, profiles: profiles, preferences: preferences)
@@ -97,7 +97,7 @@ struct CommunitySignInTests {
         }
         let h = harness()
 
-        try await h.signIn.loginWithEmail(email: "a@b.c", password: "secret12", rememberMe: true)
+        try await h.signIn.loginWithEmail(email: "a@b.c", password: "secret12")
 
         let session = h.store.state.value
         #expect(session.isCompleteSession)
@@ -114,8 +114,30 @@ struct CommunitySignInTests {
         }
         let h = harness()
         await #expect(throws: MissingCommunityProfileError.self) {
-            try await h.signIn.loginWithEmail(email: "a@b.c", password: "secret12", rememberMe: false)
+            try await h.signIn.loginWithEmail(email: "a@b.c", password: "secret12")
         }
+        // 做了一半的会话（账号 token、没有身份）被清掉，下次从头来。
+        #expect(!h.store.state.value.hasSelectedProfile)
+        #expect(!h.store.state.value.isAuthValid)
+        #expect(h.store.state.value.accessToken == nil)
+    }
+
+    @Test func profileLoadFailureLeavesNoHalfSession() async {
+        StubProtocol.serve(host) { request in
+            switch request.url?.path {
+            case "/api/auth/login/with-email":
+                return (200, #"{"data":{"account_id":"acc-1","access_token":"step1","refresh_token":"step1-r","profiles":[{"profile_id":"prof-1","kind":"community"}]}}"#)
+            case "/api/auth/me/select-profile":
+                return (200, #"{"data":{"account_id":"acc-1","profile_id":"prof-1","access_token":"full","refresh_token":"full-r"}}"#)
+            default:
+                return (500, "")
+            }
+        }
+        let h = harness()
+        await #expect(throws: (any Error).self) {
+            try await h.signIn.loginWithEmail(email: "a@b.c", password: "secret12")
+        }
+        #expect(!h.store.state.value.isAuthValid)
         #expect(!h.store.state.value.hasSelectedProfile)
     }
 }
@@ -126,7 +148,7 @@ private struct BearerOnly: RequestInterceptor {
 
     func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping (Result<URLRequest, any Error>) -> Void) {
         var request = urlRequest
-        if let token = store.state.value.accessToken {
+        if request.value(forHTTPHeaderField: "Authorization") == nil, let token = store.state.value.accessToken {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
         completion(.success(request))

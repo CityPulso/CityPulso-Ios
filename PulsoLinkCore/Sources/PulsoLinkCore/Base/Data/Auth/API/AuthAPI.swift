@@ -53,19 +53,19 @@ public struct AuthProtectedAPI: Sendable {
 
     /* ------------------------------ 账号 / 身份 ------------------------------ */
 
-    public func getFullAccountInformationWithCommunityProfile() async throws
+    public func getFullAccountInformationWithCommunityProfile(authorization: String? = nil) async throws
         -> DataResponse<FullAccountInformationWithCommunityProfile> {
-        try await client.request(.get, "auth/me/full-account-information-with-community-profile")
+        try await client.request(.get, "auth/me/full-account-information-with-community-profile", headers: authorization.map { ["Authorization": $0] } ?? [:])
     }
 
-    public func getFullAccountInformationWithOrganizationProfile() async throws
+    public func getFullAccountInformationWithOrganizationProfile(authorization: String? = nil) async throws
         -> DataResponse<FullAccountInformationWithOrganizationProfile> {
-        try await client.request(.get, "auth/me/full-account-information-with-organization-profile")
+        try await client.request(.get, "auth/me/full-account-information-with-organization-profile", headers: authorization.map { ["Authorization": $0] } ?? [:])
     }
 
-    public func getFullAccountInformationWithAuthorityProfile() async throws
+    public func getFullAccountInformationWithAuthorityProfile(authorization: String? = nil) async throws
         -> DataResponse<FullAccountInformationWithAuthorityProfile> {
-        try await client.request(.get, "auth/me/full-account-information-with-authority-profile")
+        try await client.request(.get, "auth/me/full-account-information-with-authority-profile", headers: authorization.map { ["Authorization": $0] } ?? [:])
     }
 
     public func patchProfile(kind: ProfileKind, _ body: PatchProfileRequest) async throws {

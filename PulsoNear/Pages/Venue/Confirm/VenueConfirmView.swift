@@ -3,8 +3,8 @@ import PulsoLinkUI
 import SwiftUI
 
 /**
- * 确认订场（Android `SpaceConfirmPage`，所有球场类活动类型共用）：场馆和活动类型、预订详情（日期、几段场地、合计）、
- * 联系信息、订场方式（含时长包）、退款政策、到场须知；底部按方式显示「去支付 / 用时长包订场 / 提交订场」。
+ * 确认预约（Android `SpaceConfirmPage`，所有门店类型共用）：门店和活动类型、预约详情（日期、几段桌台或一场主题 / 剧本、人数、合计）、
+ * 联系信息、付款方式、退款政策、到店须知；底部按方式显示「去支付 / 提交预约」。
  */
 struct VenueConfirmView: View {
     @State private var model: VenueConfirmModel
@@ -12,8 +12,8 @@ struct VenueConfirmView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(PulsoShellNavigator.self) private var shell: PulsoShellNavigator?
 
-    init(venueId: String, activityType: VenueActivityType, dateKey: String, ranges: [VenueConfirmRange]) {
-        _model = State(initialValue: VenueConfirmModel(venueId: venueId, activityType: activityType, dateKey: dateKey, ranges: ranges))
+    init(venueId: String, activityType: VenueActivityType, dateKey: String, target: VenueConfirmTarget) {
+        _model = State(initialValue: VenueConfirmModel(venueId: venueId, activityType: activityType, dateKey: dateKey, target: target))
     }
 
     var body: some View {
@@ -27,9 +27,9 @@ struct VenueConfirmView: View {
     private var content: some View {
         if let venue = model.venue.data {
             Form {
-                if model.day.isLoading, model.lines.isEmpty {
+                if model.dayLoading, model.lines.isEmpty {
                     ProgressView().frame(maxWidth: .infinity)
-                } else if let error = model.day.error, model.lines.isEmpty {
+                } else if let error = model.dayError, model.lines.isEmpty {
                     PulsoLoadErrorView(error) { model.refresh() }
                 } else if model.stale {
                     ContentUnavailableView {
@@ -44,9 +44,9 @@ struct VenueConfirmView: View {
                     detailsSection(venue)
                     contactSection
                     methodSection
-                    if let entry = model.entry.data {
+                    if let refund = model.refundPolicy {
                         Section("venue_confirm_refund_title") {
-                            SpaceRefundPolicySummary(policy: entry.refundPolicy, tiers: entry.refundTiers, note: entry.refundPolicyNote)
+                            SpaceRefundPolicySummary(policy: refund.policy, tiers: refund.tiers, note: refund.note)
                         }
                     }
                     if let instructions = venue.bookingInstructions, !instructions.trimmingCharacters(in: .whitespaces).isEmpty {
@@ -80,12 +80,12 @@ struct VenueConfirmView: View {
     private func venueSection(_ venue: VenueDetail) -> some View {
         Section("venue_confirm_venue_title") {
             HStack(spacing: 12) {
-                ActivityTypeCover(url: model.imageURL(venue.images.min { $0.sortOrder < $1.sortOrder }?.imageId), activityType: model.activityType.loopActivityType, iconSize: 28)
+                ActivityTypeCover(url: model.imageURL(venue.images.min { $0.sortOrder < $1.sortOrder }?.imageId), activityType: model.activityType.kind, iconSize: 28)
                     .frame(width: 64, height: 64)
                     .clipShape(.rect(cornerRadius: 12))
                 VStack(alignment: .leading, spacing: 4) {
                     Text(verbatim: venue.displayName).font(.headline)
-                    Label { Text(model.activityType.loopActivityType.labelKey) } icon: { Image(model.activityType.loopActivityType.iconAsset).resizable().scaledToFit().frame(width: 16, height: 16) }
+                    Label { Text(model.activityType.kind.labelKey) } icon: { Image(model.activityType.kind.iconAsset).resizable().scaledToFit().frame(width: 16, height: 16) }
                         .font(.subheadline)
                     if !venue.building.address.isEmpty {
                         Label { Text(verbatim: venue.building.address).lineLimit(2) } icon: { Image(systemName: "mappin.and.ellipse") }
@@ -116,6 +116,10 @@ struct VenueConfirmView: View {
                     }
                 }
             }
+            if let partySize = model.partySize {
+                Label { Text(verbatim: localizedFormat("activity_detail_participants_exact", partySize)) } icon: { Image(systemName: "person.3") }
+                    .font(.subheadline)
+            }
             if let member = pricing.member {
                 Label {
                     Text(verbatim: localizedFormat("venue_confirm_member_applied", member.levelName, bookingDiscountZhe(member.discountPercent), String(member.discountPercent)))
@@ -129,16 +133,7 @@ struct VenueConfirmView: View {
                 Spacer()
                 PriceStack(listCents: pricing.totalListCents, payCents: pricing.totalPayCents, struck: pricing.struck, currency: venue.currency, emphasized: true)
             }
-            if pricing.coveredByBundle, let bundle = model.selectedBundle {
-                Text(verbatim: localizedFormat(
-                    "venue_confirm_bundle_covers",
-                    formatBundleHours(model.totalMinutes, locale: locale),
-                    formatBundleHours(bundle.remainingMinutes - model.totalMinutes, locale: locale)
-                ))
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-            }
-            if let level = model.upsellLevel, model.memberSaveCents > 0, !pricing.coveredByBundle {
+            if let level = model.upsellLevel, model.memberSaveCents > 0 {
                 MemberSaveHint(level: level, amount: formatMoney(Double(model.memberSaveCents) / 100, currency: venue.currency, locale: locale)) {
                     shell?.push(NearRoute.venue(venueId: model.venueId, sheet: .membership))
                 }
@@ -179,40 +174,13 @@ struct VenueConfirmView: View {
             if model.method == .platform {
                 Text("venue_confirm_method_platform_direct").font(.caption).foregroundStyle(.secondary)
             }
-            if model.method == .bundle {
-                bundlePicker
-            }
         }
-    }
-
-    /** 用时长包付：选哪个包（余额不够的置灰）；按场地原价扣时长，不叠加会员折扣。 */
-    @ViewBuilder
-    private var bundlePicker: some View {
-        Text("venue_confirm_bundle_pick").font(.subheadline.weight(.semibold))
-        ForEach(model.usableBundles, id: \.id) { bundle in
-            let enabled = bundle.canPayBooking(model.activityType, minutes: model.totalMinutes)
-            let left = formatBundleHours(bundle.remainingMinutes, locale: locale)
-            Button { model.selectBundle(bundle.id) } label: {
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(verbatim: bundle.name).font(.subheadline).foregroundStyle(Color.primary)
-                        Text(verbatim: localizedFormat(enabled ? "venue_confirm_bundle_left" : "venue_confirm_bundle_short", left))
-                            .font(.caption)
-                            .foregroundStyle(enabled ? Color.secondary : Color.red)
-                    }
-                    Spacer()
-                    if model.bundleId == bundle.id { Image(systemName: "checkmark").foregroundStyle(Color.accentColor) }
-                }
-            }
-            .disabled(!enabled)
-        }
-        Text("venue_confirm_bundle_regular_rate").font(.caption).foregroundStyle(.secondary)
     }
 
     /** 底部：提示，然后按方式的提交按钮（和 WEB 一样）。 */
     private func submitBar(_ venue: VenueDetail) -> some View {
         VStack(spacing: 8) {
-            if model.entry.data != nil, !model.isPublished {
+            if model.entryLoaded, !model.isPublished {
                 Text("venue_confirm_checkout_unpublished").font(.footnote).foregroundStyle(.secondary)
             }
             if model.signedIn, !model.isPulser {
@@ -231,8 +199,6 @@ struct VenueConfirmView: View {
                             switch model.method {
                             case .platform:
                                 Text(verbatim: localizedFormat("venue_confirm_checkout_pay", formatMoney(Double(model.pricing.totalPayCents) / 100, currency: venue.currency, locale: locale)))
-                            case .bundle:
-                                Text(verbatim: localizedFormat("venue_confirm_checkout_use_bundle", formatBundleHours(model.totalMinutes, locale: locale)))
                             default:
                                 Text("venue_confirm_checkout_request")
                             }

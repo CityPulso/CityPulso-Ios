@@ -87,9 +87,9 @@ extension Container {
                 deviceIdProvider: self.deviceIdProvider(),
                 authEventBus: self.authEventBus(),
                 profileBootstrap: self.profileBootstrap(),
-                profileStore: self.profileStore(),
                 preferenceBootstrap: self.preferenceBootstrap(),
                 preferenceService: self.preferenceService(),
+                sessionTerminator: self.sessionTerminator(),
                 config: self.pulsoCoreConfig()
             )
         }.singleton

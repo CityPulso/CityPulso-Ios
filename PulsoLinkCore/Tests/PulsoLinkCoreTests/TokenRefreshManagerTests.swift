@@ -55,6 +55,20 @@ struct TokenRefreshManagerTests {
         #expect(store.state.value == .loggedOut)
     }
 
+    @Test func staleRejectionKeepsNewerSession() async throws {
+        let store = AuthSessionStore(persistence: AuthSessionPersistence(vault: MemoryVault()))
+        store.state.set(completeSession())
+        let manager = makeManager(store: store) { _ in
+            // 刷新在路上时登录 / 选身份换了新票，服务端随即作废了旧票。
+            store.setTokens(TokensResponse(accessToken: "access-new", refreshToken: "refresh-new"))
+            throw APIError(status: 401, errCode: ErrorCodes.invalidRefreshToken)
+        }
+
+        #expect(try await manager.refresh(.unauthorized))
+        #expect(store.state.value.isCompleteSession)
+        #expect(store.state.value.refreshToken == "refresh-new")
+    }
+
     @Test func networkFailureKeepsSession() async {
         let store = AuthSessionStore(persistence: AuthSessionPersistence(vault: MemoryVault()))
         store.state.set(completeSession())

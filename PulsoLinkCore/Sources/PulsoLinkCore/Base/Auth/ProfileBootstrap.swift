@@ -61,6 +61,17 @@ public final class ProfileBootstrap: @unchecked Sendable {
         lock.withLock { watchers = tasks }
     }
 
+    /**
+     * 登录：用刚选好的身份读到的档案先放进 [ProfileStore]，再把身份写进会话，App 一打开就是它而不是加载中；
+     * 随后的会话变化不会再拉一遍。
+     */
+    public func adopt(_ info: CurrentFullAccountInformation, profileId: String, kind: ProfileKind) async {
+        await withLoadLock {
+            self.profileStore.set(info)
+            self.setLoadedKey(Key(profileId: profileId, kind: kind))
+        }
+    }
+
     /** 冷启动 / 开屏：等到当前会话档案写入 [ProfileStore]（已加载则不重复打网）。 */
     public func ensureLoaded() async {
         guard let key = Self.key(for: sessionStore.state.value) else { return }

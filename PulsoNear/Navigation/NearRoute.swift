@@ -43,8 +43,10 @@ enum NearRoute: Hashable {
     case resubmitPlace(requestId: String)
     /** 我标记的地点。 */
     case placeRequests
-    /** 在门店订某种业态（门店那组移植前是占位页）。 */
+    /** 在门店预约某种活动类型；页内还能切到别的类型。 */
     case venueBook(venueId: String, activityType: VenueActivityType)
+    /** 确认预约：几段桌台或一场主题 / 剧本。 */
+    case venueConfirm(venueId: String, activityType: VenueActivityType, date: String, target: VenueConfirmTarget)
     /** 收款账户（Stripe Connect）。 */
     case paymentAccounts
     /** 付款方式（保存的卡）。 */
@@ -79,7 +81,8 @@ enum NearRoute: Hashable {
         case let .spaceBooking(activityType, bookingId): SpaceBookingView(activityType: activityType, bookingId: bookingId)
         case let .building(buildingId): BuildingDetailView(buildingId: buildingId)
         case let .venue(venueId, sheet): VenueDetailView(venueId: venueId, sheet: sheet)
-        case .venueBook: PulsoComingSoonView(title: "shell_dest_venue_search", systemImage: "building.2")
+        case let .venueBook(venueId, activityType): VenueBookPage(venueId: venueId, activityType: activityType)
+        case let .venueConfirm(venueId, activityType, date, target): VenueConfirmView(venueId: venueId, activityType: activityType, dateKey: date, target: target)
         case .myMembership: PulsoComingSoonView(title: "shell_dest_wallet", systemImage: "person.text.rectangle")
         case let .markPlace(latitude, longitude): MarkPlaceView(latitude: latitude, longitude: longitude)
         case let .resubmitPlace(requestId): MarkPlaceView(requestId: requestId)

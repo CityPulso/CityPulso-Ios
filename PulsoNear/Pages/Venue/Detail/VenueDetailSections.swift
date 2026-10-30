@@ -232,7 +232,7 @@ struct VenueActivityTypesSection: View {
                 ForEach(options) { option in
                     CatalogRow(
                         name: option.name,
-                        badge: Text(option.difficulty.labelKey),
+                        badge: Text(String(localized: option.difficulty.labelResource)),
                         chips: (activityType == .scriptMurder ? [option.subtitle].compactMap { $0 }.filter { !$0.isEmpty } : []) + [
                             localizedFormat("venue_session_minutes", option.durationMinutes),
                             participantsLabel(minParticipants: option.playersMin, capacity: option.playersMax),

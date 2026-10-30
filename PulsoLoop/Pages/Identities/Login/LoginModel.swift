@@ -13,7 +13,6 @@ import SwiftUI
 final class LoginModel {
     var email = "" { didSet { errorText = nil } }
     var password = "" { didSet { errorText = nil } }
-    var rememberMe = false
     private(set) var loading = false
     /** 显示在密码框下面。 */
     private(set) var errorText: String?
@@ -30,8 +29,7 @@ final class LoginModel {
         await run(fallback: "login_failed_retry") {
             try await self.signIn.loginWithEmail(
                 email: self.email.trimmingCharacters(in: .whitespaces),
-                password: self.password,
-                rememberMe: self.rememberMe
+                password: self.password
             )
         }
     }
@@ -40,7 +38,7 @@ final class LoginModel {
         await run(fallback: "google_sign_in_failed") {
             let serverClientID = try await self.authService.googleClientId()
             guard let idToken = try await GoogleIdToken.request(serverClientID: serverClientID) else { return }
-            try await self.signIn.loginWithGoogle(idToken: idToken, rememberMe: self.rememberMe)
+            try await self.signIn.loginWithGoogle(idToken: idToken)
         }
     }
 
@@ -49,8 +47,7 @@ final class LoginModel {
             guard let apple = try AppleIdToken.from(result) else { return }
             try await self.signIn.loginWithApple(
                 identityToken: apple.identityToken,
-                displayName: apple.displayName,
-                rememberMe: self.rememberMe
+                displayName: apple.displayName
             )
         }
     }

@@ -53,16 +53,18 @@ public struct AuthRepository: Sendable {
 
     /* ------------------------------ 账号 / 身份 ------------------------------ */
 
-    public func getCurrentFullAccountInformationWithProfile(kind: ProfileKind) async throws -> CurrentFullAccountInformation {
-        switch kind {
+    /** [accessToken]：刚选好的身份，token 还没写进会话时用它来读。 */
+    public func getCurrentFullAccountInformationWithProfile(kind: ProfileKind, accessToken: String? = nil) async throws -> CurrentFullAccountInformation {
+        let authorization = accessToken.map { "Bearer \($0)" }
+        return switch kind {
         case .community:
-            .community(try await protectedAPI.getFullAccountInformationWithCommunityProfile()
+            .community(try await protectedAPI.getFullAccountInformationWithCommunityProfile(authorization: authorization)
                 .dataOrThrow("GetCurrentFullAccountInformationWithProfile"))
         case .organization:
-            .organization(try await protectedAPI.getFullAccountInformationWithOrganizationProfile()
+            .organization(try await protectedAPI.getFullAccountInformationWithOrganizationProfile(authorization: authorization)
                 .dataOrThrow("GetCurrentFullAccountInformationWithProfile"))
         case .authority:
-            .authority(try await protectedAPI.getFullAccountInformationWithAuthorityProfile()
+            .authority(try await protectedAPI.getFullAccountInformationWithAuthorityProfile(authorization: authorization)
                 .dataOrThrow("GetCurrentFullAccountInformationWithProfile"))
         }
     }
