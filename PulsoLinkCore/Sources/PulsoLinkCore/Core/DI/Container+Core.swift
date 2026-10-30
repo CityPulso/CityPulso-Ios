@@ -266,6 +266,18 @@ extension Container {
         }.singleton
     }
 
+    public var chatLocalRepository: Factory<ChatLocalRepository> {
+        self { ChatLocalRepository(database: self.pulsoDatabase(), sessionStore: self.authSessionStore()) }.singleton
+    }
+
+    public var chatWallpaperStore: Factory<ChatWallpaperStore> {
+        self {
+            let store = ChatWallpaperStore()
+            self.sessionTerminator().register(store)
+            return store
+        }.singleton
+    }
+
     public var communicationService: Factory<CommunicationService> {
         self {
             CommunicationService(

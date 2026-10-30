@@ -36,6 +36,7 @@ public final class PulsoDatabase: Sendable {
     private static let tables = [
         RemoteKeyRecord.databaseTableName, SocialConnectionRecord.databaseTableName, FriendRequestRecord.databaseTableName,
         ConversationRecord.databaseTableName, NotificationRecord.databaseTableName, ProfileCard.databaseTableName,
+        ChatMessageRecord.databaseTableName,
     ]
 
     private static var migrator: DatabaseMigrator {
@@ -90,6 +91,18 @@ public final class PulsoDatabase: Sendable {
                 t.column("avatarImageId", .text)
                 t.column("fetchedAt", .double).notNull()
             }
+            try db.create(table: ChatMessageRecord.databaseTableName) { t in
+                t.column("messageId", .text).primaryKey()
+                t.column("ownerProfileId", .text).notNull()
+                t.column("conversationId", .text).notNull()
+                t.column("clientMessageId", .text)
+                t.column("createdAtMillis", .double).notNull()
+                t.column("deletedAt", .text)
+                t.column("status", .text).notNull()
+                t.column("payloadJson", .text).notNull()
+            }
+            try db.create(index: "chat_messages_order", on: ChatMessageRecord.databaseTableName, columns: ["ownerProfileId", "conversationId", "createdAtMillis"])
+            try db.create(index: "chat_messages_client", on: ChatMessageRecord.databaseTableName, columns: ["clientMessageId"])
             try db.create(index: "notifications_order", on: NotificationRecord.databaseTableName, columns: ["ownerProfileId", "position"])
         }
         return migrator

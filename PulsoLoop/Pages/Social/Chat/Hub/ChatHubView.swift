@@ -39,7 +39,7 @@ struct ChatHubView: View {
                     .listRowBackground(Color.clear)
                 }
                 ForEach(list) { row in
-                    NavigationLink(value: LoopRoute.conversation(conversationId: row.conversationId)) {
+                    NavigationLink(value: LoopRoute.conversation(conversationId: row.conversationId, isGroup: row.isGroup)) {
                         ConversationRowView(row: row)
                     }
                 }

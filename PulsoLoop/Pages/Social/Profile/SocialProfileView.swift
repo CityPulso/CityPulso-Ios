@@ -156,7 +156,7 @@ struct SocialProfileView: View {
             if model.canMessage {
                 Button {
                     Task {
-                        if let conversationId = await model.openChat() { shell?.push(LoopRoute.conversation(conversationId: conversationId)) }
+                        if let conversationId = await model.openChat() { shell?.push(LoopRoute.conversation(conversationId: conversationId, isGroup: false)) }
                     }
                 } label: {
                     Image(systemName: "bubble.left")

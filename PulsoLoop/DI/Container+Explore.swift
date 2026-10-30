@@ -170,3 +170,10 @@ extension Container {
         }.singleton
     }
 }
+
+extension Container {
+    /** 选择页（位置 / 活动 / 收藏）把要分享的内容交给聊天室。 */
+    var chatShareDraftStore: Factory<ChatShareDraftStore> {
+        self { ChatShareDraftStore() }.singleton
+    }
+}

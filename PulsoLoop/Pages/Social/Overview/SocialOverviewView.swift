@@ -217,7 +217,7 @@ struct SocialOverviewView: View {
     private func openChat(_ row: SocialConnectionRowUi) {
         Task {
             if let conversationId = await model.openChat(row) {
-                shell?.push(LoopRoute.conversation(conversationId: conversationId))
+                shell?.push(LoopRoute.conversation(conversationId: conversationId, isGroup: false))
             }
         }
     }

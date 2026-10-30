@@ -38621,25 +38621,25 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "My courses"
+            "value": "Courses & coaching"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mes cours"
+            "value": "Cours et coaching"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "我的课程"
+            "value": "课程与私教"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "我的課程"
+            "value": "課程與私教"
           }
         }
       }
@@ -54449,60 +54449,31 @@
         }
       }
     },
-    "shell_dest_coaching": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "My coaching"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mon coaching"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "我的私教"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "我的私教"
-          }
-        }
-      }
-    },
     "shell_dest_courses": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "My courses"
+            "value": "Courses & coaching"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mes cours"
+            "value": "Cours et coaching"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "我的课程"
+            "value": "课程与私教"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "我的課程"
+            "value": "課程與私教"
           }
         }
       }

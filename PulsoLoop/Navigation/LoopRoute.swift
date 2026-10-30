@@ -48,7 +48,16 @@ enum LoopRoute: Hashable {
     /** 通知收件箱（消息页的铃铛）。 */
     case notifications
     /** 聊天室。 */
-    case conversation(conversationId: String)
+    case conversation(conversationId: String, isGroup: Bool)
+    case chatSettings(conversationId: String, isGroup: Bool)
+    /** 聊天里选位置发出去。 */
+    case chatLocationPick(conversationId: String)
+    /** 聊天里点开的位置。 */
+    case chatLocationView(latitude: Double, longitude: Double, label: String?, address: String?)
+    /** 分享我发起的 / 参加的活动。 */
+    case chatEventPicker(conversationId: String, hosted: Bool)
+    /** 分享收藏（建筑 / 球馆 / 帖子 / 论坛）。 */
+    case chatFavoritePicker(conversationId: String)
     /** 标记地图上缺的地点；从地图长按进来时预填那个位置。 */
     case markPlace(latitude: Double?, longitude: Double?)
     /** 把被拒的地点改了重新提交。 */
@@ -118,7 +127,12 @@ enum LoopRoute: Hashable {
         case .addFriend: AddFriendView()
         case .blocked: BlockedListView()
         case .notifications: NotificationsView()
-        case .conversation: PulsoComingSoonView(title: "shell_dest_chat_hub", systemImage: "bubble.left.and.bubble.right")
+        case let .conversation(conversationId, isGroup): ChatConversationView(conversationId: conversationId, isGroup: isGroup)
+        case .chatSettings: PulsoComingSoonView(title: "chat_settings_title", systemImage: "gearshape")
+        case let .chatLocationPick(conversationId): ChatLocationPickView(conversationId: conversationId)
+        case let .chatLocationView(latitude, longitude, label, address): ChatLocationView(latitude: latitude, longitude: longitude, label: label, address: address)
+        case .chatEventPicker: PulsoComingSoonView(title: "shell_chat_plus_hosted_events", systemImage: "calendar")
+        case .chatFavoritePicker: PulsoComingSoonView(title: "shell_chat_plus_favorites", systemImage: "heart")
         case let .socialProfile(profileId): SocialProfileView(profileId: profileId)
         case let .markPlace(latitude, longitude): MarkPlaceView(latitude: latitude, longitude: longitude)
         case let .resubmitPlace(requestId): MarkPlaceView(requestId: requestId)
