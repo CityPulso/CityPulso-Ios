@@ -195,6 +195,13 @@ struct DiscussionService: Sendable {
         return .cursor(invalidates: invalidates) { after, limit in try await repository.comments(postId, after: after, limit: limit, opOnly: opOnly) }
     }
 
+    /** 打开一串回复时每页读几条。 */
+    static let threadPageSize = 20
+
+    func threadReplies(_ postId: String, threadCommentId: String, after: String) async throws -> ListWithNextCursor<PostComment> {
+        try await repository.threadReplies(postId, threadCommentId: threadCommentId, after: after, limit: Self.threadPageSize)
+    }
+
     func createComment(_ postId: String, contentHtml: String, replyToCommentId: String?) async throws -> String {
         try await mutate { try await repository.createComment(postId, contentHtml: contentHtml, replyToCommentId: replyToCommentId) }
     }

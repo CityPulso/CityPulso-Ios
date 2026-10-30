@@ -448,11 +448,13 @@ struct CommentRowView: View {
     var onReport: (() -> Void)?
     var onDelete: (() -> Void)?
     var onOpenAuthor: (() -> Void)?
+    /** 显示它回复的那条；回复顶层评论的不用。 */
+    var showQuote = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             AuthorLine(author: comment.author, at: comment.createdAt, avatarURL: avatarURL, isOp: comment.isOp, onOpen: onOpenAuthor)
-            if let reply = comment.replyTo {
+            if showQuote, let reply = comment.replyTo {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(verbatim: reply.available ? localizedFormat("discussion_reply_to", reply.author.displayName ?? "") : String(localized: "discussion_reply_unavailable"))
                         .font(.caption2).foregroundStyle(.secondary)

@@ -26,10 +26,16 @@ final class PostDetailModel {
     private(set) var comments: PagedList<PostComment, String>
     private(set) var commentsGeneration = 0
     let linkCards = LinkCards()
+    /** 打开的回复串，按顶层评论 id（没打开前收着）。 */
+    private(set) var threads: [String: CommentThreadState] = [:]
+    /** 我是否关注了作者；还不知道或者不提供（我自己的帖子、作者不是社区身份）时 nil。 */
+    private(set) var followingAuthor: Bool?
+    private(set) var followBusy = false
 
     @ObservationIgnored @Injected(\.discussionService) private var discussion
     @ObservationIgnored @Injected(\.authSessionStore) private var sessionStore
     @ObservationIgnored @Injected(\.pulsoCoreConfig) private var config
+    @ObservationIgnored @Injected(\.socialService) private var social
 
     init(postId: String) {
         self.postId = postId
@@ -50,7 +56,10 @@ final class PostDetailModel {
     func load() async {
         post.isLoading = true
         do {
-            post = try await Loadable(data: discussion.post(postId), isLoading: false)
+            let detail = try await discussion.post(postId)
+            post = Loadable(data: detail, isLoading: false)
+            for threadId in threads.keys { loadThread(threadId) }
+            await loadFollow(detail)
         } catch {
             post = Loadable(data: post.data, isLoading: false, error: UiError(error))
         }
@@ -89,24 +98,85 @@ final class PostDetailModel {
         }
     }
 
+    /** 问一下我是否关注了别人帖子的社区作者；只有这时才显示关注按钮。 */
+    private func loadFollow(_ detail: PostDetail) async {
+        let session = sessionStore.state.value
+        guard !detail.isAuthor, detail.author.profileScope == .community, session.isAuthValid else { return }
+        let target = SocialTargetProfile(targetProfileId: detail.author.profileId, targetProfileScope: .community)
+        if let relations = try? await social.getRelations(RelationStatusKey(accountId: session.currentAccountId, profileId: session.currentProfileId, targets: [target])) {
+            followingAuthor = relations.items.first?.isFollowing ?? false
+        }
+    }
+
+    func toggleFollowAuthor() async {
+        guard let detail = post.data, let following = followingAuthor, !followBusy else { return }
+        followBusy = true
+        defer { followBusy = false }
+        do {
+            if following { try await social.unfollow(detail.author.profileId) } else { try await social.follow(detail.author.profileId) }
+            followingAuthor = !following
+        } catch {
+            PulsoMessageCenter.shared.error(error, fallback: "discussion_follow_author_failed")
+        }
+    }
+
+    /** 打开或收起一条顶层评论下面的回复。 */
+    func toggleThread(_ threadId: String) {
+        if threads[threadId] != nil { threads[threadId] = nil } else { loadThread(threadId) }
+    }
+
+    func moreReplies(_ threadId: String) {
+        guard let thread = threads[threadId], let cursor = thread.nextCursor, !thread.loading else { return }
+        loadThread(threadId, after: cursor)
+    }
+
+    private func loadThread(_ threadId: String, after: String = "") {
+        threads[threadId] = (threads[threadId] ?? CommentThreadState()).with(loading: true)
+        let discussion = discussion
+        let postId = postId
+        Task {
+            do {
+                let page = try await discussion.threadReplies(postId, threadCommentId: threadId, after: after)
+                // 加载中被收起：保持收起。
+                guard let current = threads[threadId] else { return }
+                let replies = after.isEmpty ? page.items : current.replies + page.items
+                threads[threadId] = CommentThreadState(replies: replies, nextCursor: page.nextCursor.flatMap { $0.isEmpty ? nil : $0 }, loading: false)
+            } catch {
+                threads[threadId] = threads[threadId]?.with(loading: false)
+                PulsoMessageCenter.shared.error(error, fallback: "discussion_action_failed")
+            }
+        }
+    }
+
+    /** 评论的赞 / 收藏同时改列表和打开的回复串里的那一条。 */
+    private func updateComment(_ id: String, _ change: (inout PostComment) -> Void) {
+        comments.update(where: { $0.id == id }, change)
+        for (threadId, thread) in threads {
+            guard let index = thread.replies.firstIndex(where: { $0.id == id }) else { continue }
+            var replies = thread.replies
+            change(&replies[index])
+            threads[threadId] = CommentThreadState(replies: replies, nextCursor: thread.nextCursor, loading: thread.loading)
+        }
+    }
+
     func toggleCommentLike(_ comment: PostComment) async {
         let liked = !comment.likedByMe
-        comments.update(where: { $0.id == comment.id }) { $0.likedByMe = liked; $0.likeCount = max(0, $0.likeCount + (liked ? 1 : -1)) }
+        updateComment(comment.id) { $0.likedByMe = liked; $0.likeCount = max(0, $0.likeCount + (liked ? 1 : -1)) }
         do {
             try await discussion.setCommentLiked(comment.id, liked)
         } catch {
-            comments.update(where: { $0.id == comment.id }) { $0.likedByMe = !liked; $0.likeCount = max(0, $0.likeCount + (liked ? -1 : 1)) }
+            updateComment(comment.id) { $0.likedByMe = !liked; $0.likeCount = max(0, $0.likeCount + (liked ? -1 : 1)) }
             PulsoMessageCenter.shared.error(error, fallback: "discussion_action_failed")
         }
     }
 
     func toggleCommentBookmark(_ comment: PostComment) async {
         let bookmarked = !comment.bookmarkedByMe
-        comments.update(where: { $0.id == comment.id }) { $0.bookmarkedByMe = bookmarked; $0.bookmarkCount = max(0, $0.bookmarkCount + (bookmarked ? 1 : -1)) }
+        updateComment(comment.id) { $0.bookmarkedByMe = bookmarked; $0.bookmarkCount = max(0, $0.bookmarkCount + (bookmarked ? 1 : -1)) }
         do {
             try await discussion.setCommentBookmarked(comment.id, bookmarked)
         } catch {
-            comments.update(where: { $0.id == comment.id }) { $0.bookmarkedByMe = !bookmarked; $0.bookmarkCount = max(0, $0.bookmarkCount + (bookmarked ? -1 : 1)) }
+            updateComment(comment.id) { $0.bookmarkedByMe = !bookmarked; $0.bookmarkCount = max(0, $0.bookmarkCount + (bookmarked ? -1 : 1)) }
             PulsoMessageCenter.shared.error(error, fallback: "discussion_action_failed")
         }
     }
@@ -119,6 +189,11 @@ final class PostDetailModel {
         defer { posting = false }
         do {
             _ = try await discussion.createComment(postId, contentHtml: html, replyToCommentId: replyTo?.id)
+            // 回复落在这一串里：打开它，写的人能看到。
+            if let reply = replyTo {
+                let threadId = reply.threadCommentId ?? reply.id
+                if threads[threadId] == nil { loadThread(threadId) }
+            }
             replyTo = nil
             return true
         } catch {
@@ -214,8 +289,19 @@ struct PostDetailView: View {
     private func content(_ data: PostDetail) -> some View {
         List {
             Section {
-                AuthorLine(author: data.author, at: data.firstPublishedAt ?? data.createdAt, avatarURL: model.imageURL(data.author.avatarImageId)) {
-                    shell?.push(NearRoute.socialProfile(profileId: data.author.profileId))
+                HStack(spacing: 12) {
+                    AuthorLine(author: data.author, at: data.firstPublishedAt ?? data.createdAt, avatarURL: model.imageURL(data.author.avatarImageId)) {
+                        shell?.push(NearRoute.socialProfile(profileId: data.author.profileId))
+                    }
+                    if let following = model.followingAuthor {
+                        Button { Task { await model.toggleFollowAuthor() } } label: {
+                            if model.followBusy { ProgressView() } else { Text((following ? "discussion_following_author" : "discussion_follow_author") as LocalizedStringKey) }
+                        }
+                        .buttonStyle(.borderless)
+                        .controlSize(.small)
+                        .tint(following ? Color.secondary : Color.accentColor)
+                        .disabled(model.followBusy)
+                    }
                 }
                 HStack(alignment: .top) {
                     Text(verbatim: data.title).font(.title2.bold())
@@ -226,16 +312,9 @@ struct PostDetailView: View {
                     Text(verbatim: localizedFormat("discussion_edited_at", DateTimeFormatters.monthDayTime(edited) ?? "")).font(.caption2).foregroundStyle(.secondary)
                 }
                 sections(data.sections)
-                let gallery = unplacedImages(data)
-                if !gallery.isEmpty {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 6) {
-                            ForEach(gallery, id: \.id) { image in
-                                PulsoRemoteImage(url: model.imageURL(image.imageId)).frame(width: 120, height: 120).clipShape(.rect(cornerRadius: 8))
-                            }
-                        }
-                    }
-                }
+                // 正文里没放的照片，按张数排：一张宽图、两张并排、一张高的配两张、2×2 带「+N」。
+                let gallery = unplacedImages(data).map(\.imageId)
+                PostPhotos(layout: detailPhotoLayout(postId: data.id, count: gallery.count), previewIds: Array(gallery.prefix(4)), imageCount: gallery.count, imageURL: model.imageURL)
                 if !data.topics.isEmpty {
                     TopicChipRow(topics: data.topics) { shell?.push(NearRoute.forum(forumId: $0.forumId)) }
                 }
@@ -291,25 +370,41 @@ struct PostDetailView: View {
         }
     }
 
-    /** 正文段落（文字、整宽照片、链接卡片），段与段之间空一行。 */
+    /**
+     * 正文按写的顺序：文字、段落之间的照片、链接——一个活动或场馆是大卡片，一篇帖子或一栋建筑是一行，
+     * 连着的几个链接合成一组「相关内容」。
+     */
     @ViewBuilder
     private func sections(_ sections: [PostSection]) -> some View {
-        ForEach(Array(sections.enumerated()), id: \.offset) { _, section in
-            switch section {
-            case let .textSection(text):
-                RichTextBody(html: text.contentHtml)
-            case let .imageSection(image):
-                PulsoRemoteImage(url: model.imageURL(image.imageId), contentMode: .fit).frame(maxWidth: .infinity).clipShape(.rect(cornerRadius: 8))
-            case let .linkSection(link):
-                Button {
-                    if let route = PostLinkLoader.route(link.link) { shell?.push(route) }
-                } label: {
-                    PostLinkCard(link: link.link, state: model.linkCards.states[link.link.key] ?? .loading, imageURL: model.imageURL)
+        ForEach(Array(bodyBlocks(sections).enumerated()), id: \.offset) { _, block in
+            switch block {
+            case let .links(links) where links.count > 1:
+                PostLinkGroup(links: links, cards: model.linkCards, imageURL: model.imageURL, onOpen: { open($0) }, title: "discussion_card_related", limit: links.count)
+            case let .links(links):
+                if let link = links.first {
+                    LinkTargetCard(
+                        link: link,
+                        state: model.linkCards.states[link.key] ?? .loading,
+                        variant: link.type == .activity || link.type == .venue ? .hero : .row,
+                        imageURL: model.imageURL,
+                        onOpen: { open(link) },
+                        label: link.type == .post ? String(localized: "discussion_card_linked_post") : nil
+                    )
+                    .onAppear { model.linkCards.ensure(link) }
                 }
-                .buttonStyle(.plain)
-                .onAppear { model.linkCards.ensure(link.link) }
+            case let .text(html):
+                RichTextBody(html: html)
+            case let .image(imageId):
+                PulsoRemoteImage(url: model.imageURL(imageId))
+                    .aspectRatio(3 / 2, contentMode: .fill)
+                    .frame(width: 208)
+                    .clipShape(.rect(cornerRadius: 12))
             }
         }
+    }
+
+    private func open(_ link: PostLink) {
+        if let route = PostLinkLoader.route(link) { shell?.push(route) }
     }
 
     /** 没被正文段落放进去的照片：正文下面一排。 */
@@ -333,17 +428,11 @@ struct PostDetailView: View {
                 Text("discussion_comments_empty").foregroundStyle(.secondary)
             } else {
                 ForEach(comments.items, id: \.id) { comment in
-                    CommentRowView(
-                        comment: comment,
-                        avatarURL: model.imageURL(comment.author.avatarImageId),
-                        onLike: { Task { await model.toggleCommentLike(comment) } },
-                        onBookmark: { Task { await model.toggleCommentBookmark(comment) } },
-                        onReply: data.allowComments ? { model.replyTo = comment } : nil,
-                        onReport: comment.author.profileId != model.profileId && data.reportForumId != nil ? { model.reporting = ReportTarget(commentId: comment.id) } : nil,
-                        onDelete: comment.author.profileId == model.profileId || data.isAuthor ? { Task { await model.deleteComment(comment) } } : nil,
-                        onOpenAuthor: { shell?.push(NearRoute.socialProfile(profileId: comment.author.profileId)) }
-                    )
-                    .onAppear { if comment.id == comments.items.last?.id { comments.loadMore() } }
+                    commentRow(comment, data: data, showQuote: true)
+                    // 只看楼主时是一个平的列表，每条回复带引用；否则顶层评论下面可以展开回复。
+                    if !model.opOnly, comment.threadReplyCount > 0 {
+                        thread(comment, data: data)
+                    }
                 }
             }
         } header: {
@@ -351,6 +440,51 @@ struct PostDetailView: View {
                 Text(verbatim: localizedFormat("discussion_comments_count", data.commentCount))
                 Spacer()
                 Toggle("discussion_op_only", isOn: $model.opOnly).fixedSize().font(.caption)
+            }
+        }
+    }
+
+    private func commentRow(_ comment: PostComment, data: PostDetail, showQuote: Bool) -> some View {
+        CommentRowView(
+            comment: comment,
+            avatarURL: model.imageURL(comment.author.avatarImageId),
+            onLike: { Task { await model.toggleCommentLike(comment) } },
+            onBookmark: { Task { await model.toggleCommentBookmark(comment) } },
+            onReply: data.allowComments ? { model.replyTo = comment } : nil,
+            onReport: comment.author.profileId != model.profileId && data.reportForumId != nil ? { model.reporting = ReportTarget(commentId: comment.id) } : nil,
+            onDelete: comment.author.profileId == model.profileId || data.isAuthor ? { Task { await model.deleteComment(comment) } } : nil,
+            onOpenAuthor: { shell?.push(NearRoute.socialProfile(profileId: comment.author.profileId)) },
+            showQuote: showQuote
+        )
+        .onAppear { if comment.id == model.comments.items.last?.id { model.comments.loadMore() } }
+    }
+
+    /** 顶层评论下面的回复：收在「展开 N 条回复」后面，打开后缩进一层。回复顶层评论的不带引用，回复回复的显示它回的那条。 */
+    @ViewBuilder
+    private func thread(_ comment: PostComment, data: PostDetail) -> some View {
+        let thread = model.threads[comment.id]
+        Button { model.toggleThread(comment.id) } label: {
+            Label {
+                Text(verbatim: thread != nil ? String(localized: "discussion_hide_replies") : localizedFormat("discussion_show_replies", comment.threadReplyCount))
+            } icon: {
+                Image(systemName: thread != nil ? "chevron.up" : "chevron.down")
+            }
+            .font(.caption.weight(.medium))
+        }
+        .buttonStyle(.borderless)
+        .padding(.leading, 32)
+        if let thread {
+            ForEach(thread.replies, id: \.id) { reply in
+                commentRow(reply, data: data, showQuote: reply.replyTo?.commentId != reply.threadCommentId)
+                    .padding(.leading, 32)
+            }
+            if thread.loading {
+                ProgressView().padding(.leading, 32)
+            } else if thread.nextCursor != nil {
+                Button("discussion_more_replies") { model.moreReplies(comment.id) }
+                    .font(.caption.weight(.medium))
+                    .buttonStyle(.borderless)
+                    .padding(.leading, 32)
             }
         }
     }
@@ -383,3 +517,40 @@ struct PostDetailView: View {
 }
 
 extension PostComment: Identifiable {}
+
+/** 打开的一串回复，最早的在前；读完了 [nextCursor] 是 nil。 */
+struct CommentThreadState: Hashable {
+    var replies: [PostComment] = []
+    var nextCursor: String?
+    var loading = true
+
+    func with(loading: Bool) -> CommentThreadState {
+        CommentThreadState(replies: replies, nextCursor: nextCursor, loading: loading)
+    }
+}
+
+/** 正文的一段：一个段落，或连着的几个链接段落（读起来是一组「相关内容」）。 */
+private enum BodyBlock {
+    case text(String)
+    case image(String)
+    case links([PostLink])
+}
+
+private func bodyBlocks(_ sections: [PostSection]) -> [BodyBlock] {
+    var blocks: [BodyBlock] = []
+    for section in sections {
+        switch section {
+        case let .textSection(text):
+            blocks.append(.text(text.contentHtml))
+        case let .imageSection(image):
+            blocks.append(.image(image.imageId))
+        case let .linkSection(link):
+            if case let .links(previous) = blocks.last {
+                blocks[blocks.count - 1] = .links(previous + [link.link])
+            } else {
+                blocks.append(.links([link.link]))
+            }
+        }
+    }
+    return blocks
+}

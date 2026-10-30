@@ -129,6 +129,11 @@ struct DiscussionRepository: Sendable {
         try await api.comments(id: postId, CommentStreamRequest(after: after, limit: limit, opOnly: opOnly)).dataOrThrow("ListComments")
     }
 
+    /** 一条顶层评论下面的回复，最早的在前。 */
+    func threadReplies(_ postId: String, threadCommentId: String, after: String, limit: Int) async throws -> ListWithNextCursor<PostComment> {
+        try await api.comments(id: postId, CommentStreamRequest(after: after, limit: limit, threadCommentId: threadCommentId, opOnly: false)).dataOrThrow("ListComments")
+    }
+
     func createComment(_ postId: String, contentHtml: String, replyToCommentId: String?) async throws -> String {
         try await api.createComment(id: postId, CreateCommentRequest(contentHtml: contentHtml, replyToCommentId: replyToCommentId)).dataOrThrow("CreateComment").id
     }
