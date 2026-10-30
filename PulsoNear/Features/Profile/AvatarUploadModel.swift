@@ -5,8 +5,9 @@ import PulsoLinkUI
 import SwiftUI
 
 /**
- * 头像：选图 → 上传（待确认）→ 确认（对应 Android `AvatarUploadController`）。
- * 换图或放弃时，服务端那张待确认的图会被丢掉；确认后广播账号已更新，各页的资料随之刷新。
+ * 头像：选图 → 上传（待确认）→ 确认（对应 Android `AvatarUploadController`）。换图或放弃时，服务端那张待确认的图会被丢掉。
+ * 自己的头像（[AssetCategory.avatar]，没有 [onConfirmed]）：确认时服务端就设好了，再广播账号已更新，各页的资料随之刷新。
+ * 别的图（群头像）：确认后把图片 id 交给 [onConfirmed]，由它放到该放的地方并报告结果。
  */
 @MainActor
 @Observable
@@ -19,6 +20,13 @@ final class AvatarUploadModel {
 
     @ObservationIgnored @Injected(\.assetRepository) private var assets
     @ObservationIgnored @Injected(\.authService) private var authService
+    @ObservationIgnored private let category: AssetCategory
+    @ObservationIgnored private let onConfirmed: (@MainActor (String) async throws -> Void)?
+
+    init(category: AssetCategory = .avatar, onConfirmed: (@MainActor (String) async throws -> Void)? = nil) {
+        self.category = category
+        self.onConfirmed = onConfirmed
+    }
 
     var isBusy: Bool { isUploading || isConfirming }
 
@@ -37,7 +45,7 @@ final class AvatarUploadModel {
             guard let image = try await PickedImage.load(item, defaultName: "avatar.jpg") else { return }
             preview = UIImage(data: image.data).map(Image.init(uiImage:))
             pendingImageId = try await assets.putImage(
-                image.data, fileName: image.fileName, mimeType: image.mimeType, category: .avatar
+                image.data, fileName: image.fileName, mimeType: image.mimeType, category: category
             ).imageId
         } catch {
             preview = nil
@@ -50,11 +58,15 @@ final class AvatarUploadModel {
         isConfirming = true
         defer { isConfirming = false }
         do {
-            try await assets.confirmPending(imageId: id, category: .avatar)
+            try await assets.confirmPending(imageId: id, category: category)
             pendingImageId = nil
             isPresented = false
-            authService.notifyAccountUpdated()
-            PulsoMessageCenter.shared.success("avatar_upload_success")
+            if let onConfirmed {
+                try await onConfirmed(id)
+            } else {
+                authService.notifyAccountUpdated()
+                PulsoMessageCenter.shared.success("avatar_upload_success")
+            }
         } catch {
             PulsoMessageCenter.shared.error(error, fallback: "profile_upload_failed")
         }

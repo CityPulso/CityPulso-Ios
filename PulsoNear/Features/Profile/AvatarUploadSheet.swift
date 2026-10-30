@@ -5,6 +5,7 @@ import SwiftUI
 /** 上传头像的弹层（对应 Android `AvatarUploadSheet` / `PulsoAvatarUploadDialog`）：系统相册选图，预览，保存。 */
 struct AvatarUploadSheet: View {
     @Bindable var model: AvatarUploadModel
+    var title: LocalizedStringKey = "avatar_upload_title"
     @State private var selection: PhotosPickerItem?
 
     var body: some View {
@@ -42,7 +43,7 @@ struct AvatarUploadSheet: View {
                 Spacer()
             }
             .padding()
-            .navigationTitle("avatar_upload_title")
+            .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -71,9 +72,9 @@ struct AvatarUploadSheet: View {
 
 extension View {
     /** 挂上头像弹层。 */
-    func avatarUploadSheet(_ model: AvatarUploadModel) -> some View {
+    func avatarUploadSheet(_ model: AvatarUploadModel, title: LocalizedStringKey = "avatar_upload_title") -> some View {
         sheet(isPresented: Bindable(model).isPresented, onDismiss: { model.dismissed() }) {
-            AvatarUploadSheet(model: model)
+            AvatarUploadSheet(model: model, title: title)
         }
     }
 }

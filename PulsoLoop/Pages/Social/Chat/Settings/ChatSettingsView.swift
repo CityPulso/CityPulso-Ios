@@ -24,17 +24,31 @@ final class ChatSettingsModel {
     var groupTitle = ""
     private(set) var savedGroupTitle = ""
     private(set) var isSavingGroupTitle = false
+    /** 群头像；只有群主能改群名和群头像。 */
+    private(set) var groupAvatarImageId: String?
+    private(set) var isOwner = false
+    /** 群头像：按群头像上传（不是自己的头像），确认后设到群上。 */
+    @ObservationIgnored private(set) var photoUpload = AvatarUploadModel()
     private(set) var isLeaving = false
     private(set) var wallpaperPath: String?
 
     @ObservationIgnored @Injected(\.communicationService) private var communicationService
     @ObservationIgnored @Injected(\.chatWallpaperStore) private var wallpapers
     @ObservationIgnored @Injected(\.authSessionStore) private var sessionStore
+    @ObservationIgnored @Injected(\.pulsoCoreConfig) private var config
 
     init(conversationId: String, isGroup: Bool) {
         self.conversationId = conversationId
         self.isGroup = isGroup
+        photoUpload = AvatarUploadModel(category: .groupAvatar) { [weak self] imageId in
+            guard let self else { return }
+            let detail = try await communicationService.updateGroupConversation(conversationId, UpdateGroupRequest(avatarImageId: imageId))
+            groupAvatarImageId = detail.avatarImageId
+            PulsoMessageCenter.shared.success("chat_settings_group_photo_updated")
+        }
     }
+
+    var groupAvatarURL: URL? { ImageURLs.image(groupAvatarImageId, base: config.apiBaseURL) }
 
     private var type: ConversationType { isGroup ? .group : .direct }
 
@@ -60,6 +74,8 @@ final class ChatSettingsModel {
                 let detail = try await communicationService.getGroupDetail(GroupConversationKey(accountId: session.currentAccountId, profileId: session.currentProfileId, conversationId: conversationId))
                 groupTitle = detail.title
                 savedGroupTitle = detail.title
+                groupAvatarImageId = detail.avatarImageId
+                isOwner = detail.createdByProfileId == session.currentProfileId
             }
             page = Loadable(data: true, isLoading: false)
         } catch {
@@ -186,6 +202,7 @@ struct ChatSettingsView: View {
         .navigationTitle("chat_settings_title")
         .task { await model.load() }
         .task { await model.observeWallpaper() }
+        .avatarUploadSheet(model.photoUpload, title: "chat_settings_group_photo_title")
         .onChange(of: wallpaperItem) { _, item in
             guard let item else { return }
             wallpaperItem = nil
@@ -216,13 +233,39 @@ struct ChatSettingsView: View {
         }
     }
 
+    /** 顶部的群头像和群名；群主点头像角上的相机换头像。 */
+    private var groupHeader: some View {
+        VStack(spacing: 8) {
+            PulsoAvatar(url: model.groupAvatarURL, size: 80, systemImage: "person.3.fill")
+                .overlay(alignment: .bottomTrailing) {
+                    if model.isOwner {
+                        Button { model.photoUpload.open() } label: {
+                            Image(systemName: "camera.fill")
+                                .font(.footnote)
+                                .foregroundStyle(.white)
+                                .frame(width: 32, height: 32)
+                                .background(Color.accentColor, in: .circle)
+                                .overlay(Circle().stroke(Color(.systemBackground), lineWidth: 2))
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(Text("chat_settings_group_photo_change"))
+                    }
+                }
+            Text(verbatim: model.savedGroupTitle).font(.title3.weight(.semibold)).lineLimit(2).multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
     private var form: some View {
         Form {
             if model.isGroup {
+                Section { groupHeader }
+                    .listRowBackground(Color.clear)
                 Section("chat_settings_group_section") {
                     HStack {
                         TextField("chat_settings_group_title", text: $model.groupTitle, prompt: Text("chat_settings_group_title_placeholder"))
-                        if model.groupTitleChanged {
+                            .disabled(!model.isOwner)
+                        if model.isOwner, model.groupTitleChanged {
                             Button("chat_settings_save_group_title") { Task { await model.saveGroupTitle() } }
                                 .disabled(model.isSavingGroupTitle)
                         }
