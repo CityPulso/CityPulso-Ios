@@ -1,5 +1,5 @@
-import ActivityKit
-import ActivityKitUI
+import EventKit
+import EventKitUI
 import PulsoLinkCore
 import SwiftUI
 
@@ -25,7 +25,7 @@ struct CalendarDraft: Identifiable {
 
 /**
  * 系统的「新建日程」界面，预填活动（Android 用 `ACTION_INSERT` 打开日历 App）。
- * iOS 17+ 的 `EKActivityEditViewController` 在系统进程里运行，不需要日历权限，也不用写 Info.plist 用途说明。
+ * iOS 17+ 的 `EKEventEditViewController` 在系统进程里运行，不需要日历权限，也不用写 Info.plist 用途说明。
  */
 struct CalendarActivityEditor: UIViewControllerRepresentable {
     let draft: CalendarDraft
@@ -33,32 +33,32 @@ struct CalendarActivityEditor: UIViewControllerRepresentable {
 
     func makeCoordinator() -> Coordinator { Coordinator(onDone: onDone) }
 
-    func makeUIViewController(context: Context) -> EKActivityEditViewController {
-        let store = EKActivityStore()
-        let activity = EKActivity(activityStore: store)
+    func makeUIViewController(context: Context) -> EKEventEditViewController {
+        let store = EKEventStore()
+        let activity = EKEvent(eventStore: store)
         activity.title = draft.title
         activity.startDate = draft.start
         activity.endDate = draft.end
         activity.location = draft.location
         activity.notes = draft.notes
-        let controller = EKActivityEditViewController()
-        controller.activityStore = store
+        let controller = EKEventEditViewController()
+        controller.eventStore = store
         controller.activity = activity
         controller.editViewDelegate = context.coordinator
         return controller
     }
 
-    func updateUIViewController(_: EKActivityEditViewController, context _: Context) {}
+    func updateUIViewController(_: EKEventEditViewController, context _: Context) {}
 
     @MainActor
-    final class Coordinator: NSObject, @preconcurrency EKActivityEditViewDelegate {
+    final class Coordinator: NSObject, @preconcurrency EKEventEditViewDelegate {
         let onDone: () -> Void
 
         init(onDone: @escaping () -> Void) {
             self.onDone = onDone
         }
 
-        func activityEditViewController(_: EKActivityEditViewController, didCompleteWith _: EKActivityEditViewAction) {
+        func activityEditViewController(_: EKEventEditViewController, didCompleteWith _: EKEventEditViewAction) {
             onDone()
         }
     }

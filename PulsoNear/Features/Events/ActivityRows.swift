@@ -179,17 +179,6 @@ enum RegistrationTone {
     static var paid: Color { RadixScale.orange.step(11) }
 }
 
-/** 状态色（Android `SpaceBookingStatus.tone()`）。 */
-    var tone: Color {
-        switch self {
-        case .pending, .awaitingApproval: RadixScale.amber.step(11)
-        case .awaitingPayment: RadixScale.blue.step(11)
-        case .confirmed: RadixScale.green.step(11)
-        case .canceled, .expired: .secondary
-        }
-    }
-}
-
 /** 标题；空的显示「未命名活动」。 */
 struct ActivityTitle: View {
     let title: String?
