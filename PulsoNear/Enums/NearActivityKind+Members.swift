@@ -13,3 +13,8 @@ extension NearActivityKind: Identifiable {
         fromWire(type.rawValue)
     }
 }
+
+extension NearActivityType {
+    /** 线上的活动类型对应的页面类型（详情、图标、服务都按它分）。 */
+    var kind: NearActivityKind { NearActivityKind.fromActivityType(self) }
+}

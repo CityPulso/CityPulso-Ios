@@ -79,7 +79,7 @@ final class ForumDetailModel {
 
     /** 活动条第一次显示某场活动时读它的标题、时间、场地和照片。 */
     func ensureActivity(_ activity: ForumActivity) {
-        guard activityInfo[activity.activityId] == nil, let service = activityTypeServices[activity.activityType] else { return }
+        guard activityInfo[activity.activityId] == nil, let service = activityTypeServices[activity.activityType.kind] else { return }
         Task {
             for await response in service.detail(activityId: activity.activityId) {
                 if case let .data(detail) = response {
@@ -354,9 +354,9 @@ struct ForumDetailView: View {
 
     private func activityCard(_ activity: ForumActivity) -> some View {
         let info = model.activityInfo[activity.activityId]
-        return Button { shell?.push(NearRoute.activity(activityType: activity.activityType, activityId: activity.activityId)) } label: {
+        return Button { shell?.push(NearRoute.activity(activityType: activity.activityType.kind, activityId: activity.activityId)) } label: {
             VStack(alignment: .leading, spacing: 4) {
-                ActivityTypeCover(url: model.imageURL(info?.coverImageId), activityType: activity.activityType, iconSize: 28)
+                ActivityTypeCover(url: model.imageURL(info?.coverImageId), activityType: activity.activityType.kind, iconSize: 28)
                     .frame(width: 180, height: 90)
                     .clipShape(.rect(cornerRadius: 8))
                 Text(verbatim: info?.title ?? activity.postTitle).font(.subheadline.weight(.semibold)).lineLimit(1)

@@ -349,7 +349,7 @@ struct FavoritesView: View {
             ForEach(list.items, id: \.id) { item in
                 NavigationLink(value: NearRoute.venue(venueId: item.venueId)) {
                     HStack(spacing: 12) {
-                        ActivityTypeCover(url: model.imageURL(item.coverImageId), activityType: item.venueActivityTypes.first?.loopActivityType ?? .boardGame, iconSize: 24)
+                        ActivityTypeCover(url: model.imageURL(item.coverImageId), activityType: item.venueActivityTypes.first?.kind ?? .boardGame, iconSize: 24)
                             .frame(width: 64, height: 64)
                             .clipShape(.rect(cornerRadius: 12))
                         VStack(alignment: .leading, spacing: 3) {
@@ -361,7 +361,7 @@ struct FavoritesView: View {
                                 VenueOpenChip(status: status)
                             }
                             PulsoFlowLayout(spacing: 4) {
-                                ForEach(item.venueActivityTypes, id: \.self) { ActivityTypeTag(activityType: $0.loopActivityType) }
+                                ForEach(item.venueActivityTypes, id: \.self) { ActivityTypeTag(activityType: $0.kind) }
                             }
                             Text(verbatim: localizedFormat("shell_views_count", item.venueView)).font(.caption2).foregroundStyle(.secondary)
                         }
@@ -446,7 +446,7 @@ private struct FavoritesFilterSheet: View {
                     Picker(selection: $activityType) {
                         Text(verbatim: countLabel(String(localized: "favorites_filter_all"), model.venueCounts?.total)).tag(VenueActivityType?.none)
                         ForEach(VenueActivityType.allCases, id: \.self) { activityType in
-                            Text(verbatim: countLabel(String(localized: activityType.loopActivityType.labelResource), model.venueCounts?.byActivityType.first { $0.activityType == activityType }?.count)).tag(VenueActivityType?.some(activityType))
+                            Text(verbatim: countLabel(String(localized: activityType.kind.labelResource), model.venueCounts?.byActivityType.first { $0.activityType == activityType }?.count)).tag(VenueActivityType?.some(activityType))
                         }
                     } label: {
                         Text("favorites_filter_activity_type")
