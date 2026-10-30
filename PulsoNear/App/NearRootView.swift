@@ -23,6 +23,9 @@ struct NearRootView: View {
         .environment(session)
         .pulsoMessageHost()
         .pulsoTheme(theme.settings)
-        .onOpenURL { GoogleIdToken.handle($0) }
+        .onOpenURL { url in
+            // 跃圈打开的卡片先存进 inbox，登录后的主界面取走；其余的是 Google 登录回跳。
+            if !NearDeepLinkInbox.shared.offer(url) { GoogleIdToken.handle(url) }
+        }
     }
 }

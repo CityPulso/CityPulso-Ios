@@ -118,7 +118,7 @@ struct ChatConversationView: View {
     /** 卡片打开的页面（Android `openCard`）。 */
     private func cardRoute(_ type: MessageType, _ card: ChatSharedCardContent) -> NearRoute? {
         switch type {
-        case .activityShare: card.subtype.map { .activity(activityType: NearActivityKind.fromActivityType(NearActivityType.fromWire($0)), activityId: card.targetId) }
+        case .eventShare: card.subtype.map { .activity(activityType: NearActivityKind.fromActivityType(NearActivityType.fromWire($0)), activityId: card.targetId) }
         case .venueShare: .venue(venueId: card.targetId, sheet: nil)
         case .buildingShare: .building(buildingId: card.targetId)
         case .postShare: .post(postId: card.targetId)

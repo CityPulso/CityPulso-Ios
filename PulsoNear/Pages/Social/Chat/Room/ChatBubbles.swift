@@ -102,7 +102,7 @@ struct ChatMessageBubble: View {
             if let file = message.file { fileCard(file) }
         case .location:
             if let location = message.location { locationCard(location) }
-        case .activityShare, .venueShare, .buildingShare, .postShare, .forumShare:
+        case .eventShare, .venueShare, .buildingShare, .postShare, .forumShare:
             if let card = message.sharedCard { ChatShareCard(type: message.type, card: card, mine: message.isMine, hosted: message.hostedCard, callbacks: callbacks) }
         case .text, .system:
             bubble {
@@ -255,7 +255,7 @@ struct ChatShareCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if let image = card.imageKey, let url = URL(string: image), type != .postShare {
-                PulsoRemoteImage(url: url).frame(height: type == .activityShare || type == .venueShare ? 140 : 96).clipped()
+                PulsoRemoteImage(url: url).frame(height: type == .eventShare || type == .venueShare ? 140 : 96).clipped()
             }
             VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 6) {
@@ -267,7 +267,7 @@ struct ChatShareCard: View {
                     }
                 }
                 Text(verbatim: card.title).font(.subheadline.weight(.semibold)).lineLimit(2)
-                if type == .activityShare, let when = card.subtitle.flatMap(cardWhen) ?? card.subtitle, !when.isEmpty {
+                if type == .eventShare, let when = card.subtitle.flatMap(cardWhen) ?? card.subtitle, !when.isEmpty {
                     Text(verbatim: when).font(.caption).opacity(0.8).lineLimit(1)
                 } else if type != .postShare, let subtitle = card.subtitle, !subtitle.isEmpty {
                     Text(verbatim: subtitle).font(.caption).opacity(0.8).lineLimit(2)
@@ -294,7 +294,7 @@ struct ChatShareCard: View {
 
     private var kindLabel: LocalizedStringKey {
         switch type {
-        case .activityShare: "shell_chat_card_kind_event"
+        case .eventShare: "shell_chat_card_kind_event"
         case .venueShare: "shell_chat_card_kind_venue"
         case .buildingShare: "shell_chat_card_kind_building"
         case .forumShare: "shell_chat_card_kind_forum"
@@ -305,7 +305,7 @@ struct ChatShareCard: View {
 
     private var kindSymbol: String {
         switch type {
-        case .activityShare: "calendar"
+        case .eventShare: "calendar"
         case .venueShare: "storefront"
         case .buildingShare: "building.2"
         case .forumShare: "text.bubble"
@@ -315,7 +315,7 @@ struct ChatShareCard: View {
 
     private var primaryLabel: LocalizedStringKey {
         switch type {
-        case .activityShare: "shell_chat_card_view_and_join"
+        case .eventShare: "shell_chat_card_view_and_join"
         case .venueShare: "shell_chat_card_view_details"
         case .buildingShare: "shell_chat_card_view_building"
         case .forumShare: "shell_chat_card_enter"

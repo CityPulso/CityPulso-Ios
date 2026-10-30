@@ -131,7 +131,7 @@ func conversationPreview(_ row: ConversationRowUi) -> String? {
     case .audio: kind = "shell_chat_voice_message"
     case .file: kind = "shell_chat_plus_file"
     case .location: kind = "shell_chat_plus_location"
-    case .activityShare: kind = "shell_chat_card_kind_activity"
+    case .eventShare: kind = "shell_chat_card_kind_activity"
     case .venueShare: kind = "shell_chat_card_kind_venue"
     case .forumShare: kind = "shell_chat_card_kind_forum"
     case .postShare: kind = "shell_chat_card_kind_post"

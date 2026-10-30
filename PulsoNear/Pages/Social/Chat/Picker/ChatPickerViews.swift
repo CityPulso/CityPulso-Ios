@@ -76,7 +76,7 @@ final class ChatActivityPickerModel {
     }
 
     func pick(_ row: ChatActivityPickRow) {
-        drafts.emit(.card(conversationId: conversationId, type: .activityShare, card: ChatSharedCardContent(
+        drafts.emit(.card(conversationId: conversationId, type: .eventShare, card: ChatSharedCardContent(
             product: .loop,
             targetId: row.activityId,
             subtype: row.activityType.activityType.rawValue,

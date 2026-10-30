@@ -76,7 +76,7 @@ extension MessageType {
     /** 分享卡片类消息。 */
     var isShareCard: Bool {
         switch self {
-        case .activityShare, .venueShare, .buildingShare, .postShare, .forumShare: true
+        case .eventShare, .venueShare, .buildingShare, .postShare, .forumShare: true
         default: false
         }
     }
@@ -254,7 +254,7 @@ final class ChatConversationModel {
         let base = config.apiBaseURL
         var shared = item.type.isShareCard ? item.content.shared : nil
         if let key = shared?.imageKey { shared?.imageKey = ImageURLs.image(key, base: base)?.absoluteString ?? key }
-        let hosted = item.type == .activityShare && shared?.hostProfileId != nil && shared?.hostProfileId == item.senderId
+        let hosted = item.type == .eventShare && shared?.hostProfileId != nil && shared?.hostProfileId == item.senderId
         return ChatMessageRowUi(
             messageId: item.messageId,
             senderId: item.senderId,
