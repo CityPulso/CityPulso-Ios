@@ -212,7 +212,8 @@ protocol PostCardFields {
     var previewImageIds: [String] { get }
     var imageCount: Int { get }
     var topics: [PostTopic] { get }
-    var event: PostEventLink? { get }
+    /** 正文里所有链接，按正文顺序。 */
+    var links: [PostLink] { get }
     var forums: [PostForumRef] { get }
     var createdAt: String { get }
     var likedByMe: Bool { get set }
@@ -285,7 +286,7 @@ struct PostCardView<Post: PostCardFields>: View {
             if layout == .row { photoRow }
             if !post.topics.isEmpty { TopicChipRow(topics: post.topics, onOpen: onOpenTopic) }
             if let repost = post.repostOf { RepostQuote(repost: repost) }
-            if post.event != nil {
+            if post.links.contains(where: { $0.type == .event }) {
                 Label("discussion_linked_event", systemImage: "calendar").font(.caption).foregroundStyle(.tint)
             }
             if let reason, !reason.isEmpty { Text(verbatim: reason).font(.caption).foregroundStyle(.red) }

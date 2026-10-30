@@ -16,6 +16,8 @@ enum NearShellPages {
             SettingsView()
         case .profile:
             ProfileOverviewView()
+        case .create:
+            CreateActivityView()
         default:
             PulsoComingSoonView(destination)
         }

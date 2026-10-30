@@ -1529,6 +1529,10 @@ struct PostComment: Codable, Sendable, Hashable {
     var author: DiscussionProfileCard
     var isOp: Bool
     var replyTo: CommentReplyTo?
+    /** The top-level comment a reply lives under (null on a top-level comment). */
+    var threadCommentId: String?
+    /** Replies under a top-level comment, however deep. */
+    var threadReplyCount: Int
     var contentHtml: String
     var contentText: String
     var likeCount: Int
@@ -1538,12 +1542,14 @@ struct PostComment: Codable, Sendable, Hashable {
     var likedByMe: Bool
     var bookmarkedByMe: Bool
 
-    init(id: String, postId: String, author: DiscussionProfileCard, isOp: Bool = false, replyTo: CommentReplyTo? = nil, contentHtml: String = "", contentText: String = "", likeCount: Int = 0, bookmarkCount: Int = 0, replyCount: Int = 0, createdAt: String = "", likedByMe: Bool = false, bookmarkedByMe: Bool = false) {
+    init(id: String, postId: String, author: DiscussionProfileCard, isOp: Bool = false, replyTo: CommentReplyTo? = nil, threadCommentId: String? = nil, threadReplyCount: Int = 0, contentHtml: String = "", contentText: String = "", likeCount: Int = 0, bookmarkCount: Int = 0, replyCount: Int = 0, createdAt: String = "", likedByMe: Bool = false, bookmarkedByMe: Bool = false) {
         self.id = id
         self.postId = postId
         self.author = author
         self.isOp = isOp
         self.replyTo = replyTo
+        self.threadCommentId = threadCommentId
+        self.threadReplyCount = threadReplyCount
         self.contentHtml = contentHtml
         self.contentText = contentText
         self.likeCount = likeCount
@@ -1561,6 +1567,8 @@ struct PostComment: Codable, Sendable, Hashable {
         author = try container.wireRequired(DiscussionProfileCard.self, "author")
         isOp = try container.wire(Bool.self, "isOp") ?? false
         replyTo = try container.wire(CommentReplyTo.self, "replyTo")
+        threadCommentId = try container.wire(String.self, "threadCommentId")
+        threadReplyCount = try container.wire(Int.self, "threadReplyCount") ?? 0
         contentHtml = try container.wire(String.self, "contentHtml") ?? ""
         contentText = try container.wire(String.self, "contentText") ?? ""
         likeCount = try container.wire(Int.self, "likeCount") ?? 0
@@ -1578,6 +1586,8 @@ struct PostComment: Codable, Sendable, Hashable {
         try container.wire(author, "author")
         try container.wire(isOp, "isOp", default: false)
         try container.wireOptional(replyTo, "replyTo")
+        try container.wireOptional(threadCommentId, "threadCommentId")
+        try container.wire(threadReplyCount, "threadReplyCount", default: 0)
         try container.wire(contentHtml, "contentHtml", default: "")
         try container.wire(contentText, "contentText", default: "")
         try container.wire(likeCount, "likeCount", default: 0)
@@ -2431,11 +2441,13 @@ struct ForumStreamRequest: Codable, Sendable, Hashable {
 struct CommentStreamRequest: Codable, Sendable, Hashable {
     var after: String
     var limit: Int
+    var threadCommentId: String?
     var opOnly: Bool
 
-    init(after: String = "", limit: Int = 20, opOnly: Bool = false) {
+    init(after: String = "", limit: Int = 20, threadCommentId: String? = nil, opOnly: Bool = false) {
         self.after = after
         self.limit = limit
+        self.threadCommentId = threadCommentId
         self.opOnly = opOnly
     }
 
@@ -2443,6 +2455,7 @@ struct CommentStreamRequest: Codable, Sendable, Hashable {
         let container = try decoder.container(keyedBy: WireKey.self)
         after = try container.wire(String.self, "after") ?? ""
         limit = try container.wire(Int.self, "limit") ?? 20
+        threadCommentId = try container.wire(String.self, "threadCommentId")
         opOnly = try container.wire(Bool.self, "opOnly") ?? false
     }
 
@@ -2450,6 +2463,7 @@ struct CommentStreamRequest: Codable, Sendable, Hashable {
         var container = encoder.container(keyedBy: WireKey.self)
         try container.wire(after, "after", default: "")
         try container.wire(limit, "limit", default: 20)
+        try container.wireOptional(threadCommentId, "threadCommentId")
         try container.wire(opOnly, "opOnly", default: false)
     }
 }

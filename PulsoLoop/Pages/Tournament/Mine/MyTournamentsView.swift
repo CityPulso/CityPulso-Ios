@@ -103,11 +103,6 @@ struct MyTournamentsView: View {
 
     var body: some View {
         List {
-            Text("tournament_mine_subtitle")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .listRowBackground(Color.clear)
-                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 4, trailing: 16))
             Section {
                 switch model.tab {
                 case .entries: entryRows

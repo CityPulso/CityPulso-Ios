@@ -699,29 +699,6 @@ struct RepostOf: Codable, Sendable, Hashable {
     }
 }
 
-/** The first Loop event a post body links to: the chip on a card. */
-struct PostEventLink: Codable, Sendable, Hashable {
-    var sport: LoopSport
-    var eventId: String
-
-    init(sport: LoopSport, eventId: String) {
-        self.sport = sport
-        self.eventId = eventId
-    }
-
-    init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: WireKey.self)
-        sport = try container.wireRequired(LoopSport.self, "sport")
-        eventId = try container.wireRequired(String.self, "eventId")
-    }
-
-    func encode(to encoder: any Encoder) throws {
-        var container = encoder.container(keyedBy: WireKey.self)
-        try container.wire(sport, "sport")
-        try container.wire(eventId, "eventId")
-    }
-}
-
 /** What a link section points at; [sport] is set for events only. */
 struct PostLink: Codable, Sendable, Hashable {
     var type: PostLinkType
@@ -968,14 +945,15 @@ struct PostCard: Codable, Sendable, Hashable {
     var previewImageIds: [String]
     var imageCount: Int
     var topics: [PostTopic]
-    var event: PostEventLink?
+    /** Every link in the body, in body order (the card draws them by type and count). */
+    var links: [PostLink]
     var forums: [PostForumRef]
     var createdAt: String
     var likedByMe: Bool
     var bookmarkedByMe: Bool
     var reactedAt: String?
 
-    init(id: String, author: DiscussionProfileCard, kind: PostKind = .discussion, city: String? = nil, title: String = "", contentText: String = "", repostOf: RepostOf? = nil, likeCount: Int = 0, commentCount: Int = 0, bookmarkCount: Int = 0, repostCount: Int = 0, firstPublishedAt: String? = nil, editedAt: String? = nil, previewImageIds: [String] = [], imageCount: Int = 0, topics: [PostTopic] = [], event: PostEventLink? = nil, forums: [PostForumRef] = [], createdAt: String = "", likedByMe: Bool = false, bookmarkedByMe: Bool = false, reactedAt: String? = nil) {
+    init(id: String, author: DiscussionProfileCard, kind: PostKind = .discussion, city: String? = nil, title: String = "", contentText: String = "", repostOf: RepostOf? = nil, likeCount: Int = 0, commentCount: Int = 0, bookmarkCount: Int = 0, repostCount: Int = 0, firstPublishedAt: String? = nil, editedAt: String? = nil, previewImageIds: [String] = [], imageCount: Int = 0, topics: [PostTopic] = [], links: [PostLink] = [], forums: [PostForumRef] = [], createdAt: String = "", likedByMe: Bool = false, bookmarkedByMe: Bool = false, reactedAt: String? = nil) {
         self.id = id
         self.author = author
         self.kind = kind
@@ -992,7 +970,7 @@ struct PostCard: Codable, Sendable, Hashable {
         self.previewImageIds = previewImageIds
         self.imageCount = imageCount
         self.topics = topics
-        self.event = event
+        self.links = links
         self.forums = forums
         self.createdAt = createdAt
         self.likedByMe = likedByMe
@@ -1018,7 +996,7 @@ struct PostCard: Codable, Sendable, Hashable {
         previewImageIds = try container.wire([String].self, "previewImageIds") ?? []
         imageCount = try container.wire(Int.self, "imageCount") ?? 0
         topics = try container.wire([PostTopic].self, "topics") ?? []
-        event = try container.wire(PostEventLink.self, "event")
+        links = try container.wire([PostLink].self, "links") ?? []
         forums = try container.wire([PostForumRef].self, "forums") ?? []
         createdAt = try container.wire(String.self, "createdAt") ?? ""
         likedByMe = try container.wire(Bool.self, "likedByMe") ?? false
@@ -1044,7 +1022,7 @@ struct PostCard: Codable, Sendable, Hashable {
         try container.wire(previewImageIds, "previewImageIds", default: [])
         try container.wire(imageCount, "imageCount", default: 0)
         try container.wire(topics, "topics", default: [])
-        try container.wireOptional(event, "event")
+        try container.wire(links, "links", default: [])
         try container.wire(forums, "forums", default: [])
         try container.wire(createdAt, "createdAt", default: "")
         try container.wire(likedByMe, "likedByMe", default: false)
@@ -1072,7 +1050,8 @@ struct ForumPost: Codable, Sendable, Hashable {
     var previewImageIds: [String]
     var imageCount: Int
     var topics: [PostTopic]
-    var event: PostEventLink?
+    /** Every link in the body, in body order (the card draws them by type and count). */
+    var links: [PostLink]
     var forums: [PostForumRef]
     var createdAt: String
     var likedByMe: Bool
@@ -1088,7 +1067,7 @@ struct ForumPost: Codable, Sendable, Hashable {
     var rejectReason: String?
     var removedReason: String?
 
-    init(id: String, author: DiscussionProfileCard, kind: PostKind = .discussion, city: String? = nil, title: String = "", contentText: String = "", repostOf: RepostOf? = nil, likeCount: Int = 0, commentCount: Int = 0, bookmarkCount: Int = 0, repostCount: Int = 0, firstPublishedAt: String? = nil, editedAt: String? = nil, previewImageIds: [String] = [], imageCount: Int = 0, topics: [PostTopic] = [], event: PostEventLink? = nil, forums: [PostForumRef] = [], createdAt: String = "", likedByMe: Bool = false, bookmarkedByMe: Bool = false, publicationId: String, forumId: String, forumName: String = "", forumOwnerProfileScope: ProfileKind = .community, status: ForumPostStatus = .published, isPinned: Bool = false, submittedAt: String = "", publishedAt: String? = nil, rejectReason: String? = nil, removedReason: String? = nil) {
+    init(id: String, author: DiscussionProfileCard, kind: PostKind = .discussion, city: String? = nil, title: String = "", contentText: String = "", repostOf: RepostOf? = nil, likeCount: Int = 0, commentCount: Int = 0, bookmarkCount: Int = 0, repostCount: Int = 0, firstPublishedAt: String? = nil, editedAt: String? = nil, previewImageIds: [String] = [], imageCount: Int = 0, topics: [PostTopic] = [], links: [PostLink] = [], forums: [PostForumRef] = [], createdAt: String = "", likedByMe: Bool = false, bookmarkedByMe: Bool = false, publicationId: String, forumId: String, forumName: String = "", forumOwnerProfileScope: ProfileKind = .community, status: ForumPostStatus = .published, isPinned: Bool = false, submittedAt: String = "", publishedAt: String? = nil, rejectReason: String? = nil, removedReason: String? = nil) {
         self.id = id
         self.author = author
         self.kind = kind
@@ -1105,7 +1084,7 @@ struct ForumPost: Codable, Sendable, Hashable {
         self.previewImageIds = previewImageIds
         self.imageCount = imageCount
         self.topics = topics
-        self.event = event
+        self.links = links
         self.forums = forums
         self.createdAt = createdAt
         self.likedByMe = likedByMe
@@ -1140,7 +1119,7 @@ struct ForumPost: Codable, Sendable, Hashable {
         previewImageIds = try container.wire([String].self, "previewImageIds") ?? []
         imageCount = try container.wire(Int.self, "imageCount") ?? 0
         topics = try container.wire([PostTopic].self, "topics") ?? []
-        event = try container.wire(PostEventLink.self, "event")
+        links = try container.wire([PostLink].self, "links") ?? []
         forums = try container.wire([PostForumRef].self, "forums") ?? []
         createdAt = try container.wire(String.self, "createdAt") ?? ""
         likedByMe = try container.wire(Bool.self, "likedByMe") ?? false
@@ -1175,7 +1154,7 @@ struct ForumPost: Codable, Sendable, Hashable {
         try container.wire(previewImageIds, "previewImageIds", default: [])
         try container.wire(imageCount, "imageCount", default: 0)
         try container.wire(topics, "topics", default: [])
-        try container.wireOptional(event, "event")
+        try container.wire(links, "links", default: [])
         try container.wire(forums, "forums", default: [])
         try container.wire(createdAt, "createdAt", default: "")
         try container.wire(likedByMe, "likedByMe", default: false)
@@ -1529,6 +1508,10 @@ struct PostComment: Codable, Sendable, Hashable {
     var author: DiscussionProfileCard
     var isOp: Bool
     var replyTo: CommentReplyTo?
+    /** The top-level comment a reply lives under (null on a top-level comment). */
+    var threadCommentId: String?
+    /** Replies under a top-level comment, however deep. */
+    var threadReplyCount: Int
     var contentHtml: String
     var contentText: String
     var likeCount: Int
@@ -1538,12 +1521,14 @@ struct PostComment: Codable, Sendable, Hashable {
     var likedByMe: Bool
     var bookmarkedByMe: Bool
 
-    init(id: String, postId: String, author: DiscussionProfileCard, isOp: Bool = false, replyTo: CommentReplyTo? = nil, contentHtml: String = "", contentText: String = "", likeCount: Int = 0, bookmarkCount: Int = 0, replyCount: Int = 0, createdAt: String = "", likedByMe: Bool = false, bookmarkedByMe: Bool = false) {
+    init(id: String, postId: String, author: DiscussionProfileCard, isOp: Bool = false, replyTo: CommentReplyTo? = nil, threadCommentId: String? = nil, threadReplyCount: Int = 0, contentHtml: String = "", contentText: String = "", likeCount: Int = 0, bookmarkCount: Int = 0, replyCount: Int = 0, createdAt: String = "", likedByMe: Bool = false, bookmarkedByMe: Bool = false) {
         self.id = id
         self.postId = postId
         self.author = author
         self.isOp = isOp
         self.replyTo = replyTo
+        self.threadCommentId = threadCommentId
+        self.threadReplyCount = threadReplyCount
         self.contentHtml = contentHtml
         self.contentText = contentText
         self.likeCount = likeCount
@@ -1561,6 +1546,8 @@ struct PostComment: Codable, Sendable, Hashable {
         author = try container.wireRequired(DiscussionProfileCard.self, "author")
         isOp = try container.wire(Bool.self, "isOp") ?? false
         replyTo = try container.wire(CommentReplyTo.self, "replyTo")
+        threadCommentId = try container.wire(String.self, "threadCommentId")
+        threadReplyCount = try container.wire(Int.self, "threadReplyCount") ?? 0
         contentHtml = try container.wire(String.self, "contentHtml") ?? ""
         contentText = try container.wire(String.self, "contentText") ?? ""
         likeCount = try container.wire(Int.self, "likeCount") ?? 0
@@ -1578,6 +1565,8 @@ struct PostComment: Codable, Sendable, Hashable {
         try container.wire(author, "author")
         try container.wire(isOp, "isOp", default: false)
         try container.wireOptional(replyTo, "replyTo")
+        try container.wireOptional(threadCommentId, "threadCommentId")
+        try container.wire(threadReplyCount, "threadReplyCount", default: 0)
         try container.wire(contentHtml, "contentHtml", default: "")
         try container.wire(contentText, "contentText", default: "")
         try container.wire(likeCount, "likeCount", default: 0)
@@ -2431,11 +2420,13 @@ struct ForumStreamRequest: Codable, Sendable, Hashable {
 struct CommentStreamRequest: Codable, Sendable, Hashable {
     var after: String
     var limit: Int
+    var threadCommentId: String?
     var opOnly: Bool
 
-    init(after: String = "", limit: Int = 20, opOnly: Bool = false) {
+    init(after: String = "", limit: Int = 20, threadCommentId: String? = nil, opOnly: Bool = false) {
         self.after = after
         self.limit = limit
+        self.threadCommentId = threadCommentId
         self.opOnly = opOnly
     }
 
@@ -2443,6 +2434,7 @@ struct CommentStreamRequest: Codable, Sendable, Hashable {
         let container = try decoder.container(keyedBy: WireKey.self)
         after = try container.wire(String.self, "after") ?? ""
         limit = try container.wire(Int.self, "limit") ?? 20
+        threadCommentId = try container.wire(String.self, "threadCommentId")
         opOnly = try container.wire(Bool.self, "opOnly") ?? false
     }
 
@@ -2450,6 +2442,7 @@ struct CommentStreamRequest: Codable, Sendable, Hashable {
         var container = encoder.container(keyedBy: WireKey.self)
         try container.wire(after, "after", default: "")
         try container.wire(limit, "limit", default: 20)
+        try container.wireOptional(threadCommentId, "threadCommentId")
         try container.wire(opOnly, "opOnly", default: false)
     }
 }

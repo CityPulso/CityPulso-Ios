@@ -39,7 +39,7 @@ final class TournamentsModel {
 }
 
 /**
- * 赛事（Android `TournamentsScreen`，应用托盘里的赛事页）：所有公开赛事，可以搜索，运动标签带图标；右上角进「我的赛事」。
+ * 赛事（Android `TournamentsScreen`，应用托盘里的赛事页）：所有公开赛事，可以搜索，运动标签带图标；搜索框旁边的奖杯进「我的赛事」。
  * 搜索框和运动标签在列表上方固定。
  */
 struct TournamentsView: View {
@@ -47,11 +47,6 @@ struct TournamentsView: View {
 
     var body: some View {
         List {
-            Text("tournament_list_subtitle")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .listRowBackground(Color.clear)
-                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 4, trailing: 16))
             Section {
                 rows
             } header: {
@@ -61,14 +56,7 @@ struct TournamentsView: View {
         .listStyle(.plain)
         .listRowSeparator(.hidden)
         .navigationTitle("shell_dest_tournaments")
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                NavigationLink(value: LoopRoute.myTournaments) {
-                    Label("tournament_mine_title", systemImage: "trophy").labelStyle(.titleAndIcon)
-                }
-                .buttonStyle(.glassProminent)
-            }
-        }
+        .navigationBarTitleDisplayMode(.inline)
         .refreshable { await model.tournaments.refresh() }
         .task(id: model.generation) { await model.tournaments.observe() }
         .task(id: model.search) { await model.searchChanged() }
@@ -78,17 +66,26 @@ struct TournamentsView: View {
     private var filters: some View {
         VStack(spacing: 8) {
             HStack(spacing: 8) {
-                Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
-                TextField("tournament_list_search", text: $model.search)
-                    .submitLabel(.search)
-                if !model.search.isEmpty {
-                    Button { model.search = "" } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(.tertiary) }
-                        .buttonStyle(.plain)
+                HStack(spacing: 8) {
+                    Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
+                    TextField("tournament_list_search", text: $model.search)
+                        .submitLabel(.search)
+                    if !model.search.isEmpty {
+                        Button { model.search = "" } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(.tertiary) }
+                            .buttonStyle(.plain)
+                    }
                 }
+                .padding(.horizontal, 12)
+                .frame(height: 40)
+                .background(.fill.tertiary, in: .capsule)
+                // 「我的赛事」是搜索框旁边的图标（Android：作为底栏页时没有顶栏，入口放这里）。
+                NavigationLink(value: LoopRoute.myTournaments) {
+                    Image(systemName: "trophy")
+                        .frame(width: 40, height: 40)
+                        .background(.fill.tertiary, in: .circle)
+                }
+                .accessibilityLabel(Text("tournament_mine_title"))
             }
-            .padding(.horizontal, 12)
-            .frame(height: 40)
-            .background(.fill.tertiary, in: .capsule)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 4) {
                     sportTab(nil)

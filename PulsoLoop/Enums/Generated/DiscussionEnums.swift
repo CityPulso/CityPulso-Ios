@@ -387,3 +387,79 @@ enum PostKind: String, WireEnum {
         }
     }
 }
+
+/** Feed card arrangement: photos and links under the text (rich) or one thumbnail beside it (compact). */
+enum PostCardStyle: CaseIterable, Codable, Sendable, Hashable {
+    case rich
+    case compact
+}
+
+/** How a feed card (or the post page) lays out its photos (the forum designs). */
+enum PostPhotoLayout: CaseIterable, Codable, Sendable, Hashable {
+    case none
+    /** One wide 16:9 photo under the text. */
+    case hero
+    /** Compact: one photo beside the text. */
+    case side
+    /** Compact: a 2×2 block beside the text, "+N" on the last tile. */
+    case sideGrid
+    /** Two photos side by side. */
+    case pair
+    /** Three square tiles in a row, "+N" on the last. */
+    case strip
+    /** One tall photo on the left, two stacked on the right. */
+    case split
+    /** Large photo over two rows, two on the right and a wide one below with "+N". */
+    case mosaic
+    /** A 2×2 grid, "+N" on the last tile. */
+    case grid
+
+    var tiles: Int {
+        switch self {
+        case .none: 0
+        case .hero: 1
+        case .side: 1
+        case .sideGrid: 4
+        case .pair: 2
+        case .strip: 3
+        case .split: 3
+        case .mosaic: 4
+        case .grid: 4
+        }
+    }
+}
+
+/** The look of one link card (the same target can be drawn several ways). */
+enum LinkCardVariant: CaseIterable, Codable, Sendable, Hashable {
+    /** Full-width cover with the type tag; event facts and a wide button, or venue address and sports. */
+    case hero
+    /** Event: cover on the left, when / where / spots and a join button on the right. */
+    case inline
+    /** Compact card: the cover only, beside the text. */
+    case side
+    /** One row: thumbnail, type tag, title, one meta line and a chevron. */
+    case row
+    /** Venue under the post photos: name, address and "View venue". */
+    case bar
+}
+
+/** How a feed card shows the links in its body. */
+enum PostLinkLayout: CaseIterable, Codable, Sendable, Hashable {
+    case none
+    /** Event: full-width cover with the event tag, facts and a wide "View event" button. */
+    case eventHero
+    /** Event: cover on the left, date / place / spots and "Join event" on the right. */
+    case eventInline
+    /** Compact: the event cover beside the text. */
+    case eventSide
+    /** Venue: full-width cover with the venue tag, name, address and sports. */
+    case venueHero
+    /** Venue: one bar with name, address and "View venue" under the photos. */
+    case venueRow
+    /** Compact: the venue cover beside the text. */
+    case venueSide
+    /** A linked post or building as one row card. */
+    case linked
+    /** Two or more links as rows, three shown and the rest behind "+ N more links". */
+    case group
+}

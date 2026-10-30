@@ -1,6 +1,7 @@
 import Foundation
 import PulsoLinkCore
 import PulsoLinkUI
+import SwiftUI
 
 /** 一场活动最多几张照片，第一张是封面（Android `EVENT_PHOTOS_MAX`，WEB `MAX_PHOTOS`）。 */
 let activityPhotosMax = 6
@@ -101,16 +102,6 @@ struct CreateDraft: Codable, Hashable, Sendable {
     var forDraft: CreateDraft {
         var copy = self
         copy.photos = photos.filter { $0.status == .ready }
-        return copy
-    }
-
-    /** 选好类型时用它的默认人数预填（还没填过才填）。 */
-    func withDefaults(for kind: NearActivityKind) -> CreateDraft {
-        var copy = self
-        copy.activityType = kind
-        if minParticipants.isEmpty { copy.minParticipants = String(kind.defaultMinParticipants) }
-        if capacity.isEmpty { copy.capacity = String(kind.defaultMaxParticipants) }
-        if waitlistCapacity.isEmpty { copy.waitlistCapacity = String(kind.defaultMaxParticipants / 2) }
         return copy
     }
 
@@ -223,6 +214,18 @@ extension String {
 }
 
 /* ------------------------------ 时长 ------------------------------ */
+
+extension ActivityDurationPreset {
+    var labelKey: LocalizedStringKey {
+        switch self {
+        case .hours2: "create_flow_duration_hours_2"
+        case .hours4: "create_flow_duration_hours_4"
+        case .hours6: "create_flow_duration_hours_6"
+        case .sameDay: "create_flow_duration_same_day"
+        case .plusOneDay: "create_flow_duration_plus_one_day"
+        }
+    }
+}
 
 /** 快捷时长的结束时间（Android `ActivityDurationPreset.endsAt`）：几小时后、当天 23:59、加一天。 */
 func endsAt(_ preset: ActivityDurationPreset, start: Date, calendar: Calendar = .current) -> Date {

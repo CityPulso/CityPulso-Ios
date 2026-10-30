@@ -70,6 +70,14 @@ extension Container {
         self { DeviceLocationBootstrap(store: self.deviceLocationStore()) }.singleton
     }
 
+    var activityCreateDraftStore: Factory<ActivityCreateDraftStore> {
+        self {
+            let store = ActivityCreateDraftStore()
+            self.sessionTerminator().register(store)
+            return store
+        }.singleton
+    }
+
     var venueEventBus: Factory<VenueEventBus> {
         self { VenueEventBus() }.singleton
     }
