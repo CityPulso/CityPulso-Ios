@@ -70,13 +70,19 @@ struct ActionCount: View {
     let label: LocalizedStringKey
     var active = false
     var activeTint: Color = .accentColor
+    /** 代替数字的文字（提问帖的「3 个回答」）。 */
+    var text: String?
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             HStack(spacing: 4) {
                 Image(systemName: symbol)
-                if let count, count > 0 { Text(count, format: .number).font(.caption) }
+                if let text {
+                    Text(verbatim: text).font(.caption)
+                } else if let count, count > 0 {
+                    Text(count, format: .number).font(.caption)
+                }
             }
             .foregroundStyle(active ? AnyShapeStyle(activeTint) : AnyShapeStyle(.secondary))
             .padding(.vertical, 4)
@@ -99,11 +105,19 @@ struct PostActionBar: View {
     var onRepost: (() -> Void)?
     var shareURL: URL?
     let onBookmark: () -> Void
+    /** 提问帖：评论读作回答。 */
+    var answers = false
 
     var body: some View {
         HStack(spacing: 4) {
             ActionCount(symbol: likedByMe ? "heart.fill" : "heart", count: likeCount, label: "discussion_action_like", active: likedByMe, activeTint: .red, action: onLike)
-            ActionCount(symbol: "bubble.right", count: commentCount, label: "discussion_action_comment", action: onComment)
+            ActionCount(
+                symbol: "bubble.right",
+                count: commentCount,
+                label: "discussion_action_comment",
+                text: answers ? localizedFormat("discussion_card_answers", commentCount) : nil,
+                action: onComment
+            )
             if let onRepost { ActionCount(symbol: "arrow.2.squarepath", count: repostCount, label: "discussion_action_repost", action: onRepost) }
             if let shareURL {
                 ShareLink(item: shareURL) { Image(systemName: "square.and.arrow.up").foregroundStyle(.secondary).padding(.horizontal, 6) }
@@ -195,37 +209,11 @@ struct ForumTypeTags: View {
     }
 }
 
-/** 列表里的帖子共有的字段（`PostCard` 和 `ForumPost`）。 */
-protocol PostCardFields {
-    var id: String { get }
-    var author: DiscussionProfileCard { get }
-    var kind: PostKind { get }
-    var city: String? { get }
-    var title: String { get }
-    var contentText: String { get }
-    var repostOf: RepostOf? { get }
-    var likeCount: Int { get set }
-    var commentCount: Int { get }
-    var bookmarkCount: Int { get set }
-    var repostCount: Int { get }
-    var firstPublishedAt: String? { get }
-    var previewImageIds: [String] { get }
-    var imageCount: Int { get }
-    var topics: [PostTopic] { get }
-    /** 正文里所有链接，按正文顺序。 */
-    var links: [PostLink] { get }
-    var forums: [PostForumRef] { get }
-    var createdAt: String { get }
-    var likedByMe: Bool { get set }
-    var bookmarkedByMe: Bool { get set }
-}
-
-extension PostCard: PostCardFields, Identifiable {}
-extension ForumPost: PostCardFields, Identifiable {}
-
 /**
- * 帖子卡片（Android `PostCardItem`）：作者 / 论坛 / 时间 / 城市，类型和状态，标题和摘要，照片（一张在旁边或一排），
- * 话题、转发、关联活动、原因，最下面的操作。
+ * 信息流里的帖子（Android `PostCardItem`，论坛设计稿）。头部：头像、「名字 · 在某论坛 +N」、「时间 · 城市」、类型、⋯。
+ * 正文按帖子里有什么来画（见 [PostCardLayout]）：几种照片布局、关联的活动 / 球馆 / 帖子各自一张卡、多个链接成组、
+ * 找球友 / 约球的事实框，或者文字旁边一张缩略图的紧凑卡。话题、被转发的原帖和操作排在最后。
+ * 链接目标在卡片出现时经页面的 [LinkCards] 读取。
  */
 struct PostCardView<Post: PostCardFields>: View {
     let post: Post
@@ -243,88 +231,148 @@ struct PostCardView<Post: PostCardFields>: View {
     var hideForums = false
     var onReport: (() -> Void)?
 
+    @Environment(LinkCards.self) private var sharedCards: LinkCards?
+    @Environment(PulsoShellNavigator.self) private var shell: PulsoShellNavigator?
+    @State private var ownCards = LinkCards()
+
+    private var cards: LinkCards { sharedCards ?? ownCards }
+
     var body: some View {
-        let layout = PostMediaLayout(imageCount: post.imageCount, previewIds: post.previewImageIds)
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 10) {
-                PulsoAvatar(url: imageURL(post.author.avatarImageId), size: 40, fallbackText: post.author.displayName ?? post.author.profileId)
-                    .onTapGesture { onOpenAuthor?() }
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(verbatim: post.author.displayName ?? String(localized: "discussion_unknown_member")).font(.subheadline.bold()).lineLimit(1)
-                    let first = hideForums ? nil : post.forums.first
-                    let meta = [
-                        first.map { localizedFormat("discussion_card_in_forum", $0.forumName) + (post.forums.count > 1 ? " +\(post.forums.count - 1)" : "") },
-                        DateTimeFormatters.monthDayTime(post.firstPublishedAt ?? post.createdAt),
-                        post.city,
-                    ].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
-                    if !meta.isEmpty {
-                        Text(verbatim: meta).font(.caption).foregroundStyle(.secondary).lineLimit(1)
-                            .onTapGesture { if let first, let onOpenForum { onOpenForum(first.forumId) } }
+        let layout = PostCardLayout(post)
+        VStack(alignment: .leading, spacing: 12) {
+            header
+            if layout.style == .compact {
+                HStack(alignment: .top, spacing: 12) {
+                    text(layout, compact: true).frame(maxWidth: .infinity, alignment: .leading)
+                    if layout.photos != .none {
+                        PostPhotos(layout: layout.photos, previewIds: post.previewImageIds, imageCount: post.imageCount, imageURL: imageURL)
+                    } else if let side = layout.linkItems.first {
+                        LinkTargetCard(link: side, state: state(side), variant: .side, imageURL: imageURL, onOpen: { open(side) })
                     }
-                }
-                Spacer(minLength: 0)
-                if pinned { Image(systemName: "pin.fill").font(.caption).foregroundStyle(.tint).accessibilityLabel(Text("discussion_pinned")) }
-                if let status, status != .published { PostStatusChip(status: status) }
-                PostKindChip(kind: post.kind)
-                if let onReport {
-                    Menu {
-                        Button(action: onReport) { Label("discussion_action_report", systemImage: "flag") }
-                    } label: {
-                        Image(systemName: "ellipsis").frame(width: 28, height: 28)
-                    }
-                    .accessibilityLabel(Text("discussion_more_actions"))
-                }
-            }
-            if layout == .single, let first = post.previewImageIds.first {
-                HStack(alignment: .top, spacing: 10) {
-                    text.frame(maxWidth: .infinity, alignment: .leading)
-                    PulsoRemoteImage(url: imageURL(first)).frame(width: 96, height: 72).clipShape(.rect(cornerRadius: 6))
                 }
             } else {
-                text
+                text(layout, compact: false)
+                if layout.facts {
+                    PostFactsBox(
+                        event: layout.factsEvent.map(state),
+                        city: post.city,
+                        onJoin: { if let event = layout.factsEvent { open(event) } },
+                        onInterested: onOpen
+                    )
+                }
+                // 关联帖子读作背景，放在照片前面；活动 / 球馆卡跟在照片后面。
+                if layout.links == .linked { linkArea(layout) }
+                PostPhotos(layout: layout.photos, previewIds: post.previewImageIds, imageCount: post.imageCount, imageURL: imageURL)
+                if layout.links != .linked { linkArea(layout) }
             }
-            if layout == .row { photoRow }
             if !post.topics.isEmpty { TopicChipRow(topics: post.topics, onOpen: onOpenTopic) }
             if let repost = post.repostOf { RepostQuote(repost: repost) }
             if let reason, !reason.isEmpty { Text(verbatim: reason).font(.caption).foregroundStyle(.red) }
             PostActionBar(
                 likedByMe: post.likedByMe, likeCount: post.likeCount, commentCount: post.commentCount, repostCount: post.repostCount,
-                bookmarkedByMe: post.bookmarkedByMe, onLike: onLike, onComment: onOpen, onRepost: onRepost, shareURL: postShareURL(post.id), onBookmark: onBookmark
+                bookmarkedByMe: post.bookmarkedByMe, onLike: onLike, onComment: onOpen, onRepost: onRepost, shareURL: postShareURL(post.id), onBookmark: onBookmark,
+                answers: layout.question
             )
         }
         .contentShape(.rect)
         .onTapGesture(perform: onOpen)
-    }
-
-    @ViewBuilder
-    private var text: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(verbatim: post.title).font(.title3.bold()).lineLimit(2)
-            if !post.contentText.trimmingCharacters(in: .whitespaces).isEmpty {
-                Text(verbatim: post.contentText).font(.subheadline).foregroundStyle(.secondary).lineLimit(2)
+        .onAppear {
+            for link in (layout.factsEvent.map { [$0] } ?? []) + layout.linkItems where layout.links != .group || link == layout.factsEvent {
+                cards.ensure(link)
             }
         }
     }
 
-    private var photoRow: some View {
-        let tiles = Array(post.previewImageIds.prefix(PostMediaLayout.rowTiles))
-        let more = hiddenPhotoCount(post.imageCount, post.previewImageIds)
-        return HStack(spacing: 6) {
-            ForEach(Array(tiles.enumerated()), id: \.offset) { index, id in
-                Color.clear
-                    .aspectRatio(1, contentMode: .fit)
-                    .overlay { PulsoRemoteImage(url: imageURL(id)) }
-                    .overlay {
-                        if more > 0, index == tiles.count - 1 {
-                            ZStack {
-                                Color.black.opacity(0.5)
-                                Text(verbatim: "+\(more)").font(.title2.bold()).foregroundStyle(.white)
-                            }
-                        }
+    /** 头像、「名字 · 在某论坛 +N」、「时间 · 城市」，然后置顶、状态、类型和菜单。 */
+    private var header: some View {
+        HStack(spacing: 10) {
+            PulsoAvatar(url: imageURL(post.author.avatarImageId), size: 40, fallbackText: post.author.displayName ?? post.author.profileId)
+                .onTapGesture { onOpenAuthor?() }
+            VStack(alignment: .leading, spacing: 1) {
+                let first = hideForums ? nil : post.forums.first
+                HStack(spacing: 4) {
+                    Text(verbatim: post.author.displayName ?? String(localized: "discussion_unknown_member")).font(.subheadline.bold()).lineLimit(1)
+                    if let first {
+                        Text(verbatim: localizedFormat("discussion_card_in_forum", first.forumName) + (post.forums.count > 1 ? " +\(post.forums.count - 1)" : ""))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                            .onTapGesture { onOpenForum?(first.forumId) }
                     }
-                    .clipShape(.rect(cornerRadius: 6))
+                }
+                let meta = [DateTimeFormatters.monthDayTime(post.firstPublishedAt ?? post.createdAt), post.city].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
+                if !meta.isEmpty { Text(verbatim: meta).font(.caption2).foregroundStyle(.secondary).lineLimit(1) }
+            }
+            Spacer(minLength: 0)
+            if pinned { Image(systemName: "pin.fill").font(.caption).foregroundStyle(.tint).accessibilityLabel(Text("discussion_pinned")) }
+            if let status, status != .published { PostStatusChip(status: status) }
+            PostKindChip(kind: post.kind)
+            if let onReport {
+                Menu {
+                    Button(action: onReport) { Label("discussion_action_report", systemImage: "flag") }
+                } label: {
+                    Image(systemName: "ellipsis").frame(width: 28, height: 28)
+                }
+                .accessibilityLabel(Text("discussion_more_actions"))
             }
         }
+    }
+
+    private func text(_ layout: PostCardLayout, compact: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(verbatim: post.title).font((compact ? Font.headline : .title3).bold()).lineLimit(2)
+            if !post.contentText.trimmingCharacters(in: .whitespaces).isEmpty {
+                Text(verbatim: post.contentText).font(.subheadline).foregroundStyle(.secondary).lineLimit(layout.longExcerpt ? 3 : 2)
+            }
+        }
+    }
+
+    /** 丰富卡的链接区：一组行、大的或内嵌的活动卡、大的球馆卡或球馆条，或者一行。 */
+    @ViewBuilder
+    private func linkArea(_ layout: PostCardLayout) -> some View {
+        if let only = layout.linkItems.first {
+            switch layout.links {
+            case .none, .eventSide, .venueSide:
+                EmptyView()
+            case .group:
+                PostLinkGroup(links: layout.linkItems, cards: cards, imageURL: imageURL, onOpen: { open($0) })
+            case .eventHero, .venueHero:
+                LinkTargetCard(link: only, state: state(only), variant: .hero, imageURL: imageURL, onOpen: { open(only) })
+            case .eventInline:
+                LinkTargetCard(link: only, state: state(only), variant: .inline, imageURL: imageURL, onOpen: { open(only) })
+            case .venueRow:
+                LinkTargetCard(link: only, state: state(only), variant: .bar, imageURL: imageURL, onOpen: { open(only) })
+            case .linked:
+                LinkTargetCard(
+                    link: only, state: state(only), variant: .row, imageURL: imageURL, onOpen: { open(only) },
+                    label: only.type == .post ? String(localized: "discussion_card_linked_post") : nil
+                )
+            }
+        }
+    }
+
+    private func state(_ link: PostLink) -> LinkCardState {
+        cards.states[link.key] ?? .loading
+    }
+
+    private func open(_ link: PostLink) {
+        if let route = PostLinkLoader.route(link) { shell?.push(route) }
+    }
+}
+
+/** 一页共用一份链接卡片缓存（Android `PostLinksViewModel` 每页一个）：页面里所有帖子卡片从这里读链接目标。 */
+private struct PostLinkCardsScope: ViewModifier {
+    @State private var cards = LinkCards()
+
+    func body(content: Content) -> some View {
+        content.environment(cards)
+    }
+}
+
+extension View {
+    /** 给这一页的帖子卡片一份共用的链接卡片缓存。 */
+    func postLinkCards() -> some View {
+        modifier(PostLinkCardsScope())
     }
 }
 

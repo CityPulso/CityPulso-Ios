@@ -1,4 +1,5 @@
 import PulsoLinkCore
+import PulsoLinkUI
 import SwiftUI
 
 extension ForumSport {
@@ -33,31 +34,6 @@ func postShareURL(_ postId: String) -> URL {
     URL(string: "\(loopWebBaseURL)/panel/discussion/post-detail/\(postId)")!
 }
 
-/** 帖子卡片怎么放照片：没有、一张放在文字旁、一排小图（Android `PostMediaLayout`）。 */
-enum PostMediaLayout {
-    case none
-    case single
-    case row
-
-    /** 一排最多几张，最后一张写「+N」。 */
-    static let rowTiles = 3
-
-    init(imageCount: Int, previewIds: [String]) {
-        if imageCount <= 0 || previewIds.isEmpty {
-            self = .none
-        } else if imageCount == 1 {
-            self = .single
-        } else {
-            self = .row
-        }
-    }
-}
-
-/** 一排里放不下的照片数。 */
-func hiddenPhotoCount(_ imageCount: Int, _ previewIds: [String]) -> Int {
-    max(0, imageCount - min(previewIds.count, PostMediaLayout.rowTiles))
-}
-
 extension PostKind {
     /** 帖子类型标签的颜色（WEB 同款）。 */
     var tone: Color {
@@ -69,6 +45,28 @@ extension PostKind {
         case .tips: Color(argb: 0xFFD6A100)
         case .question: Color(argb: 0xFF00A2C7)
         case .gear: Color(argb: 0xFF8B8D98)
+        }
+    }
+}
+
+extension PostLinkType {
+    /** 链接类型标签的颜色：活动橙、球馆绿、帖子蓝、建筑青（WEB 同款）。 */
+    var tone: Color {
+        switch self {
+        case .post: Color(argb: 0xFF0090FF)
+        case .event: Color(argb: 0xFFF76B15)
+        case .venue: Color(argb: 0xFF30A46C)
+        case .building: Color(argb: 0xFF12A594)
+        }
+    }
+
+    /** 「还有 N 个链接」后面的分类计数（「1 个活动」）。 */
+    func countText(_ count: Int) -> String {
+        switch self {
+        case .post: localizedFormat("discussion_link_count_post", count)
+        case .event: localizedFormat("discussion_link_count_event", count)
+        case .venue: localizedFormat("discussion_link_count_venue", count)
+        case .building: localizedFormat("discussion_link_count_building", count)
         }
     }
 }

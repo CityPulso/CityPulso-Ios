@@ -3,11 +3,31 @@ import PulsoLinkCore
 import PulsoLinkUI
 import SwiftUI
 
-/** 链接卡片上显示的：标题、一行说明、封面（Android `LinkCardInfo`）。 */
+/**
+ * 链接卡片能显示的全部内容，各类型卡片挑自己有的（Android `LinkCardInfo`）。活动：时间、地点、名额；
+ * 球馆 / 建筑：地址和（球馆）运动；帖子：谁写的、什么时候。
+ */
 struct LinkCardInfo: Hashable, Sendable {
     let title: String
-    let meta: String
     let coverImageId: String?
+    var startsAt: String?
+    var endsAt: String?
+    var place: String?
+    var capacity = 0
+    var joined = 0
+    var address: String?
+    var sports: [LoopSport] = []
+    var byline: String?
+    var at: String?
+
+    /** 行标题下的一行说明：活动是时间 · 地点，球馆 / 建筑是地址，帖子是作者 · 时间。 */
+    func meta(_ type: PostLinkType, locale: Locale = .current) -> String {
+        switch type {
+        case .event: [startsAt.map { formatEventWhen($0, nil, locale: locale) }, place].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
+        case .venue, .building: address ?? ""
+        case .post: [byline, at.flatMap { DateTimeFormatters.monthDayTime($0) }].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
+        }
+    }
 }
 
 /** 链接卡片的状态：加载中、目标没了（或看不到）、好了。 */
@@ -55,8 +75,9 @@ enum PostLinkLoader {
                 let post = try await container.discussionService().post(link.id)
                 return LinkCardInfo(
                     title: post.title,
-                    meta: [post.author.displayName, post.publications.first?.forumName].compactMap { $0 }.joined(separator: " · "),
-                    coverImageId: post.images.min { $0.sortOrder < $1.sortOrder }?.imageId
+                    coverImageId: post.images.min { $0.sortOrder < $1.sortOrder }?.imageId,
+                    byline: post.author.displayName,
+                    at: post.firstPublishedAt ?? post.createdAt
                 )
             case .event:
                 guard let sport = link.sport, let service = container.loopSportServices()[sport] else { return nil }
@@ -64,10 +85,15 @@ enum PostLinkLoader {
                     switch response {
                     case .loading: continue
                     case let .data(detail):
+                        let event = detail.event
                         return LinkCardInfo(
-                            title: detail.event.title,
-                            meta: [DateTimeFormatters.monthDayTime(detail.event.startsAt), detail.event.venueName].compactMap { $0 }.joined(separator: " · "),
-                            coverImageId: detail.imageIds.first
+                            title: event.title,
+                            coverImageId: detail.imageIds.first,
+                            startsAt: event.startsAt,
+                            endsAt: event.endsAt,
+                            place: event.venueName,
+                            capacity: event.capacity,
+                            joined: event.participatingCount
                         )
                     case .error: return nil
                     }
@@ -75,10 +101,15 @@ enum PostLinkLoader {
                 return nil
             case .venue:
                 let venue = try await container.venueService().getVenue(link.id)
-                return LinkCardInfo(title: venue.building.name, meta: venue.building.address, coverImageId: venue.images.min { $0.sortOrder < $1.sortOrder }?.imageId ?? venue.building.images.first?.imageId)
+                return LinkCardInfo(
+                    title: venue.building.name,
+                    coverImageId: venue.images.min { $0.sortOrder < $1.sortOrder }?.imageId ?? venue.building.images.first?.imageId,
+                    address: venue.building.address,
+                    sports: venue.publishedSports.map(\.loopSport)
+                )
             case .building:
                 let building = try await container.buildingService().getBuilding(id: link.id)
-                return LinkCardInfo(title: building.name, meta: building.address, coverImageId: building.coverImageId)
+                return LinkCardInfo(title: building.name, coverImageId: building.coverImageId, address: building.address)
             }
         } catch {
             return nil
@@ -152,7 +183,8 @@ struct PostLinkCard: View {
                 .clipShape(.rect(cornerRadius: 6))
                 VStack(alignment: .leading, spacing: 2) {
                     Text(verbatim: info.title).font(.subheadline.weight(.semibold)).lineLimit(2)
-                    if !info.meta.isEmpty { Text(verbatim: info.meta).font(.caption).foregroundStyle(.secondary).lineLimit(1) }
+                    let meta = info.meta(link.type)
+                    if !meta.isEmpty { Text(verbatim: meta).font(.caption).foregroundStyle(.secondary).lineLimit(1) }
                 }
                 Spacer(minLength: 0)
                 Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)

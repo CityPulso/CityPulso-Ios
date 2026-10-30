@@ -27,7 +27,7 @@ enum LoopShellPages {
         case .venueSearch:
             VenueSearchView()
         case .favorites:
-            FavoritesView()
+            FavoritesView().postLinkCards()
         case .wallet:
             WalletView()
         case .billing:
@@ -41,7 +41,7 @@ enum LoopShellPages {
         case .chatHub:
             ChatHubView()
         case .forum:
-            ForumFeedView()
+            ForumFeedView().postLinkCards()
         default:
             PulsoComingSoonView(destination)
         }

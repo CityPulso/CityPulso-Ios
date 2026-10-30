@@ -27,13 +27,13 @@ enum NearShellPages {
         case .venueSearch:
             VenueSearchView()
         case .favorites:
-            FavoritesView()
+            FavoritesView().postLinkCards()
         case .wallet:
             WalletView()
         case .billing:
             BillingView()
         case .forum:
-            ForumFeedView()
+            ForumFeedView().postLinkCards()
         case .chatHub:
             ChatHubView()
         default:

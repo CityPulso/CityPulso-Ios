@@ -73,17 +73,18 @@ enum NearbyDistance: String, WireEnum {
 
 /** When a nearby event starts. [ANY] sends no range; [CUSTOM] uses the picked from / to. */
 enum EventDatePreset: String, WireEnum {
-    case `any` = "ANY"
+    /** Default: everything that starts from now on, with no end. */
+    case upcoming = "UPCOMING"
     case today = "TODAY"
     case thisWeek = "THIS_WEEK"
     case thisMonth = "THIS_MONTH"
     case custom = "CUSTOM"
 
-    static let fallback: EventDatePreset = .`any`
+    static let fallback: EventDatePreset = .upcoming
 
     var labelKey: LocalizedStringKey {
         switch self {
-        case .`any`: "nearby_filter_date_any"
+        case .upcoming: "nearby_filter_date_upcoming"
         case .today: "nearby_filter_date_today"
         case .thisWeek: "nearby_filter_date_week"
         case .thisMonth: "nearby_filter_date_month"
@@ -93,7 +94,7 @@ enum EventDatePreset: String, WireEnum {
 
     var labelResource: String.LocalizationValue {
         switch self {
-        case .`any`: "nearby_filter_date_any"
+        case .upcoming: "nearby_filter_date_upcoming"
         case .today: "nearby_filter_date_today"
         case .thisWeek: "nearby_filter_date_week"
         case .thisMonth: "nearby_filter_date_month"
