@@ -699,29 +699,6 @@ struct RepostOf: Codable, Sendable, Hashable {
     }
 }
 
-/** The first Near event a post body links to: the chip on a card. */
-struct PostActivityLink: Codable, Sendable, Hashable {
-    var activityType: NearActivityType
-    var activityId: String
-
-    init(activityType: NearActivityType, activityId: String) {
-        self.activityType = activityType
-        self.activityId = activityId
-    }
-
-    init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: WireKey.self)
-        activityType = try container.wireRequired(NearActivityType.self, "activityType")
-        activityId = try container.wireRequired(String.self, "activityId")
-    }
-
-    func encode(to encoder: any Encoder) throws {
-        var container = encoder.container(keyedBy: WireKey.self)
-        try container.wire(activityType, "activityType")
-        try container.wire(activityId, "activityId")
-    }
-}
-
 /** What a link section points at; [activity type] is set for events only. */
 struct PostLink: Codable, Sendable, Hashable {
     var type: PostLinkType
@@ -968,14 +945,15 @@ struct PostCard: Codable, Sendable, Hashable {
     var previewImageIds: [String]
     var imageCount: Int
     var topics: [PostTopic]
-    var activity: PostActivityLink?
+    /** Every link in the body, in body order (the card draws them by type and count). */
+    var links: [PostLink]
     var forums: [PostForumRef]
     var createdAt: String
     var likedByMe: Bool
     var bookmarkedByMe: Bool
     var reactedAt: String?
 
-    init(id: String, author: DiscussionProfileCard, kind: PostKind = .discussion, city: String? = nil, title: String = "", contentText: String = "", repostOf: RepostOf? = nil, likeCount: Int = 0, commentCount: Int = 0, bookmarkCount: Int = 0, repostCount: Int = 0, firstPublishedAt: String? = nil, editedAt: String? = nil, previewImageIds: [String] = [], imageCount: Int = 0, topics: [PostTopic] = [], activity: PostActivityLink? = nil, forums: [PostForumRef] = [], createdAt: String = "", likedByMe: Bool = false, bookmarkedByMe: Bool = false, reactedAt: String? = nil) {
+    init(id: String, author: DiscussionProfileCard, kind: PostKind = .discussion, city: String? = nil, title: String = "", contentText: String = "", repostOf: RepostOf? = nil, likeCount: Int = 0, commentCount: Int = 0, bookmarkCount: Int = 0, repostCount: Int = 0, firstPublishedAt: String? = nil, editedAt: String? = nil, previewImageIds: [String] = [], imageCount: Int = 0, topics: [PostTopic] = [], links: [PostLink] = [], forums: [PostForumRef] = [], createdAt: String = "", likedByMe: Bool = false, bookmarkedByMe: Bool = false, reactedAt: String? = nil) {
         self.id = id
         self.author = author
         self.kind = kind
@@ -992,7 +970,7 @@ struct PostCard: Codable, Sendable, Hashable {
         self.previewImageIds = previewImageIds
         self.imageCount = imageCount
         self.topics = topics
-        self.activity = activity
+        self.links = links
         self.forums = forums
         self.createdAt = createdAt
         self.likedByMe = likedByMe
@@ -1018,7 +996,7 @@ struct PostCard: Codable, Sendable, Hashable {
         previewImageIds = try container.wire([String].self, "previewImageIds") ?? []
         imageCount = try container.wire(Int.self, "imageCount") ?? 0
         topics = try container.wire([PostTopic].self, "topics") ?? []
-        activity = try container.wire(PostActivityLink.self, "activity")
+        links = try container.wire([PostLink].self, "links") ?? []
         forums = try container.wire([PostForumRef].self, "forums") ?? []
         createdAt = try container.wire(String.self, "createdAt") ?? ""
         likedByMe = try container.wire(Bool.self, "likedByMe") ?? false
@@ -1044,7 +1022,7 @@ struct PostCard: Codable, Sendable, Hashable {
         try container.wire(previewImageIds, "previewImageIds", default: [])
         try container.wire(imageCount, "imageCount", default: 0)
         try container.wire(topics, "topics", default: [])
-        try container.wireOptional(activity, "activity")
+        try container.wire(links, "links", default: [])
         try container.wire(forums, "forums", default: [])
         try container.wire(createdAt, "createdAt", default: "")
         try container.wire(likedByMe, "likedByMe", default: false)
@@ -1072,7 +1050,8 @@ struct ForumPost: Codable, Sendable, Hashable {
     var previewImageIds: [String]
     var imageCount: Int
     var topics: [PostTopic]
-    var activity: PostActivityLink?
+    /** Every link in the body, in body order (the card draws them by type and count). */
+    var links: [PostLink]
     var forums: [PostForumRef]
     var createdAt: String
     var likedByMe: Bool
@@ -1088,7 +1067,7 @@ struct ForumPost: Codable, Sendable, Hashable {
     var rejectReason: String?
     var removedReason: String?
 
-    init(id: String, author: DiscussionProfileCard, kind: PostKind = .discussion, city: String? = nil, title: String = "", contentText: String = "", repostOf: RepostOf? = nil, likeCount: Int = 0, commentCount: Int = 0, bookmarkCount: Int = 0, repostCount: Int = 0, firstPublishedAt: String? = nil, editedAt: String? = nil, previewImageIds: [String] = [], imageCount: Int = 0, topics: [PostTopic] = [], activity: PostActivityLink? = nil, forums: [PostForumRef] = [], createdAt: String = "", likedByMe: Bool = false, bookmarkedByMe: Bool = false, publicationId: String, forumId: String, forumName: String = "", forumOwnerProfileScope: ProfileKind = .community, status: ForumPostStatus = .published, isPinned: Bool = false, submittedAt: String = "", publishedAt: String? = nil, rejectReason: String? = nil, removedReason: String? = nil) {
+    init(id: String, author: DiscussionProfileCard, kind: PostKind = .discussion, city: String? = nil, title: String = "", contentText: String = "", repostOf: RepostOf? = nil, likeCount: Int = 0, commentCount: Int = 0, bookmarkCount: Int = 0, repostCount: Int = 0, firstPublishedAt: String? = nil, editedAt: String? = nil, previewImageIds: [String] = [], imageCount: Int = 0, topics: [PostTopic] = [], links: [PostLink] = [], forums: [PostForumRef] = [], createdAt: String = "", likedByMe: Bool = false, bookmarkedByMe: Bool = false, publicationId: String, forumId: String, forumName: String = "", forumOwnerProfileScope: ProfileKind = .community, status: ForumPostStatus = .published, isPinned: Bool = false, submittedAt: String = "", publishedAt: String? = nil, rejectReason: String? = nil, removedReason: String? = nil) {
         self.id = id
         self.author = author
         self.kind = kind
@@ -1105,7 +1084,7 @@ struct ForumPost: Codable, Sendable, Hashable {
         self.previewImageIds = previewImageIds
         self.imageCount = imageCount
         self.topics = topics
-        self.activity = activity
+        self.links = links
         self.forums = forums
         self.createdAt = createdAt
         self.likedByMe = likedByMe
@@ -1140,7 +1119,7 @@ struct ForumPost: Codable, Sendable, Hashable {
         previewImageIds = try container.wire([String].self, "previewImageIds") ?? []
         imageCount = try container.wire(Int.self, "imageCount") ?? 0
         topics = try container.wire([PostTopic].self, "topics") ?? []
-        activity = try container.wire(PostActivityLink.self, "activity")
+        links = try container.wire([PostLink].self, "links") ?? []
         forums = try container.wire([PostForumRef].self, "forums") ?? []
         createdAt = try container.wire(String.self, "createdAt") ?? ""
         likedByMe = try container.wire(Bool.self, "likedByMe") ?? false
@@ -1175,7 +1154,7 @@ struct ForumPost: Codable, Sendable, Hashable {
         try container.wire(previewImageIds, "previewImageIds", default: [])
         try container.wire(imageCount, "imageCount", default: 0)
         try container.wire(topics, "topics", default: [])
-        try container.wireOptional(activity, "activity")
+        try container.wire(links, "links", default: [])
         try container.wire(forums, "forums", default: [])
         try container.wire(createdAt, "createdAt", default: "")
         try container.wire(likedByMe, "likedByMe", default: false)

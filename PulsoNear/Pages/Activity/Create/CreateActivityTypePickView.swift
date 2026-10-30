@@ -96,3 +96,50 @@ extension NearActivityNotice {
         }
     }
 }
+
+/**
+ * 基础步骤里的类型横排（Android `CreateActivityTypeTiles`）：选中的在最前，然后其他能发起的类型，最后「更多」回到选类型页。
+ * 点一个就把表单换成那种类型，已填的保留。
+ */
+struct CreateActivityTypeTiles: View {
+    let selected: NearActivityKind
+    let enabled: Bool
+    let onSelect: (NearActivityKind) -> Void
+    let onMore: () -> Void
+
+    private static let shown = 7
+
+    var body: some View {
+        let kinds = Array(([selected] + NearActivityKind.allCases.filter { $0.available && $0 != selected }).prefix(Self.shown))
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(kinds) { kind in
+                    tile(selected: kind == selected) {
+                        Image(kind.iconAsset).resizable().scaledToFit().frame(width: 32, height: 32)
+                        Text(kind.labelKey).lineLimit(1).minimumScaleFactor(0.8)
+                    } action: {
+                        if kind != selected { onSelect(kind) }
+                    }
+                }
+                tile(selected: false) {
+                    Image(systemName: "ellipsis").font(.title2).frame(width: 32, height: 32)
+                    Text("create_activity_type_more")
+                } action: {
+                    onMore()
+                }
+            }
+        }
+        .disabled(!enabled)
+    }
+
+    private func tile(selected: Bool, @ViewBuilder content: () -> some View, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: 6) { content() }
+                .font(.caption.weight(.medium))
+                .frame(width: 76, height: 76)
+                .background(selected ? Color.accentColor.opacity(0.12) : Color.clear, in: .rect(cornerRadius: 14))
+                .overlay(RoundedRectangle(cornerRadius: 14).stroke(selected ? Color.accentColor : Color(.separator)))
+        }
+        .buttonStyle(.plain)
+    }
+}

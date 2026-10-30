@@ -25,6 +25,12 @@ from pathlib import Path
 IOS_ROOT = Path(__file__).resolve().parent.parent
 NEAR = IOS_ROOT / "PulsoNear"
 
+# Every type except the four other space venues (mahjong, KTV, billiards, esports).
+NON_SPACE_VENUES = {
+    "texas_holdem", "werewolf", "script_murder", "escape_room", "bar_party", "indoor_social", "outdoor_social",
+    "language_exchange", "book_club", "diy",
+}
+
 # Board game files every type gets a copy of (paths contain "BoardGame"), with the types (wire values) that do NOT take
 # the copy. Mahjong carries its rule set (`mahjongVariant`), so its rows, create request and service glue (basic edit
 # sends the rule set) are written by hand.
@@ -38,6 +44,10 @@ TEMPLATES: list[tuple[str, set[str]]] = [
     ("DI/Container+BoardGame.swift", set()),
     ("Features/Events/Rows/BoardGameRows.swift", {"mahjong"}),
     ("Features/Create/BoardGameCreate.swift", {"mahjong"}),
+    # Venue types that book tables / rooms / seats by the hour (Android `VenueBookingTemplate.SPACE`); escape rooms and
+    # murder mysteries book themed sessions and the other types have no venue entry.
+    ("Services/BoardGameVenueService.swift", NON_SPACE_VENUES),
+    ("DI/Container+BoardGameVenue.swift", NON_SPACE_VENUES),
 ]
 
 SOURCE = ("BoardGame", "boardGame", "board_game")

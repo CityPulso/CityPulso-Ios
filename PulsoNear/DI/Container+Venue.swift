@@ -18,4 +18,32 @@ extension Container {
     var venueService: Factory<VenueService> {
         self { VenueService(repository: self.venueRepository(), query: self.venueQueryStore(), eventBus: self.venueEventBus(), session: self.authSessionStore()) }.singleton
     }
+
+    /** 按场次订的门店类型（密室、剧本杀）。 */
+    var sessionVenueServices: Factory<[VenueActivityType: any SessionVenueService]> {
+        self { [.escapeRoom: self.escapeRoomVenueService(), .scriptMurder: self.scriptMurderVenueService()] }.singleton
+    }
+
+    /** 每种门店类型的「我的预约」读写（活动中心、日程）。 */
+    var venueBookingServices: Factory<[VenueActivityType: any VenueBookingService]> {
+        self {
+            var services: [VenueActivityType: any VenueBookingService] = [:]
+            for (type, service) in self.venueActivityTypeServices() { services[type] = service }
+            for (type, service) in self.sessionVenueServices() { services[type] = service }
+            return services
+        }.singleton
+    }
+
+    /** 按桌台 / 包间 / 机位订的门店类型各自的预约读写（密室、剧本杀按场次订，见 [sessionVenueServices]）。 */
+    var venueActivityTypeServices: Factory<[VenueActivityType: any VenueActivityTypeService]> {
+        self {
+            [
+                .boardGame: self.boardGameVenueService(),
+                .mahjong: self.mahjongVenueService(),
+                .ktv: self.ktvVenueService(),
+                .billiards: self.billiardsVenueService(),
+                .esports: self.esportsVenueService(),
+            ]
+        }.singleton
+    }
 }

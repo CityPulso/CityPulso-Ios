@@ -20,6 +20,8 @@ public enum AssetCategory: String, WireEnum {
     case venueOffering = "venue_offering"
     case badmintonCourt = "badminton_court"
     case forum
+    /** A group chat's picture (confirming it never touches the uploader's own avatar). */
+    case groupAvatar = "group_avatar"
     case tennis
     case tennisCourt = "tennis_court"
     case pickleball
