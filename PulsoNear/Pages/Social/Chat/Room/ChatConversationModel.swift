@@ -144,7 +144,7 @@ final class ChatConversationModel {
                 }
             },
             {
-                for await draft in self.shareDrafts.activities() where draft.conversationId == self.conversationId {
+                for await draft in self.shareDrafts.events() where draft.conversationId == self.conversationId {
                     let (type, content) = draft.message
                     await self.sendNow(type: type, content: content)
                 }
