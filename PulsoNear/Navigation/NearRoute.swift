@@ -25,6 +25,14 @@ enum NearRoute: Hashable {
     case joinActivity(activityType: NearActivityKind, activityId: String)
     /** 一场活动的收款清单。 */
     case checklist(activityType: NearActivityKind, activityId: String)
+    /** 选附近搜索的中心点。 */
+    case locationPick
+    /** 活动与预约，停在 [tab]。 */
+    case calendar(tab: ActivityCenterTab?)
+    /** 我的一条门店预约。 */
+    case spaceBooking(activityType: VenueActivityType, bookingId: String)
+    /** 门店详情（门店那组移植前是占位页）。 */
+    case venue(venueId: String)
     /** 收款账户（Stripe Connect）。 */
     case paymentAccounts
     /** 付款方式（保存的卡）。 */
@@ -54,6 +62,10 @@ enum NearRoute: Hashable {
         case let .activity(activityType, activityId): ActivityDetailView(activityType: activityType, activityId: activityId)
         case let .joinActivity(activityType, activityId): ActivityDetailView(activityType: activityType, activityId: activityId, openJoin: true)
         case let .checklist(activityType, activityId): ChecklistView(activityType: activityType, activityId: activityId)
+        case .locationPick: LocationPickView()
+        case let .calendar(tab): CalendarView(initialTab: tab)
+        case let .spaceBooking(activityType, bookingId): SpaceBookingView(activityType: activityType, bookingId: bookingId)
+        case .venue: PulsoComingSoonView(title: "shell_dest_venue_search", systemImage: "building.2")
         case .paymentAccounts: PaymentAccountsView()
         case .paymentMethods: PaymentMethodsView()
         case .social, .socialProfile: PulsoComingSoonView(title: "shell_dest_social", systemImage: "person.2")

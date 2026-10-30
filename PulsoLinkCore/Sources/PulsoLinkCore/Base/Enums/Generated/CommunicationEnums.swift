@@ -87,13 +87,14 @@ public enum ChatTab: String, WireEnum {
     public static let fallback: ChatTab = .direct
 }
 
-/** 群聊系统消息码（API `constants.SystemMessageCode`）。 */
+/** 系统消息码（API `constants.SystemMessageCode`）。 */
 public enum ChatSystemMessageCode: String, WireEnum {
     case groupCreated = "group_created"
     case groupInviteRejected = "group_invite_rejected"
     case groupMemberAdded = "group_member_added"
     case groupMemberRemoved = "group_member_removed"
     case groupMemberLeft = "group_member_left"
+    case directCreated = "direct_created"
 
     public static let fallback: ChatSystemMessageCode = .groupCreated
 }

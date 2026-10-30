@@ -18,6 +18,10 @@ enum NearShellPages {
             ProfileOverviewView()
         case .create:
             CreateActivityView()
+        case .calendar:
+            CalendarView(initialTab: nil)
+        case .search:
+            ActivitySearchView()
         default:
             PulsoComingSoonView(destination)
         }

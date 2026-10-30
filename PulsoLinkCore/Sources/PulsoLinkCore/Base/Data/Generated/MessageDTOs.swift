@@ -87,18 +87,24 @@ public struct ChatSharedCardContent: Codable, Sendable, Hashable {
     }
 }
 
-/** 系统消息内容。 */
+/** 系统消息内容。名字在发出时就写进来，之后改名或退群也照旧显示。 */
 public struct ChatSystemContent: Codable, Sendable, Hashable {
     public var code: String
     public var actorId: String?
     public var targetId: String?
     public var targetIds: [String]?
+    public var actorName: String?
+    public var targetNames: [String]?
+    public var groupName: String?
 
-    public init(code: String, actorId: String? = nil, targetId: String? = nil, targetIds: [String]? = nil) {
+    public init(code: String, actorId: String? = nil, targetId: String? = nil, targetIds: [String]? = nil, actorName: String? = nil, targetNames: [String]? = nil, groupName: String? = nil) {
         self.code = code
         self.actorId = actorId
         self.targetId = targetId
         self.targetIds = targetIds
+        self.actorName = actorName
+        self.targetNames = targetNames
+        self.groupName = groupName
     }
 
     public init(from decoder: any Decoder) throws {
@@ -107,6 +113,9 @@ public struct ChatSystemContent: Codable, Sendable, Hashable {
         actorId = try container.wire(String.self, "actorId")
         targetId = try container.wire(String.self, "targetId")
         targetIds = try container.wire([String].self, "targetIds")
+        actorName = try container.wire(String.self, "actorName")
+        targetNames = try container.wire([String].self, "targetNames")
+        groupName = try container.wire(String.self, "groupName")
     }
 
     public func encode(to encoder: any Encoder) throws {
@@ -115,6 +124,9 @@ public struct ChatSystemContent: Codable, Sendable, Hashable {
         try container.wireOptional(actorId, "actorId")
         try container.wireOptional(targetId, "targetId")
         try container.wireOptional(targetIds, "targetIds")
+        try container.wireOptional(actorName, "actorName")
+        try container.wireOptional(targetNames, "targetNames")
+        try container.wireOptional(groupName, "groupName")
     }
 }
 

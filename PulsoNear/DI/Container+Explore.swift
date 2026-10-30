@@ -70,6 +70,10 @@ extension Container {
         self { DeviceLocationBootstrap(store: self.deviceLocationStore()) }.singleton
     }
 
+    var activityNearbyFilterStore: Factory<ActivityNearbyFilterStore> {
+        self { ActivityNearbyFilterStore() }.singleton
+    }
+
     var activityCreateDraftStore: Factory<ActivityCreateDraftStore> {
         self {
             let store = ActivityCreateDraftStore()

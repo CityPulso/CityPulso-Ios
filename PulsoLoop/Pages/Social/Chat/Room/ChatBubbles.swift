@@ -30,7 +30,7 @@ struct ChatMessageBubble: View {
 
     var body: some View {
         if message.type == .system {
-            ChatCenterNote(text: message.text.isEmpty ? "—" : message.text)
+            ChatCenterNote(text: chatSystemNoticeText(message.content.system, mine: message.isMine))
         } else if message.deleted {
             ChatCenterNote(text: message.isMine
                 ? String(localized: "shell_chat_unsent_mine")
