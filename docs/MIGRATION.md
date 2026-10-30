@@ -51,8 +51,10 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 - **登录同步 Android（2026-10-30）**：手机一律记住登录（去掉「记住我」）；选身份后先用新身份的 token 读到档案、套上偏好再写进会话；
   登录中途失败结束半截会话（`LogoutReason.signInFailed`）；刷新被拒的若已不是会话里的票（登录 / 选身份作废了旧票），不登出；
   账号没有 community 身份时显示 `login_no_community_profile`。Linux 测试 84 个全过。
-- 还差 Near：会员页 / 钱包 / 账单 / 收藏页、社交 / 聊天 / 通知（`socialProfile`、`social` 还是占位页）、论坛、我的会员卡（`myMembership` 占位）、
-  个人页活动数、本地数据页、`youneary://` 深链；最后 `screenshots/` 截图（iPhone + iPad）。
+- Near 其余也写完（2026-10-30）：钱包（会员卡 / 等门店确认，没有时长包）、我的会员卡 / 会员申请、账单、收藏、地图设置、
+  清除本地数据、论坛（信息流 / 详情 / 帖子 / 发帖编辑 / 管理 / 发现 / 我的 / 赞过）、社交 / 聊天 / 通知（按 Near 的资源类型跳转）、
+  个人页活动数（15 种活动类型发起 + 参加）、`youneary://` 深链和聊天卡片交给跃圈。通用分页列表移到 PulsoLinkUI（`PulsoPagedList`）。
+- 还差：等 CI 全绿后逐页看 iPhone / iPad 截图修布局；最后 `screenshots/` 截图（iPhone + iPad）。
 
 ## 状态
 
@@ -220,7 +222,7 @@ Near 是 Loop 的分叉：活动换成 15 种 Near 活动，球馆换成门店�
 | 门店搜索 / 门店详情 / 场馆建筑 | `pages/venue/{search,detail}` | 🟦 |
 | OpenVenueBook / 确认（桌台时段、密室 / 剧本杀场次） | `pages/venue/{book,confirm}` | 🟦 |
 | OpenSpaceBooking（我的一条预约） | `pages/venue/booking` | 🟦 |
-| OpenChatActivityPicker | `pages/social/chat/picker` | ⬜ |
-| 其余命令 | 与 Loop 同名 | ⬜ 跟随 Loop 对应组 |
+| OpenChatActivityPicker | `pages/social/chat/picker` | 🟦 |
+| 其余命令（社交 / 聊天 / 通知 / 论坛 / 钱包 / 会员 / 账单 / 收藏 / 地图设置 / 本地数据 / 深链） | 与 Loop 同名 | 🟦 |
 
 Near 没有：课程、私教、赛事、时长包。

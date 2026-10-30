@@ -39,6 +39,7 @@ struct ProfileOverviewView: View {
         .ignoresSafeArea(edges: .top)
         .refreshable { await model.refresh(showIndicator: true) }
         .task { await model.observeRelationCounts() }
+        .task { await model.observeCounts() }
         .sheet(isPresented: $pickingFavorites) {
             FavoritesPickerSheet(initial: info.favoriteActivities) { next in
                 pickingFavorites = false

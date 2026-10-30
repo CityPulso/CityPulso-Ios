@@ -20,7 +20,11 @@ final class ProfileOverviewModel {
     @ObservationIgnored @Injected(\.pulsoCoreConfig) private var config
     @ObservationIgnored @Injected(\.socialService) private var socialService
     @ObservationIgnored @Injected(\.authService) private var authService
-    /** 头部数字；没回来之前是 nil（显示 `-`）。活动 = 发起 + 参加，等 Near 活动移植后填上。 */
+    @ObservationIgnored @Injected(\.authSessionStore) private var sessionStore
+    @ObservationIgnored @Injected(\.nearActivityServices) private var services
+    @ObservationIgnored private var hostedByKind: [NearActivityKind: Int] = [:]
+    @ObservationIgnored private var joinedByKind: [NearActivityKind: Int] = [:]
+    /** 头部数字；没回来之前是 nil（显示 `-`）。活动 = 各活动类型的发起 + 参加。 */
     private(set) var followingCount: Int?
     private(set) var followerCount: Int?
     private(set) var activityCount: Int?
@@ -64,6 +68,40 @@ final class ProfileOverviewModel {
         } catch {
             PulsoMessageCenter.shared.error(error, fallback: "profile_edit_save_failed")
         }
+    }
+
+    /** 各活动类型的发起 / 参加数加起来；身份变了重算。页面消失时随 `.task` 取消。 */
+    func observeCounts() async {
+        let session = sessionStore.state.value
+        let accountId = session.currentAccountId
+        let profileId = session.currentProfileId
+        guard !accountId.isEmpty, !profileId.isEmpty else { return }
+        hostedByKind = [:]
+        joinedByKind = [:]
+        var operations: [@MainActor () async -> Void] = []
+        for (kind, service) in services {
+            let hostedStream = service.hostedActivities(accountId: accountId, profileId: profileId, hostedProfileId: profileId, limit: 100)
+            let joinedStream = service.myRegistrations(ActivityTypeRegistrationsQuery(accountId: accountId, profileId: profileId, limit: 100))
+            operations.append {
+                for await case let .data(items) in hostedStream {
+                    self.hostedByKind[kind] = items.count
+                    self.publishCounts()
+                }
+            }
+            operations.append {
+                for await case let .data(items) in joinedStream {
+                    self.joinedByKind[kind] = items.count
+                    self.publishCounts()
+                }
+            }
+        }
+        await concurrently(operations)
+    }
+
+    /** 每种活动类型都回答了才换数字（Android `sumOrNull`）。 */
+    private func publishCounts() {
+        guard hostedByKind.count == services.count, joinedByKind.count == services.count else { return }
+        activityCount = hostedByKind.values.reduce(0, +) + joinedByKind.values.reduce(0, +)
     }
 
     func observe() async {
