@@ -59,10 +59,20 @@ struct MyCoursesView: View {
             .overlay(alignment: .trailing) { if model.busyId == enrollment.id { ProgressView() } }
         }
         .navigationTitle("my_courses_title")
-        .confirmationDialog("my_courses_cancel_title", isPresented: Binding(get: { canceling != nil }, set: { if !$0 { canceling = nil } }), titleVisibility: .visible, presenting: canceling) { enrollment in
-            Button("my_courses_cancel", role: .destructive) { Task { await model.cancel(enrollment.id) } }
-        } message: { _ in
-            Text("my_courses_cancel_body")
+        .sheet(item: $canceling) { enrollment in
+            // 按住确认（Android `holdConfirm`）。
+            VStack(alignment: .leading, spacing: 16) {
+                Text("my_courses_cancel_title").font(.title3.bold())
+                Text("my_courses_cancel_body").foregroundStyle(.secondary)
+                PulsoHoldButton("my_courses_cancel", loading: model.busyId == enrollment.id) {
+                    Task {
+                        await model.cancel(enrollment.id)
+                        canceling = nil
+                    }
+                }
+            }
+            .padding(24)
+            .presentationDetents([.height(240)])
         }
     }
 }
@@ -239,3 +249,6 @@ struct ProgramList<Item: Identifiable & Sendable, EmptyAction: View, Header: Vie
         .task { if observe { await list.observe() } }
     }
 }
+
+extension CourseEnrollment: Identifiable {}
+extension CoachingSession: Identifiable {}

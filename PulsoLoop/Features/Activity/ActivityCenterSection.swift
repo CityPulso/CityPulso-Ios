@@ -63,7 +63,7 @@ struct ActivityCenterSection: View {
                 .padding(.horizontal)
                 // 我的订场在这里（不再有单独的订场页）：即将开始或已结束。
                 if model.tab == .courtBookings {
-                    Picker("court_bookings_title", selection: $model.bookingTab) {
+                    Picker("activity_tab_bookings", selection: $model.bookingTab) {
                         Text("court_bookings_tabs_upcoming").tag(CourtBookingListTab.upcoming)
                         Text("court_bookings_tabs_past").tag(CourtBookingListTab.past)
                     }

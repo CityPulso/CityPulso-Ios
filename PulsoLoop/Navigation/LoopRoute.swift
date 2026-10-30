@@ -33,6 +33,8 @@ enum LoopRoute: Hashable {
     case building(buildingId: String)
     /** 赛事详情（第 12 组）。 */
     case tournament(tournamentId: String)
+    /** 我的赛事（报名成功后的「看我的赛事」）。 */
+    case myTournaments
     /** 别人的主页（第 10 组）。 */
     /** 社交：好友 / 关注 / 粉丝，停在 [tab]。 */
     case social(tab: SocialConnectionsTab)
@@ -45,6 +47,8 @@ enum LoopRoute: Hashable {
     case placeRequests
     /** 课程详情（第 12 组）。 */
     case course(courseId: String)
+    /** 我的课程（课程详情报名后的「看我的课程」）。 */
+    case myCourses
     /** 教练主页（第 12 组）。 */
     case coach(profileId: String)
     /** 教练面板（第 12 组）。 */
@@ -97,14 +101,16 @@ enum LoopRoute: Hashable {
         case let .venueBook(venueId, sport): VenueBookView(venueId: venueId, sport: sport)
         case let .venueConfirm(venueId, sport, date, ranges): VenueConfirmView(venueId: venueId, sport: sport, dateKey: date, ranges: ranges)
         case let .building(buildingId): BuildingDetailView(buildingId: buildingId)
-        case .tournament: PulsoComingSoonView(title: "explore_layers_tournaments", systemImage: "trophy")
+        case let .tournament(tournamentId): TournamentDetailView(tournamentId: tournamentId)
+        case .myTournaments: MyTournamentsView()
         case .social: PulsoComingSoonView(title: "shell_dest_social", systemImage: "person.2")
         case .socialProfile: PulsoComingSoonView(title: "event_detail_participants_view_profile", systemImage: "person.crop.circle")
         case let .markPlace(latitude, longitude): MarkPlaceView(latitude: latitude, longitude: longitude)
         case let .resubmitPlace(requestId): MarkPlaceView(requestId: requestId)
         case .placeRequests: PlaceRequestsView()
-        case .course: PulsoComingSoonView(title: "venue_programs_courses", systemImage: "book")
-        case .coach: PulsoComingSoonView(title: "venue_programs_coaches", systemImage: "figure.strengthtraining.traditional")
+        case let .course(courseId): CourseDetailView(courseId: courseId)
+        case .myCourses: MyCoursesView()
+        case let .coach(profileId): CoachDetailView(profileId: profileId)
         case .coachPanel: PulsoComingSoonView(title: "venue_programs_coach_panel", systemImage: "rectangle.stack")
         case let .myMembership(membershipId): MyMembershipView(membershipId: membershipId)
         case let .wallet(tab): WalletView(tab: tab)

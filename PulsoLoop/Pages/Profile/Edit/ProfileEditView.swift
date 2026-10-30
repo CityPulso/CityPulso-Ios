@@ -30,7 +30,7 @@ struct ProfileEditView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 NavigationLink(value: LoopRoute.identities) {
-                    Label("profile_overview_open_identities", systemImage: "person.text.rectangle")
+                    Label("profile_identities_title", systemImage: "person.text.rectangle")
                 }
             }
             if model.isDirty {

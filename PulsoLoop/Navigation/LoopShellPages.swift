@@ -32,6 +32,12 @@ enum LoopShellPages {
             WalletView()
         case .billing:
             BillingView()
+        case .courses:
+            MyCoursesView()
+        case .coaching:
+            MyCoachingView()
+        case .tournaments:
+            MyTournamentsView()
         default:
             PulsoComingSoonView(destination)
         }
