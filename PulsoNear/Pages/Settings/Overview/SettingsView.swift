@@ -51,7 +51,7 @@ struct SettingsView: View {
                 NavigationLink(value: NearRoute.accountSecurity) {
                     Label("account_security_title", systemImage: "lock.shield")
                 }
-                NavigationLink(value: NearRoute.comingSoon(title: "place_requests_title", systemImage: "mappin.and.ellipse")) {
+                NavigationLink(value: NearRoute.placeRequests) {
                     Label("place_requests_title", systemImage: "mappin.and.ellipse")
                 }
             }
@@ -66,11 +66,14 @@ struct SettingsView: View {
             }
 
             Section("settings_section_preferences") {
-                NavigationLink(value: NearRoute.comingSoon(title: "settings_map_defaults", systemImage: "map")) {
+                NavigationLink(value: NearRoute.mapSettings) {
                     Label("settings_map_defaults", systemImage: "map")
                 }
                 NavigationLink(value: NearRoute.activityPreferences) {
                     Label("settings_activity_preferences", systemImage: "calendar")
+                }
+                NavigationLink(value: NearRoute.storage) {
+                    Label("settings_storage", systemImage: "internaldrive")
                 }
             }
 

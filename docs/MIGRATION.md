@@ -42,9 +42,17 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
   对应文件只差活动专属字段（Near 没有场地数 / 每场人数 / 器材 / 组别 / 赛制，多了最少人数；15 种里只有麻将多一个规则）。
   iOS 照同样的路：先把 Loop 代码按改名规则转成 Near 的桌游模板，补上差异，再用 `Scripts/fork_activity.py`（同 fork_sport.py，
   带 `--check`）分叉出另外 14 种。已完成：数据层（仓储 / 事件总线 / 查询 / 服务 / 发起请求 / 行）15 种全部、发起草稿和校验
-  （最少人数、麻将规则、禁赌提示勾选、快捷时长）、地图与位置 DI。下一步：活动页面（详情 / 发起 / 收款清单 / 日历 / 地图 / 搜索），
-  然后门店（桌台 / 包间 / 机位、场次、开台）这些和 Loop 球馆不同的部分，按 Android Near 逐页写。
-- 还差：Near 其余部分；最后 `screenshots/` 截图（iPhone + iPad）。
+  （最少人数、麻将规则、禁赌提示勾选、快捷时长）、地图与位置 DI。
+  活动页面已写完：详情（须知提示、麻将规则）、发起向导（类型分组卡片、快捷时长、发布前勾选须知）、收款清单、日历 / 活动中心、
+  议程侧栏、活动搜索、地图（没有赛事图层）、选点、标记地点 / 我标记的地点、收款账户。
+  门店已写完：门店搜索、门店详情（概览 / 桌台 / 会员 / 商品与服务 / 活动 / 须知；桌台类列桌台，KTV 包间大小和最低消费、台球桌型，
+  桌游门店列游戏库，密室 / 剧本杀列主题 / 剧本）、会员购买、场馆建筑、收藏心形、预约页（顶部切换类型原地换内容：桌台类是时段表，
+  密室 / 剧本杀选场次和人数）、确认页（桌台和场次共用）、我的一条预约。Near 没有时长包，相关代码都已去掉。
+- **登录同步 Android（2026-10-30）**：手机一律记住登录（去掉「记住我」）；选身份后先用新身份的 token 读到档案、套上偏好再写进会话；
+  登录中途失败结束半截会话（`LogoutReason.signInFailed`）；刷新被拒的若已不是会话里的票（登录 / 选身份作废了旧票），不登出；
+  账号没有 community 身份时显示 `login_no_community_profile`。Linux 测试 84 个全过。
+- 还差 Near：会员页 / 钱包 / 账单 / 收藏页、社交 / 聊天 / 通知（`socialProfile`、`social` 还是占位页）、论坛、我的会员卡（`myMembership` 占位）、
+  个人页活动数、本地数据页、`youneary://` 深链；最后 `screenshots/` 截图（iPhone + iPad）。
 
 ## 状态
 
@@ -207,9 +215,11 @@ Near 是 Loop 的分叉：活动换成 15 种 Near 活动，球馆换成门店�
 | 设置 + 账号（同 Loop 第 2 组），活动偏好 | `pages/settings`、`pages/account` | 🟩 |
 | 个人页 / 编辑资料（喜欢的活动，最多 3 个）/ 背景图 / 身份（无角色申请） | `pages/profile`、`pages/identities/overview` | 🟦 |
 | 欢迎 / 登录 / 注册 | `pages/welcome`、`pages/identities` | 🟩 |
-| OpenActivity / OpenCreatedActivity / OpenChecklist | `pages/activity/*` | ⬜ |
-| OpenSessionConfirm（密室 / 剧本杀场次） | `pages/venue/confirm` | ⬜ |
-| OpenSpaceBooking（桌台 / 包间 / 机位） | `pages/venue/booking` | ⬜ |
+| OpenActivity / OpenCreatedActivity / OpenChecklist | `pages/activity/*` | 🟦 |
+| 日历 / 议程 / 活动搜索 / 地图 / 选点 / 标记地点 | `pages/activity/*`、`pages/location`、`pages/place` | 🟦 |
+| 门店搜索 / 门店详情 / 场馆建筑 | `pages/venue/{search,detail}` | 🟦 |
+| OpenVenueBook / 确认（桌台时段、密室 / 剧本杀场次） | `pages/venue/{book,confirm}` | 🟦 |
+| OpenSpaceBooking（我的一条预约） | `pages/venue/booking` | 🟦 |
 | OpenChatActivityPicker | `pages/social/chat/picker` | ⬜ |
 | 其余命令 | 与 Loop 同名 | ⬜ 跟随 Loop 对应组 |
 

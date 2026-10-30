@@ -26,6 +26,14 @@ enum NearShellPages {
             ExploreView()
         case .venueSearch:
             VenueSearchView()
+        case .favorites:
+            FavoritesView()
+        case .wallet:
+            WalletView()
+        case .billing:
+            BillingView()
+        case .forum:
+            ForumFeedView()
         default:
             PulsoComingSoonView(destination)
         }

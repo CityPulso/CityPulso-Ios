@@ -173,7 +173,7 @@ struct MyForumsView: View {
     @Injected(\.pulsoCoreConfig) private var config
 
     var body: some View {
-        ProgramList(list: forums, emptyTitle: "discussion_my_forums_empty", emptyBody: "discussion_my_forums_empty_body") {
+        PulsoPagedList(list: forums, emptyTitle: "discussion_my_forums_empty", emptyBody: "discussion_my_forums_empty_body") {
             NavigationLink("discussion_create_forum", value: LoopRoute.forumCreate).buttonStyle(.glassProminent)
         } header: {
             NavigationLink(value: LoopRoute.forumCreate) {
@@ -254,7 +254,7 @@ struct LikedPostsView: View {
     @Environment(PulsoShellNavigator.self) private var shell: PulsoShellNavigator?
 
     var body: some View {
-        ProgramList(list: model.posts, emptyTitle: "discussion_liked_empty", emptyBody: "discussion_liked_empty_body") {
+        PulsoPagedList(list: model.posts, emptyTitle: "discussion_liked_empty", emptyBody: "discussion_liked_empty_body") {
             Button("discussion_browse_feed") { shell?.open(.forum) }.buttonStyle(.glassProminent)
         } row: { post in
             PostCardView(

@@ -1,3 +1,4 @@
+import Factory
 import PulsoLinkCore
 import PulsoLinkUI
 import SwiftUI
@@ -19,6 +20,12 @@ enum NearRoute: Hashable {
     case profileEdit
     case backgrounds
     case identities
+    /** 设置 → 清除本地数据。 */
+    case storage
+    /** 设置 → 地图默认、地图样式、我的位置标记。 */
+    case mapSettings
+    case mapStyle
+    case locationMarker
     /** 活动详情（所有活动类型共用一页）。 */
     case activity(activityType: NearActivityKind, activityId: String)
     /** 从地图卡片点「报名」进来：加载完还能报名就直接打开报名弹层。 */
@@ -33,8 +40,12 @@ enum NearRoute: Hashable {
     case spaceBooking(activityType: VenueActivityType, bookingId: String)
     /** 门店详情；[sheet] 进来时直接打开会员面板。 */
     case venue(venueId: String, sheet: VenueDetailSheet? = nil)
-    /** 我在某家门店的会员卡（会员那组移植前是占位页）。 */
+    /** 我在某家门店的会员卡。 */
     case myMembership(membershipId: String)
+    /** 一笔等门店确认的会员申请。 */
+    case myMembershipPurchase(purchaseId: String)
+    /** 钱包（不在底栏时从别的页推进来）。 */
+    case wallet
     /** 没有门店的场馆建筑。 */
     case building(buildingId: String)
     /** 标记地图上缺的地点；从地图长按进来时预填那个位置。 */
@@ -51,6 +62,16 @@ enum NearRoute: Hashable {
     case paymentAccounts
     /** 付款方式（保存的卡）。 */
     case paymentMethods
+    /** 论坛、帖子、发帖、建论坛和管理。 */
+    case forum(forumId: String)
+    case forumManage(forumId: String)
+    case forumSearch
+    case forumCreate
+    case myForums
+    case likedPosts
+    case post(postId: String)
+    case postCreate(prefill: PostCreatePrefill)
+    case postEdit(postId: String)
     /** 别人的主页（社交那组移植前是占位页）。 */
     case socialProfile(profileId: String)
     /** 社交：好友 / 关注 / 粉丝，停在 [tab]。 */
@@ -73,6 +94,10 @@ enum NearRoute: Hashable {
         case .profileEdit: ProfileEditView()
         case .backgrounds: ProfileBackgroundsView()
         case .identities: ProfileIdentitiesView()
+        case .storage: StorageView(service: Container.shared.localDataService())
+        case .mapSettings: MapSettingsView()
+        case .mapStyle: MapStyleView()
+        case .locationMarker: LocationMarkerView()
         case let .activity(activityType, activityId): ActivityDetailView(activityType: activityType, activityId: activityId)
         case let .joinActivity(activityType, activityId): ActivityDetailView(activityType: activityType, activityId: activityId, openJoin: true)
         case let .checklist(activityType, activityId): ChecklistView(activityType: activityType, activityId: activityId)
@@ -83,12 +108,23 @@ enum NearRoute: Hashable {
         case let .venue(venueId, sheet): VenueDetailView(venueId: venueId, sheet: sheet)
         case let .venueBook(venueId, activityType): VenueBookPage(venueId: venueId, activityType: activityType)
         case let .venueConfirm(venueId, activityType, date, target): VenueConfirmView(venueId: venueId, activityType: activityType, dateKey: date, target: target)
-        case .myMembership: PulsoComingSoonView(title: "shell_dest_wallet", systemImage: "person.text.rectangle")
+        case let .myMembership(membershipId): MyMembershipView(membershipId: membershipId)
+        case let .myMembershipPurchase(purchaseId): MyMembershipPurchaseView(purchaseId: purchaseId)
+        case .wallet: WalletView()
         case let .markPlace(latitude, longitude): MarkPlaceView(latitude: latitude, longitude: longitude)
         case let .resubmitPlace(requestId): MarkPlaceView(requestId: requestId)
         case .placeRequests: PlaceRequestsView()
         case .paymentAccounts: PaymentAccountsView()
         case .paymentMethods: PaymentMethodsView()
+        case let .post(postId): PostDetailView(postId: postId)
+        case let .forum(forumId): ForumDetailView(forumId: forumId)
+        case let .postCreate(prefill): PostCreateView(prefill: prefill)
+        case let .postEdit(postId): PostEditView(postId: postId)
+        case .forumSearch: ForumSearchView()
+        case .myForums: MyForumsView()
+        case .likedPosts: LikedPostsView()
+        case let .forumManage(forumId): ForumManageView(forumId: forumId)
+        case .forumCreate: ForumCreateView()
         case .social, .socialProfile: PulsoComingSoonView(title: "shell_dest_social", systemImage: "person.2")
         case let .comingSoon(title, systemImage):
             PulsoComingSoonView(title: LocalizedStringKey(title), systemImage: systemImage)

@@ -1,5 +1,6 @@
 import Factory
 import PulsoLinkCore
+import PulsoLinkUI
 
 /** 地图 / 附近搜索的依赖（Android Explore 与位置相关的单例）。 */
 extension Container {
@@ -84,6 +85,24 @@ extension Container {
 
     var activityNearbyFilterStore: Factory<ActivityNearbyFilterStore> {
         self { ActivityNearbyFilterStore() }.singleton
+    }
+
+    var discussionEventBus: Factory<DiscussionEventBus> {
+        self { DiscussionEventBus() }.singleton
+    }
+
+    var discussionService: Factory<DiscussionService> {
+        self { DiscussionService(repository: DiscussionRepository(api: DiscussionAPI(client: self.protectedClient())), bus: self.discussionEventBus()) }.singleton
+    }
+
+    /** 设置页「清除本地数据」的各项：本地库、聊天壁纸、图片缓存、发起草稿。 */
+    var localDataService: Factory<LocalDataService> {
+        self {
+            LocalDataService(sources: self.pulsoDatabase().localDataSources(wallpapers: self.chatWallpaperStore()) + [
+                ImageCacheDataSource(),
+                CreateDraftDataSource(store: self.activityCreateDraftStore()),
+            ])
+        }.singleton
     }
 
     var activityCreateDraftStore: Factory<ActivityCreateDraftStore> {
