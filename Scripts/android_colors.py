@@ -25,7 +25,7 @@ def render() -> str:
     text = SOURCE.read_text()
     scales: dict[str, dict[str, list[str]]] = {}
     for match in re.finditer(r"val (\w+)_(LIGHT|DARK) = RadixScale\((.*?)\n    \)", text, re.S):
-        colors = [c[2:] for c in re.findall(r"Color\(0x([0-9A-Fa-f]{8})\)", match[3])]
+        colors = [c for c in re.findall(r"Color\(0x([0-9A-Fa-f]{8})\)", match[3])]
         assert len(colors) == 12, match[1]
         scales.setdefault(match[1].lower(), {})[match[2].lower()] = colors
     names = list(scales)
