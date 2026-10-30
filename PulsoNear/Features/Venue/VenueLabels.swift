@@ -54,7 +54,7 @@ extension BoardGameTitleDifficulty {
 }
 
 extension KtvRoomSize {
-    var labelKey: LocalizedStringKey {
+    var labelResource: String.LocalizationValue {
         switch self {
         case .small: "venue_ktv_room_size_small"
         case .medium: "venue_ktv_room_size_medium"
@@ -64,7 +64,7 @@ extension KtvRoomSize {
 }
 
 extension BilliardsTableType {
-    var labelKey: LocalizedStringKey {
+    var labelResource: String.LocalizationValue {
         switch self {
         case .chineseEightBall: "venue_billiards_table_type_chinese_eight_ball"
         case .pool: "venue_billiards_table_type_pool"
@@ -75,7 +75,7 @@ extension BilliardsTableType {
 
 extension SpaceKind {
     /** 桌台 / 包间 / 机位。 */
-    var labelKey: LocalizedStringKey {
+    var labelResource: String.LocalizationValue {
         switch self {
         case .table: "venue_space_kind_table"
         case .room: "venue_space_kind_room"

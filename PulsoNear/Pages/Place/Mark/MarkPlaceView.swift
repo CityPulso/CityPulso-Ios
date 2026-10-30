@@ -229,7 +229,7 @@ extension BuildingType {
     /** 每种地点类型下面那一行说明（什么算这一类）。 */
     var placeHintKey: LocalizedStringKey {
         switch self {
-        case .activityTypesVenue: "place_type_activity_types_venue_hint"
+        case .sportsVenue: "place_type_sports_venue_hint"
         case .outdoorSpace: "place_type_outdoor_space_hint"
         case .park: "place_type_park_hint"
         case .leisureVenue: "building_type_leisure_venue"

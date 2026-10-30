@@ -15,15 +15,13 @@ struct BuildingTypeVisual {
 
     static func of(_ wire: String?) -> BuildingTypeVisual {
         switch BuildingType.fromWire(wire) {
-        case .activityTypesVenue: BuildingTypeVisual(scale: .orange, systemImage: "building.2")
+        case .sportsVenue: BuildingTypeVisual(scale: .orange, systemImage: "building.2")
         case .leisureVenue: BuildingTypeVisual(scale: .amber, systemImage: "square.grid.2x2")
         case .outdoorSpace: BuildingTypeVisual(scale: .cyan, systemImage: "tennis.racket")
         case .park: BuildingTypeVisual(scale: .grass, systemImage: "tree")
         }
     }
 }
-
-/** 赛事针和卡片的琥珀色（Android `VenueTone.Amber`）。 */
 
 /** 地图针的叠放层次（Android `ExploreMapLayer`）：活动 < 门店 < 我的位置 < 常驻卡片 < 选中针 < 选中卡片。 */
 enum ExploreMapLayer {
@@ -37,16 +35,8 @@ enum ExploreMapLayer {
 }
 
 extension NearActivityKind {
-    /** PNG 的视觉中心（WEB `--icon-x` / `--icon-y`）。 */
-    var iconAnchor: CGPoint {
-        switch self {
-        case .boardGame: CGPoint(x: 0.533, y: 0.427)
-        case .tennis: CGPoint(x: 0.562, y: 0.492)
-        case .football: CGPoint(x: 0.501, y: 0.477)
-        case .baseball: CGPoint(x: 0.495, y: 0.531)
-        default: CGPoint(x: 0.5, y: 0.5)
-        }
-    }
+    /** PNG 的视觉中心（WEB `--icon-x` / `--icon-y`）；Near 的图标都以画面中心为准。 */
+    var iconAnchor: CGPoint { CGPoint(x: 0.5, y: 0.5) }
 
     var pinAccent: Color { colorScale.lightStep(9) }
     var pinAccentBg: Color { colorScale.lightStep(3) }
@@ -178,7 +168,6 @@ struct ExploreActivityPinCard: View {
         let price = pin.isFree ? String(localized: "explore_pin_free") : pin.priceAmount.map { formatMoney($0, currency: pin.currency, locale: locale) } ?? "—"
         return [
             String(localized: activityType.labelResource),
-            String(localized: pin.matchFormat.labelResource),
             price,
             DateTimeFormatters.sessionDayClockRange(pin.startsAt, pin.endsAt, locale: locale),
         ]
@@ -187,7 +176,7 @@ struct ExploreActivityPinCard: View {
     }
 }
 
-/* ------------------------------ 门店 / 建筑 / 赛事针 ------------------------------ */
+/* ------------------------------ 门店 / 建筑针 ------------------------------ */
 
 /** 门店锚点（Android `ExploreVenuePin`）：圆角方块，图标和颜色跟建筑类型；右上角今天空着的场地数。 */
 struct ExploreVenuePin: View {

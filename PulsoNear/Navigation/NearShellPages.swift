@@ -24,6 +24,8 @@ enum NearShellPages {
             ActivitySearchView()
         case .explore:
             ExploreView()
+        case .venueSearch:
+            VenueSearchView()
         default:
             PulsoComingSoonView(destination)
         }

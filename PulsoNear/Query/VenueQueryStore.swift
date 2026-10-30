@@ -50,11 +50,14 @@ final class VenueQueryStore: LogoutClearable {
     let detail: MemoryQuery<VenueKey, VenueDetail>
     let offerings: MemoryQuery<VenueKey, [VenueOffering]>
     let nearby: MemoryQuery<NearbyVenuesKey, NearbyVenuesPage>
+    /** 门店游戏库（桌游门店详情里列出的桌游）。 */
+    let boardGameTitles: MemoryQuery<VenueKey, [BoardGameTitle]>
 
-    init(repository: VenueRepository, eventBus: VenueEventBus) {
+    init(repository: VenueRepository, boardGames: BoardGameEntryAPI, eventBus: VenueEventBus) {
         let invalidates: @Sendable () -> AsyncStream<Void> = { eventBus.signals { _ in true } }
         detail = MemoryQuery(invalidates: invalidates) { key in try await repository.getVenue(key.venueId) }
         offerings = MemoryQuery(invalidates: invalidates) { key in try await repository.listOfferings(key.venueId) }
+        boardGameTitles = MemoryQuery(invalidates: invalidates) { key in try await boardGames.listTitles(venueId: key.venueId).dataOrThrow("ListBoardGameTitles") }
         nearby = MemoryQuery(invalidates: invalidates) { key in
             try await repository.listNearbyVenues(ListNearbyVenuesRequest(
                 near: GeoNearQuery(longitude: key.longitude, latitude: key.latitude, radiusM: key.radiusM),
@@ -95,5 +98,6 @@ final class VenueQueryStore: LogoutClearable {
         await detail.clear()
         await offerings.clear()
         await nearby.clear()
+        await boardGameTitles.clear()
     }
 }

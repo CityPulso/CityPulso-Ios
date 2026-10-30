@@ -4,7 +4,7 @@ import SwiftUI
 
 /**
  * 屏幕上重叠的针合成一个玻璃聚合针：最多三个类型圆标叠在一起 + 数量角标（Android `ExploreClusterPin`，WEB `PinCluster`）。
- * 点开是一个弹出面板：分段「全部 / 门店 / 活动 / 赛事」，每个针一行（地图开着卡片时显示成卡片），选一行等于点那个针。
+ * 点开是一个弹出面板：分段「全部 / 门店 / 活动」，每个针一行（地图开着卡片时显示成卡片），选一行等于点那个针。
  */
 struct ExploreClusterPin: View {
     let cluster: ExploreMapCluster

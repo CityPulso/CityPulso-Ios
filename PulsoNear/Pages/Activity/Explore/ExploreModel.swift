@@ -49,7 +49,7 @@ extension ExploreMapItemKind {
 
 /**
  * Explore 地图（Android `ExploreViewModel` + `ExploreUiState` 及其 ActivityPins / PlaceLayers / Previews /
- * MapPreferences / AddressSearch 帮手）：视口里的活动、门店、建筑、赛事针，筛选，地址搜索，平面 / 立体、范围圈，
+ * MapPreferences / AddressSearch 帮手）：视口里的活动、门店、建筑针，筛选，地址搜索，平面 / 立体、范围圈，
  * 从搜索页聚焦过来。3D 建筑只按偏好显示，工具栏不切换。
  */
 @MainActor
@@ -151,7 +151,7 @@ final class ExploreModel {
     @ObservationIgnored private var venuePreviewKey: String?
     @ObservationIgnored private var venuePreviewTask: Task<Void, Never>?
 
-    /** 门店 / 建筑 / 赛事图层的一次视口（Android `VenueViewport`）。 */
+    /** 门店 / 建筑图层的一次视口（Android `VenueViewport`）。 */
     struct VenueViewport: Hashable {
         var lat: Double
         var lng: Double

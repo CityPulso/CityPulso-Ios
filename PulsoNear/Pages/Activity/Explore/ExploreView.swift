@@ -419,7 +419,7 @@ struct ExploreActivityTypeChipRow: View {
     }
 }
 
-/** 右上角的地图工具（Android `ExploreMapTools`）：我的位置、活动 / 门店 / 赛事图层、发起（球友才有）、标记地点。 */
+/** 右上角的地图工具（Android `ExploreMapTools`）：我的位置、活动 / 门店图层、发起（普通成员才有）、标记地点。 */
 private struct ExploreMapTools: View {
     let model: ExploreModel
     let onCreate: () -> Void

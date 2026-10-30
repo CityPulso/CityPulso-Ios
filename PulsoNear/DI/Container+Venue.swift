@@ -5,7 +5,7 @@ import PulsoLinkCore
 extension Container {
     var venueQueryStore: Factory<VenueQueryStore> {
         self {
-            let store = VenueQueryStore(repository: self.venueRepository(), eventBus: self.venueEventBus())
+            let store = VenueQueryStore(repository: self.venueRepository(), boardGames: BoardGameEntryAPI(client: self.protectedClient()), eventBus: self.venueEventBus())
             self.sessionTerminator().register(store)
             return store
         }.singleton
@@ -13,6 +13,29 @@ extension Container {
 
     var venueRepository: Factory<VenueRepository> {
         self { VenueRepository(publicAPI: VenuePublicAPI(client: self.publicClient()), api: VenueAPI(client: self.protectedClient())) }.singleton
+    }
+
+    var membershipQueryStore: Factory<MembershipQueryStore> {
+        self {
+            let store = MembershipQueryStore(memberships: MembershipRepository(api: MembershipAPI(client: self.protectedClient())), eventBus: self.venueEventBus())
+            self.sessionTerminator().register(store)
+            return store
+        }.singleton
+    }
+
+    var membershipService: Factory<MembershipService> {
+        self {
+            MembershipService(
+                repository: MembershipRepository(api: MembershipAPI(client: self.protectedClient())),
+                query: self.membershipQueryStore(),
+                eventBus: self.venueEventBus(),
+                session: self.authSessionStore()
+            )
+        }.singleton
+    }
+
+    var favoriteService: Factory<FavoriteService> {
+        self { FavoriteService(buildings: self.buildingRepository(), venues: self.venueRepository()) }.singleton
     }
 
     var venueService: Factory<VenueService> {

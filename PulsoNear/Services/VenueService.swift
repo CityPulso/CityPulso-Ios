@@ -12,7 +12,7 @@ struct VenueService: Sendable {
 
     private var profileId: String { session.state.value.currentProfileId }
 
-    /** 当前身份所在的门店（运营 / 管理 / 前台）；普通球友为空。 */
+    /** 当前身份所在的门店（运营 / 管理 / 前台）；普通成员为空。 */
     func myVenues() async throws -> [MyVenue] {
         try await repository.listMyVenues()
     }
@@ -38,6 +38,10 @@ struct VenueService: Sendable {
 
     func streamOfferings(_ venueId: String) -> AsyncStream<QueryResponse<[VenueOffering]>> {
         query.offerings.stream(VenueKey(venueId: venueId, profileId: profileId))
+    }
+
+    func streamBoardGameTitles(_ venueId: String) -> AsyncStream<QueryResponse<[BoardGameTitle]>> {
+        query.boardGameTitles.stream(VenueKey(venueId: venueId, profileId: profileId))
     }
 
     func streamNearby(_ key: NearbyVenuesKey) -> AsyncStream<QueryResponse<NearbyVenuesPage>> {

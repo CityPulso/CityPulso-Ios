@@ -31,9 +31,11 @@ enum NearRoute: Hashable {
     case calendar(tab: ActivityCenterTab?)
     /** 我的一条门店预约。 */
     case spaceBooking(activityType: VenueActivityType, bookingId: String)
-    /** 门店详情（门店那组移植前是占位页）。 */
-    case venue(venueId: String)
-    /** 没有门店的场馆建筑（门店那组移植前是占位页）。 */
+    /** 门店详情；[sheet] 进来时直接打开会员面板。 */
+    case venue(venueId: String, sheet: VenueDetailSheet? = nil)
+    /** 我在某家门店的会员卡（会员那组移植前是占位页）。 */
+    case myMembership(membershipId: String)
+    /** 没有门店的场馆建筑。 */
     case building(buildingId: String)
     /** 标记地图上缺的地点；从地图长按进来时预填那个位置。 */
     case markPlace(latitude: Double?, longitude: Double?)
@@ -75,7 +77,10 @@ enum NearRoute: Hashable {
         case .locationPick: LocationPickView()
         case let .calendar(tab): CalendarView(initialTab: tab)
         case let .spaceBooking(activityType, bookingId): SpaceBookingView(activityType: activityType, bookingId: bookingId)
-        case .venue, .venueBook, .building: PulsoComingSoonView(title: "shell_dest_venue_search", systemImage: "building.2")
+        case let .building(buildingId): BuildingDetailView(buildingId: buildingId)
+        case let .venue(venueId, sheet): VenueDetailView(venueId: venueId, sheet: sheet)
+        case .venueBook: PulsoComingSoonView(title: "shell_dest_venue_search", systemImage: "building.2")
+        case .myMembership: PulsoComingSoonView(title: "shell_dest_wallet", systemImage: "person.text.rectangle")
         case let .markPlace(latitude, longitude): MarkPlaceView(latitude: latitude, longitude: longitude)
         case let .resubmitPlace(requestId): MarkPlaceView(requestId: requestId)
         case .placeRequests: PlaceRequestsView()
