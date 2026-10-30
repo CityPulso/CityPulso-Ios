@@ -4,14 +4,19 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 
 ## 下一步
 
-- **CI 只在手动触发时编译 App**（免费额度的 macOS 分钟用完，11 月 1 日恢复）：之后跑 `gh workflow run iOS --ref main`，
-  修掉从 00fb263 起累积的编译错误。在那之前 SwiftUI 部分记为 🟦，模型层在 Linux 上类型检查。
+- **仓库已公开（2026-10-30）**：标准 runner 不计分钟，macOS 每次 push 都编译三个 App。PulsoNear、PulsoLink 已编译通过；
+  PulsoLoop 正在逐轮修自 00fb263 以来累积的编译错误（看 Actions 最新一次）。
 - 第 5、6 组的代码已写完：活动详情（11 种运动共用）、报名 / 候补 / 退出 / 参与者 / 占座付款、发起人改信息和结束、
   加入日历、收款清单、发起活动向导（选运动、四步、照片上传、附近场馆自动关联、草稿、各运动自己的选项）。
-- 第 7 组开始：MapLibre（OpenFreeMap 样式、3D 建筑、半径圈）的 `LoopMapView`、核心 `LocationService`、选点页已写完，
-  发起活动的「在地图上选点」接上了，发布流程可以走通（待 CI 编译 + 真机验收）。
-- 还差：深链 inbox；发布后的「发个帖子」等第 11 组；社交主页入口等第 10 组。
-- 下一步：第 7 组剩下的 Explore 地图（活动 / 球馆 / 建筑 / 赛事针、聚合、我的位置）、地点、地图设置。
+- 第 7 组：`LoopMapView`（MapLibre + OpenFreeMap、3D 建筑、两个范围圈、长按、手势回调）、选点页、Explore 地图已写完：
+  活动 / 球馆 / 建筑 / 赛事针、屏幕聚合（弹出面板）、我的位置、底部面板（卡片 → 附近列表）、选了运动时的预览卡、
+  地址搜索、筛选（活动 + 球馆，共用已保存的筛选）、地图设置（平面 / 范围 / 卡片 / 图层 / 球馆搜索距离）、从搜索页聚焦。
+- 为 Explore 先补了第 8 / 12 组的数据层：`VenueRepository` / `VenueService` / `VenueQueryStore`（详情、附近、浏览数）、
+  `TournamentRepository` / `TournamentService`、`ExploreLayerStore`、`VenueNearbyFilterStore`、营业时间。
+- 标记地点、我标记的地点也写完了（`PlaceRequestService`，设置页入口接上）。
+- 还差：深链 inbox；球馆收藏心形（第 8 组）；发布后的「发个帖子」等第 11 组；
+  社交主页入口等第 10 组。球馆 / 建筑 / 赛事 / 订场 / 社交主页的路由已经有了，先进占位页。
+- 下一步：第 8 组球馆（详情、订场、我的订场、收藏、场馆建筑）。
 
 ## 状态
 
@@ -30,7 +35,6 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 
 | 项 | 原因 | 需要谁 |
 |---|---|---|
-| macOS CI | GitHub Actions 因付款失败 / 支出上限停止，任务不启动 | 用户（GitHub → Billing & plans） |
 | Apple 登录真机 | Apple 开发者账号在申请；`PULSO_APPLE_SIGN_IN = NO`，后端 `APPLE_BUNDLE_IDS` 为空 | 用户 |
 | 真机签名 | 同上 | 用户 |
 | Apple 登录接口上线 | PulsoLink-API 新 Go 代码需要 `task run:rebuild` | 用户 |
@@ -50,6 +54,9 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 | Firebase messaging | 不接 APNs | Android 只有 Gradle 依赖，Kotlin 里没有用到；通知走 Centrifugo + 通知列表 |
 | Stripe Android | stripe-ios（PaymentSheet / Connect） | 都是线下服务（订场、课程、赛事、会员），App Store 3.1.3(e) 允许，不用 IAP |
 | Room | GRDB | |
+| Explore 常驻底部面板（自己画的三段拖拽） | 系统 sheet：卡片高度 + 全屏两档，卡片高度以下地图仍可操作；推进别的页面时先收起，回来再弹出 | iOS 原生 sheet 已有分档和背景交互 |
+| Explore 聚合针原地放大成面板 | 系统 popover（手机上也保持 popover） | iOS 原生 |
+| Explore 筛选里的胶囊 / 滑杆 | 系统表单：Picker、Toggle、设施多选子页 | iOS 表单习惯 |
 
 ## 基础设施
 
@@ -76,7 +83,7 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 
 | 目标 | Android 页面 | iOS | 组 | 状态 |
 |---|---|---|---|---|
-| EXPLORE | `pages/event/explore` | | 7 | ⬜ |
+| EXPLORE | `pages/event/explore` + `features/map` | `Pages/Event/Explore`、`Features/Map`（针是叠在 MapLibre 上的 SwiftUI 视图，按投影摆；底部面板用系统 sheet 的两个高度，聚合面板用 popover） | 7 | 🟦 |
 | CALENDAR | `pages/event/calendar` + `features/activity` | `Pages/Event/Calendar`、`Features/Activity` | 4 | 🟦 |
 | SEARCH | `pages/event/search` + `features/search` | `Pages/Event/Search`、`Features/Search` | 4 | 🟦 |
 | VENUE_SEARCH | `pages/venue/search` | | 8 | ⬜ |
@@ -122,8 +129,8 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 | OpenMapStyle | `pages/settings/map` | | 7 | ⬜ |
 | OpenLocationMarker | `pages/settings/map` | | 7 | ⬜ |
 | OpenLocationPick | `pages/location` | `Pages/Location`（`LoopMapView` + MapLibre；搜索 / 反查走核心 `LocationService`） | 7 | 🟦 |
-| OpenPlaceRequests | `pages/place/requests` | | 7 | ⬜ |
-| OpenMarkPlace | `pages/place/mark` | | 7 | ⬜ |
+| OpenPlaceRequests | `pages/place/requests` | `Pages/Place/Requests`（状态分段、按住撤回、重新提交、打开建筑） | 7 | 🟦 |
+| OpenMarkPlace | `pages/place/mark` | `Pages/Place/Mark`（新标记 / 被拒的重新提交；地图预览 + 选点页、照片上传、联系方式） | 7 | 🟦 |
 | OpenVenue | `pages/venue/detail` | | 8 | ⬜ |
 | OpenBuilding | `pages/venue/detail` | | 8 | ⬜ |
 | OpenVenueBook | `pages/venue/book/<sport>` | | 8 | ⬜ |

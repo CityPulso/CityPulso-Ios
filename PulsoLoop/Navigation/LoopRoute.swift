@@ -32,8 +32,12 @@ enum LoopRoute: Hashable {
     case tournament(tournamentId: String)
     /** 别人的主页（第 10 组）。 */
     case socialProfile(profileId: String)
-    /** 标记地图上缺的地点，预填长按的位置（第 7 组）。 */
-    case markPlace(latitude: Double, longitude: Double)
+    /** 标记地图上缺的地点；从地图长按进来时预填那个位置。 */
+    case markPlace(latitude: Double?, longitude: Double?)
+    /** 把被拒的地点改了重新提交。 */
+    case resubmitPlace(requestId: String)
+    /** 我标记的地点。 */
+    case placeRequests
     /** 一场活动的收款清单。 */
     case checklist(sport: LoopSport, eventId: String)
     /** 一条订场（第 8 组接上订场详情）。 */
@@ -66,7 +70,9 @@ enum LoopRoute: Hashable {
         case .building: PulsoComingSoonView(title: "explore_sheet_tag_building", systemImage: "building")
         case .tournament: PulsoComingSoonView(title: "explore_layers_tournaments", systemImage: "trophy")
         case .socialProfile: PulsoComingSoonView(title: "event_detail_participants_view_profile", systemImage: "person.crop.circle")
-        case .markPlace: PulsoComingSoonView(title: "place_mark_title", systemImage: "mappin.and.ellipse")
+        case let .markPlace(latitude, longitude): MarkPlaceView(latitude: latitude, longitude: longitude)
+        case let .resubmitPlace(requestId): MarkPlaceView(requestId: requestId)
+        case .placeRequests: PlaceRequestsView()
         case let .checklist(sport, eventId): ChecklistView(sport: sport, eventId: eventId)
         case let .courtBooking(sport, _): PulsoComingSoonView(title: sport.loopSport.labelKey, systemImage: "sportscourt")
         case .paymentMethods: PaymentMethodsView()

@@ -99,6 +99,10 @@ extension Container {
         self { TournamentService(repository: TournamentRepository(api: TournamentAPI(client: self.protectedClient())), eventBus: self.venueEventBus()) }.singleton
     }
 
+    var placeRequestService: Factory<PlaceRequestService> {
+        self { PlaceRequestService(repository: PlaceRequestRepository(api: PlaceRequestAPI(client: self.protectedClient()))) }.singleton
+    }
+
     var venueNearbyFilterStore: Factory<VenueNearbyFilterStore> {
         self { VenueNearbyFilterStore() }.singleton
     }

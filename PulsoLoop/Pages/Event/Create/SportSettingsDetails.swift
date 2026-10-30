@@ -164,7 +164,7 @@ struct SportSettingsDetails: View {
     }
 
     /** 几个选项里选一个：三个以内用分段控件，更多用菜单（Android `PulsoSegmentedControl`）。 */
-    private func choice<Option: CaseIterable & Hashable>(
+    private func choice<Option: CaseIterable & Hashable & Sendable>(
         _ title: LocalizedStringKey,
         _ systemImage: String,
         _ selected: Option,
