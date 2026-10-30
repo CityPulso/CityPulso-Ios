@@ -13,6 +13,8 @@ public struct ConversationDirectItem: Codable, Sendable, Hashable {
     public var lastMessageId: String?
     public var lastMessageType: String?
     public var lastMessagePreview: String?
+    /** 最后一条是系统消息时的内容，列表按聊天里的写法显示这句话。 */
+    public var lastMessageSystem: ChatSystemContent?
     public var createdAt: String
     public var updatedAt: String
     public var role: ConversationRole
@@ -23,7 +25,7 @@ public struct ConversationDirectItem: Codable, Sendable, Hashable {
     public var customTitle: String?
     public var lastReadMessageId: String?
 
-    public init(conversationId: String, peerProfileId: String, peerProfileScope: ProfileKind, createdByProfileId: String, createdByProfileScope: ProfileKind, lastMessageAt: String? = nil, lastMessageId: String? = nil, lastMessageType: String? = nil, lastMessagePreview: String? = nil, createdAt: String, updatedAt: String, role: ConversationRole, joinedAt: String, isMuted: Bool, mutedUntil: String? = nil, pinnedAt: String? = nil, customTitle: String? = nil, lastReadMessageId: String? = nil) {
+    public init(conversationId: String, peerProfileId: String, peerProfileScope: ProfileKind, createdByProfileId: String, createdByProfileScope: ProfileKind, lastMessageAt: String? = nil, lastMessageId: String? = nil, lastMessageType: String? = nil, lastMessagePreview: String? = nil, lastMessageSystem: ChatSystemContent? = nil, createdAt: String, updatedAt: String, role: ConversationRole, joinedAt: String, isMuted: Bool, mutedUntil: String? = nil, pinnedAt: String? = nil, customTitle: String? = nil, lastReadMessageId: String? = nil) {
         self.conversationId = conversationId
         self.peerProfileId = peerProfileId
         self.peerProfileScope = peerProfileScope
@@ -33,6 +35,7 @@ public struct ConversationDirectItem: Codable, Sendable, Hashable {
         self.lastMessageId = lastMessageId
         self.lastMessageType = lastMessageType
         self.lastMessagePreview = lastMessagePreview
+        self.lastMessageSystem = lastMessageSystem
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.role = role
@@ -55,6 +58,7 @@ public struct ConversationDirectItem: Codable, Sendable, Hashable {
         lastMessageId = try container.wire(String.self, "lastMessageId")
         lastMessageType = try container.wire(String.self, "lastMessageType")
         lastMessagePreview = try container.wire(String.self, "lastMessagePreview")
+        lastMessageSystem = try container.wire(ChatSystemContent.self, "lastMessageSystem")
         createdAt = try container.wireRequired(String.self, "createdAt")
         updatedAt = try container.wireRequired(String.self, "updatedAt")
         role = try container.wireRequired(ConversationRole.self, "role")
@@ -77,6 +81,7 @@ public struct ConversationDirectItem: Codable, Sendable, Hashable {
         try container.wireOptional(lastMessageId, "lastMessageId")
         try container.wireOptional(lastMessageType, "lastMessageType")
         try container.wireOptional(lastMessagePreview, "lastMessagePreview")
+        try container.wireOptional(lastMessageSystem, "lastMessageSystem")
         try container.wire(createdAt, "createdAt")
         try container.wire(updatedAt, "updatedAt")
         try container.wire(role, "role")
@@ -100,6 +105,8 @@ public struct ConversationGroupItem: Codable, Sendable, Hashable {
     public var lastMessageId: String?
     public var lastMessageType: String?
     public var lastMessagePreview: String?
+    /** 最后一条是系统消息时的内容，列表按聊天里的写法显示这句话。 */
+    public var lastMessageSystem: ChatSystemContent?
     public var createdAt: String
     public var updatedAt: String
     public var role: ConversationRole
@@ -110,7 +117,7 @@ public struct ConversationGroupItem: Codable, Sendable, Hashable {
     public var customTitle: String?
     public var lastReadMessageId: String?
 
-    public init(conversationId: String, title: String? = nil, avatarImageId: String? = nil, createdByProfileId: String, createdByProfileScope: ProfileKind, lastMessageAt: String? = nil, lastMessageId: String? = nil, lastMessageType: String? = nil, lastMessagePreview: String? = nil, createdAt: String, updatedAt: String, role: ConversationRole, joinedAt: String, isMuted: Bool, mutedUntil: String? = nil, pinnedAt: String? = nil, customTitle: String? = nil, lastReadMessageId: String? = nil) {
+    public init(conversationId: String, title: String? = nil, avatarImageId: String? = nil, createdByProfileId: String, createdByProfileScope: ProfileKind, lastMessageAt: String? = nil, lastMessageId: String? = nil, lastMessageType: String? = nil, lastMessagePreview: String? = nil, lastMessageSystem: ChatSystemContent? = nil, createdAt: String, updatedAt: String, role: ConversationRole, joinedAt: String, isMuted: Bool, mutedUntil: String? = nil, pinnedAt: String? = nil, customTitle: String? = nil, lastReadMessageId: String? = nil) {
         self.conversationId = conversationId
         self.title = title
         self.avatarImageId = avatarImageId
@@ -120,6 +127,7 @@ public struct ConversationGroupItem: Codable, Sendable, Hashable {
         self.lastMessageId = lastMessageId
         self.lastMessageType = lastMessageType
         self.lastMessagePreview = lastMessagePreview
+        self.lastMessageSystem = lastMessageSystem
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.role = role
@@ -142,6 +150,7 @@ public struct ConversationGroupItem: Codable, Sendable, Hashable {
         lastMessageId = try container.wire(String.self, "lastMessageId")
         lastMessageType = try container.wire(String.self, "lastMessageType")
         lastMessagePreview = try container.wire(String.self, "lastMessagePreview")
+        lastMessageSystem = try container.wire(ChatSystemContent.self, "lastMessageSystem")
         createdAt = try container.wireRequired(String.self, "createdAt")
         updatedAt = try container.wireRequired(String.self, "updatedAt")
         role = try container.wireRequired(ConversationRole.self, "role")
@@ -164,6 +173,7 @@ public struct ConversationGroupItem: Codable, Sendable, Hashable {
         try container.wireOptional(lastMessageId, "lastMessageId")
         try container.wireOptional(lastMessageType, "lastMessageType")
         try container.wireOptional(lastMessagePreview, "lastMessagePreview")
+        try container.wireOptional(lastMessageSystem, "lastMessageSystem")
         try container.wire(createdAt, "createdAt")
         try container.wire(updatedAt, "updatedAt")
         try container.wire(role, "role")

@@ -62,15 +62,17 @@ public struct RealtimeInboxUpdated: Codable, Sendable, Hashable {
     public var lastMessageAt: String
     public var lastMessageType: String
     public var lastMessagePreview: String?
+    public var lastMessageSystem: ChatSystemContent?
     public var senderId: String
 
-    public init(conversationType: String, conversationId: String, lastMessageId: String, lastMessageAt: String, lastMessageType: String, lastMessagePreview: String? = nil, senderId: String) {
+    public init(conversationType: String, conversationId: String, lastMessageId: String, lastMessageAt: String, lastMessageType: String, lastMessagePreview: String? = nil, lastMessageSystem: ChatSystemContent? = nil, senderId: String) {
         self.conversationType = conversationType
         self.conversationId = conversationId
         self.lastMessageId = lastMessageId
         self.lastMessageAt = lastMessageAt
         self.lastMessageType = lastMessageType
         self.lastMessagePreview = lastMessagePreview
+        self.lastMessageSystem = lastMessageSystem
         self.senderId = senderId
     }
 
@@ -82,6 +84,7 @@ public struct RealtimeInboxUpdated: Codable, Sendable, Hashable {
         lastMessageAt = try container.wireRequired(String.self, "lastMessageAt")
         lastMessageType = try container.wireRequired(String.self, "lastMessageType")
         lastMessagePreview = try container.wire(String.self, "lastMessagePreview")
+        lastMessageSystem = try container.wire(ChatSystemContent.self, "lastMessageSystem")
         senderId = try container.wireRequired(String.self, "senderId")
     }
 
@@ -93,6 +96,7 @@ public struct RealtimeInboxUpdated: Codable, Sendable, Hashable {
         try container.wire(lastMessageAt, "lastMessageAt")
         try container.wire(lastMessageType, "lastMessageType")
         try container.wireOptional(lastMessagePreview, "lastMessagePreview")
+        try container.wireOptional(lastMessageSystem, "lastMessageSystem")
         try container.wire(senderId, "senderId")
     }
 }

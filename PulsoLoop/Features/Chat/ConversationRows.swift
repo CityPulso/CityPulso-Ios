@@ -13,6 +13,9 @@ struct ConversationRowUi: Identifiable, Hashable {
     let preview: String?
     /** 最后一条消息的类型：媒体和卡片在预览前（或代替预览）加一个标签。 */
     let previewType: MessageType
+    /** 最后一条是系统消息时的内容，以及读的人是不是做这件事的人。 */
+    var previewSystem: ChatSystemContent? = nil
+    var previewSystemMine = false
     let lastMessageAt: String?
     let isMuted: Bool
     let pinnedAt: String?
@@ -89,6 +92,8 @@ final class ConversationRows {
             avatarURL: ImageURLs.image(card?.avatarImageId, base: config.apiBaseURL),
             preview: item.lastMessagePreview,
             previewType: MessageType.fromWire(item.lastMessageType),
+            previewSystem: item.lastMessageSystem,
+            previewSystemMine: item.lastMessageSystem?.actorId == sessionStore.state.value.currentProfileId,
             lastMessageAt: item.lastMessageAt,
             isMuted: item.isMuted,
             pinnedAt: item.pinnedAt
@@ -106,6 +111,8 @@ final class ConversationRows {
             avatarURL: ImageURLs.image(item.avatarImageId, base: config.apiBaseURL),
             preview: item.lastMessagePreview,
             previewType: MessageType.fromWire(item.lastMessageType),
+            previewSystem: item.lastMessageSystem,
+            previewSystemMine: item.lastMessageSystem?.actorId == sessionStore.state.value.currentProfileId,
             lastMessageAt: item.lastMessageAt,
             isMuted: item.isMuted,
             pinnedAt: item.pinnedAt
@@ -129,7 +136,8 @@ func conversationPreview(_ row: ConversationRowUi) -> String? {
     case .forumShare: kind = "shell_chat_card_kind_forum"
     case .postShare: kind = "shell_chat_card_kind_post"
     case .buildingShare: kind = "shell_chat_card_kind_building"
-    case .text, .system: return body
+    case .system: return row.previewSystem.map { chatSystemNoticeText($0, mine: row.previewSystemMine) } ?? body
+    case .text: return body
     }
     let tag = localizedFormat("shell_chat_hub_preview_kind", String(localized: kind))
     return body.map { "\(tag) \($0)" } ?? tag
