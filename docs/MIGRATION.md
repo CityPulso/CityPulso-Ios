@@ -58,7 +58,9 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
   （论坛卡片 / 帖子页改版、置顶聊天、群头像、收款清单滑动操作、底栏去掉私教加我的地点、即将开始筛选、地图筛选分组、活动中心订场筛选和滑动换标签）。
 - 截图：`ScreenshotTests` 覆盖两个 App 的全部底栏页和不需要 id 的页面（iPhone + iPad），`gh workflow run iOS -f screenshots=true` 触发，
   下载到 `screenshots/iPhone`、`screenshots/iPad`。不连后端，只看布局。
-- 还差：逐页看截图修布局（iPad 宽屏）；之后用户真机连后端验收。
+- 截图逐页看过（124 张 × iPhone / iPad）：修了论坛分段贴边、钱包入口卡多出的箭头，以及所有 Radix 色阶都是透明的
+  （`Scripts/android_colors.py` 把 Android 的 `0xFF` alpha 去掉了）。
+- 还差：用户真机连后端验收（截图不连后端，只能看布局）。
 
 ## 状态
 
