@@ -38,7 +38,13 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
   建论坛（封面 / 头像 / 运动 / 简介 / 发帖方式 / 规则 / 组织身份选管理员）、论坛管理（设置、管理人员、待审、举报、公告、话题）也写完。
 - 深链：`youloopy://open/panel/...`（活动 / 球馆 / 订场 / 场馆建筑 / 帖子 / 论坛）先进 inbox，登录后的主界面推进当前栈；
   聊天里娱邻的卡片交给娱邻（`youneary://`，没装就开 pulsonear.com）。Info.plist 加了 URL Types 和 LSApplicationQueriesSchemes。
-- 还差：Near 全部分叉；最后 `screenshots/` 截图（iPhone + iPad）。
+- **Near 开始（2026-10-30）**：Android 的 Near 是 Loop 改名分叉的（event→activity、court→space、Badminton→BoardGame），
+  对应文件只差活动专属字段（Near 没有场地数 / 每场人数 / 器材 / 组别 / 赛制，多了最少人数；15 种里只有麻将多一个规则）。
+  iOS 照同样的路：先把 Loop 代码按改名规则转成 Near 的桌游模板，补上差异，再用 `Scripts/fork_activity.py`（同 fork_sport.py，
+  带 `--check`）分叉出另外 14 种。已完成：数据层（仓储 / 事件总线 / 查询 / 服务 / 发起请求 / 行）15 种全部、发起草稿和校验
+  （最少人数、麻将规则、禁赌提示勾选、快捷时长）、地图与位置 DI。下一步：活动页面（详情 / 发起 / 收款清单 / 日历 / 地图 / 搜索），
+  然后门店（桌台 / 包间 / 机位、场次、开台）这些和 Loop 球馆不同的部分，按 Android Near 逐页写。
+- 还差：Near 其余部分；最后 `screenshots/` 截图（iPhone + iPad）。
 
 ## 状态
 

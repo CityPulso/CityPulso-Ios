@@ -1,0 +1,107 @@
+import PulsoLinkCore
+
+/**
+ * Near 桌游全部读接口的缓存（对应 Android `BoardGameQueryStore`、WEB `hooks/boardGame.ts`）。
+ * 页面只订阅 stream；写操作后 [BoardGameEventBus.invalidate] → 全清，活跃订阅重拉。
+ */
+final class BoardGameQueryStore: LogoutClearable {
+    static let rosterPageSize = 30
+
+    let activities: MemoryQuery<BoardGameListKey, BoardGameActivityListResponse>
+    let myRegistrations: MemoryQuery<MyBoardGameRegistrationsKey, BoardGameMyRegistrationsResponse>
+    let profileRegistrations: MemoryQuery<BoardGameProfileRegistrationsKey, BoardGameProfileRegistrationsResponse>
+    let full: MemoryQuery<String, BoardGameFullInformation>
+    let regs: MemoryQuery<BoardGameRegsKey, BoardGameRegistrationsPage>
+    let checklist: MemoryQuery<String, BoardGamePaymentChecklistResponse>
+
+    init(repository: BoardGameRepository, eventBus: BoardGameEventBus) {
+        let invalidates: @Sendable () -> AsyncStream<Void> = { eventBus.signals { _ in true } }
+        activities = MemoryQuery(invalidates: invalidates) { key in
+            try await repository.listBoardGameActivities(ListBoardGameActivitiesRequest(
+                offset: key.offset,
+                limit: key.limit,
+                includeEnded: key.includeEnded && !key.endedOnly ? true : nil,
+                endedOnly: key.endedOnly ? true : nil,
+                profileId: key.hostedProfileId,
+                profileScope: key.hostedProfileScope,
+                buildingId: key.buildingId
+            ))
+        }
+        myRegistrations = MemoryQuery(invalidates: invalidates) { key in
+            try await repository.listMyBoardGameRegistrations(ListMyBoardGameRegistrationsRequest(
+                offset: key.offset,
+                limit: key.limit,
+                all: key.all ? true : nil,
+                includeEnded: key.includeEnded ? true : nil,
+                excludeHosted: key.excludeHosted ? true : nil
+            ))
+        }
+        profileRegistrations = MemoryQuery(invalidates: invalidates) { key in
+            try await repository.listBoardGameProfileRegistrations(ListBoardGameProfileRegistrationsRequest(
+                profileId: key.profileId,
+                profileScope: key.profileScope,
+                limit: key.limit,
+                includeEnded: key.includeEnded ? true : nil
+            ))
+        }
+        full = MemoryQuery(invalidates: invalidates) { activityId in
+            try await repository.getBoardGameActivityFullInformation(activityId: activityId)
+        }
+        regs = MemoryQuery(invalidates: invalidates) { key in
+            try await repository.listBoardGameRegistrations(activityId: key.activityId, offset: key.offset, limit: key.limit)
+        }
+        checklist = MemoryQuery(invalidates: invalidates) { activityId in
+            try await repository.getOrCreatePaymentChecklist(activityId: activityId)
+        }
+    }
+
+    /** 浏览数只增不减地叠到已缓存的列表和详情上（Android `overlayView`）。 */
+    func overlayView(activityId: String, view: Int) async {
+        guard !activityId.isEmpty, view >= 0 else { return }
+        await activities.updateAll { page in
+            var page = page
+            for index in page.items.indices where page.items[index].id == activityId && page.items[index].view < view {
+                page.items[index].view = view
+            }
+            return page
+        }
+        await myRegistrations.updateAll { page in
+            var page = page
+            for index in page.items.indices where page.items[index].id == activityId && page.items[index].view < view {
+                page.items[index].view = view
+            }
+            return page
+        }
+        await profileRegistrations.updateAll { page in
+            var page = page
+            for index in page.items.indices where page.items[index].id == activityId && page.items[index].view < view {
+                page.items[index].view = view
+            }
+            return page
+        }
+        await full.updateAll { info in
+            var info = info
+            if info.activity.id == activityId, info.activity.view < view { info.activity.view = view }
+            return info
+        }
+    }
+
+    /** 打开详情前预拉详情和名单首页（不随页面取消；失败由详情页自己报）。 */
+    func prefetchDetail(activityId: String) {
+        guard !activityId.isEmpty else { return }
+        Task {
+            _ = try? await full.get(activityId)
+            _ = try? await regs.get(BoardGameRegsKey(activityId: activityId, offset: 0, limit: Self.rosterPageSize))
+        }
+    }
+
+    /** 退出登录：清掉所有缓存，下一个账号看不到这个账号的数据。 */
+    func onLogout() async throws {
+        await activities.clear()
+        await myRegistrations.clear()
+        await profileRegistrations.clear()
+        await full.clear()
+        await regs.clear()
+        await checklist.clear()
+    }
+}
