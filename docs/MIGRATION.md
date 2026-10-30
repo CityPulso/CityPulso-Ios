@@ -32,7 +32,8 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
   Android 同一批还把「课程」和「私教」合成一页（去掉 COACHING），等 Android 提交后 iOS 跟着改。
 - 第 11 组进行中：论坛信息流、论坛详情、帖子详情（评论、点赞、收藏、举报）、发帖 / 编辑（段落编辑器：文字 / 照片 / 链接，
   上下移动、按住确认删除；链接选择器四个标签 + 粘贴链接；论坛最多 10 个、每个最多 3 个话题；城市按位置预填；照片最多 9 张）。
-  还差：论坛搜索、我的论坛、赞过的帖子、建论坛、论坛管理；收藏页的论坛 / 帖子 / 评论标签；聊天收藏选择器的帖子 / 论坛标签。
+  发现论坛（搜索 / 类型 / 运动 / 排序、行内关注）、我的论坛（待处理数、管理入口）、我赞过的帖子也写完。
+  还差：建论坛、论坛管理；收藏页的论坛 / 帖子 / 评论标签；聊天收藏选择器的帖子 / 论坛标签。
 - 还差：深链 inbox；第 11 组剩下的页面；教练面板；Near 全部分叉；最后 `screenshots/` 截图（iPhone + iPad）。
 
 ## 状态
@@ -172,12 +173,12 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 | OpenChatEventPicker / OpenChatFavoritePicker | `pages/social/chat/picker` | | 10 | ⬜ |
 | OpenForum | `pages/discussion/detail` | `Pages/Discussion/Detail` | 11 | 🟨 |
 | OpenForumManage | `pages/discussion/manage` | | 11 | ⬜ |
-| OpenForumSearch | `pages/discussion/search` | | 11 | ⬜ |
+| OpenForumSearch | `pages/discussion/search` | `Pages/Discussion/Lists/ForumListViews` | 11 | 🟨 |
 | OpenForumCreate | `pages/discussion/create` | | 11 | ⬜ |
 | OpenPost | `pages/discussion/post/detail` | `Pages/Discussion/Post/PostDetailView` | 11 | 🟨 |
 | OpenPostCreate / OpenPostEdit | `pages/discussion/post/create`、`edit` | `Pages/Discussion/Post/PostCreateView`、`PostEditView` | 11 | 🟨 |
-| OpenLikedPosts | `pages/discussion/liked` | | 11 | ⬜ |
-| OpenMyForums | `pages/discussion/mine` | | 11 | ⬜ |
+| OpenLikedPosts | `pages/discussion/liked` | `Pages/Discussion/Lists/ForumListViews` | 11 | 🟨 |
+| OpenMyForums | `pages/discussion/mine` | `Pages/Discussion/Lists/ForumListViews` | 11 | 🟨 |
 | OpenCourse | `pages/program/course` | | 12 | ⬜ |
 | OpenCoach | `pages/program/coach` | | 12 | ⬜ |
 | OpenCoachPanel | `pages/coach/panel` | | 12 | ⬜ |

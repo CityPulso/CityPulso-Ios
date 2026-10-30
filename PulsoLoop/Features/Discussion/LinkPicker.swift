@@ -4,7 +4,7 @@ import PulsoLinkUI
 import SwiftUI
 
 /** 链接选择器里能选的一行：指向什么、标题、一行说明、封面（Android `LinkPickerRow`）。 */
-struct LinkPickerRow: Identifiable, Sendable {
+struct LinkPickerRow: Identifiable, Codable, Sendable {
     let link: PostLink
     let title: String
     let meta: String
