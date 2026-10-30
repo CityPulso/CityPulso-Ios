@@ -65,7 +65,7 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 |---|---|---|
 | Apple 登录真机 | Apple 开发者账号在申请；`PULSO_APPLE_SIGN_IN = NO`，后端 `APPLE_BUNDLE_IDS` 为空 | 用户 |
 | 真机签名 | 同上 | 用户 |
-| Apple 登录接口上线 | PulsoLink-API 新 Go 代码需要 `task run:rebuild` | 用户 |
+| Apple 登录接口上线 | PulsoLink-API 新 Go 代码需要 `task app:rebuild` | 用户 |
 
 ## 平台差异（有意为之）
 
