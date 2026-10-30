@@ -20,6 +20,15 @@ extension GolfMyRegistrationItem: SportRegistrationItem {
     }
 }
 
+/** 别人主页「参加的」（只要活动字段）。 */
+extension GolfProfileRegistrationItem: SportEventItem {
+    var sport: LoopSport { .golf }
+
+    var optionLabels: [Text] {
+        [Text(golfHoles.labelKey), Text(verbatim: localizedFormat("sport_option_group_count_value", groupCount)), Text(verbatim: localizedFormat("sport_option_players_per_group_value", playersPerGroup))]
+    }
+}
+
 extension GolfFullEvent: SportFullEvent {
     var sport: LoopSport { .golf }
 

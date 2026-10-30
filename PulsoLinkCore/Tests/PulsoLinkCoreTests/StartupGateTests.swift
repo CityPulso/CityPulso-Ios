@@ -28,10 +28,12 @@ struct StartupGateTests {
         let config = stubConfig(host: host, shellDestinations: Set(ShellDestination.allCases))
         // 预热只走受保护接口；测试里不经刷新拦截器，直接带 Bearer 也不需要
         let client = APIClient(config: config, interceptor: nil, configuration: StubProtocol.configuration)
+        let auth = AuthRepository(publicAPI: AuthPublicAPI(client: client), protectedAPI: AuthProtectedAPI(client: client))
         let authService = AuthService(
-            auth: AuthRepository(publicAPI: AuthPublicAPI(client: client), protectedAPI: AuthProtectedAPI(client: client)),
+            auth: auth,
             authEventBus: events,
-            sessionStore: store
+            sessionStore: store,
+            profileCards: ProfileCardRepository(auth: auth, database: try! .inMemory())
         )
         let profiles = ProfileStore()
         let preferences = PreferenceRepository(defaults: freshDefaults())

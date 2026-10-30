@@ -45,6 +45,8 @@ enum LoopRoute: Hashable {
     case addFriend
     /** 黑名单。 */
     case blocked
+    /** 通知收件箱（消息页的铃铛）。 */
+    case notifications
     /** 聊天室。 */
     case conversation(conversationId: String)
     /** 标记地图上缺的地点；从地图长按进来时预填那个位置。 */
@@ -113,10 +115,11 @@ enum LoopRoute: Hashable {
         case .myTournaments: MyTournamentsView()
         case let .social(tab): SocialOverviewView(initialTab: tab)
         case .friendRequests: FriendRequestsView()
-        case .addFriend: PulsoComingSoonView(title: "shell_social_find_people", systemImage: "person.crop.circle.badge.magnifyingglass")
+        case .addFriend: AddFriendView()
         case .blocked: BlockedListView()
+        case .notifications: NotificationsView()
         case .conversation: PulsoComingSoonView(title: "shell_dest_chat_hub", systemImage: "bubble.left.and.bubble.right")
-        case .socialProfile: PulsoComingSoonView(title: "event_detail_participants_view_profile", systemImage: "person.crop.circle")
+        case let .socialProfile(profileId): SocialProfileView(profileId: profileId)
         case let .markPlace(latitude, longitude): MarkPlaceView(latitude: latitude, longitude: longitude)
         case let .resubmitPlace(requestId): MarkPlaceView(requestId: requestId)
         case .placeRequests: PlaceRequestsView()

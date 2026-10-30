@@ -19,6 +19,15 @@ extension TennisMyRegistrationItem: SportRegistrationItem {
     }
 }
 
+/** 别人主页「参加的」（只要活动字段）。 */
+extension TennisProfileRegistrationItem: SportEventItem {
+    var sport: LoopSport { .tennis }
+
+    var optionLabels: [Text] {
+        racketOptionLabels(matchFormat: matchFormat, eligibilityDivision: eligibilityDivision, courtCount: courtCount, playersPerCourt: playersPerCourt)
+    }
+}
+
 extension TennisFullEvent: SportFullEvent {
     var sport: LoopSport { .tennis }
 

@@ -48,10 +48,12 @@ struct CommunitySignInTests {
         let events = AuthEventBus()
         let config = stubConfig(host: host, shellDestinations: Set(ShellDestination.allCases))
         let client = APIClient(config: config, interceptor: BearerOnly(store: store), configuration: StubProtocol.configuration)
+        let auth = AuthRepository(publicAPI: AuthPublicAPI(client: client), protectedAPI: AuthProtectedAPI(client: client))
         let authService = AuthService(
-            auth: AuthRepository(publicAPI: AuthPublicAPI(client: client), protectedAPI: AuthProtectedAPI(client: client)),
+            auth: auth,
             authEventBus: events,
-            sessionStore: store
+            sessionStore: store,
+            profileCards: ProfileCardRepository(auth: auth, database: try! .inMemory())
         )
         let profiles = ProfileStore()
         let preferences = PreferenceRepository(defaults: freshDefaults())

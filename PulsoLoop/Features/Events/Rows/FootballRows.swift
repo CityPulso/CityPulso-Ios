@@ -19,6 +19,15 @@ extension FootballMyRegistrationItem: SportRegistrationItem {
     }
 }
 
+/** 别人主页「参加的」（只要活动字段）。 */
+extension FootballProfileRegistrationItem: SportEventItem {
+    var sport: LoopSport { .football }
+
+    var optionLabels: [Text] {
+        [Text(footballFormat.labelKey), Text(pitchSurface.labelKey), Text(eligibilityDivision.labelKey)]
+    }
+}
+
 extension FootballFullEvent: SportFullEvent {
     var sport: LoopSport { .football }
 

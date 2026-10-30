@@ -131,9 +131,8 @@ struct EventDetailView: View {
         return { openURL(url) }
     }
 
-    /** 社交主页在第 10 组移植。 */
     private func openProfile(_ profileId: String) {
-        shell?.push(LoopRoute.comingSoon(title: "event_detail_participants_view_profile", systemImage: "person.crop.circle"))
+        shell?.push(LoopRoute.socialProfile(profileId: profileId))
     }
 
     private func openChecklist() {

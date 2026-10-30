@@ -20,6 +20,15 @@ extension TableTennisMyRegistrationItem: SportRegistrationItem {
     }
 }
 
+/** 别人主页「参加的」（只要活动字段）。 */
+extension TableTennisProfileRegistrationItem: SportEventItem {
+    var sport: LoopSport { .tableTennis }
+
+    var optionLabels: [Text] {
+        [Text(verbatim: localizedFormat("sport_option_table_count_value", tableCount)), Text(verbatim: localizedFormat("sport_option_players_per_table_value", playersPerTable)), Text(matchFormat.labelKey), Text(eligibilityDivision.labelKey)]
+    }
+}
+
 extension TableTennisFullEvent: SportFullEvent {
     var sport: LoopSport { .tableTennis }
 

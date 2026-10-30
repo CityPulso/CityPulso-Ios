@@ -24,6 +24,9 @@ protocol LoopSportService: SportEventDetailService, SportChecklistService, Sport
 
     func myRegistrations(_ query: SportRegistrationsQuery) -> AsyncStream<QueryResponse<[any SportRegistrationItem]>>
 
+    /** 别人主页「参加的」：[profileId] 报名过的活动（含已结束），最多 [limit] 条。 */
+    func profileRegistrations(profileId: String, limit: Int) -> AsyncStream<QueryResponse<[any SportEventItem]>>
+
     func freshMyRegistrations(_ query: SportRegistrationsQuery) async throws
 
     /** 在 [buildingId] 这栋建筑办的活动；[endedOnly] 时只要已结束的（球馆详情的「活动」分段）。 */

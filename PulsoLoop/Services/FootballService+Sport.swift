@@ -21,6 +21,10 @@ extension FootballService: LoopSportService {
         _ = try await self.query.myRegistrations.fresh(Self.registrationsKey(query))
     }
 
+    func profileRegistrations(profileId: String, limit: Int) -> AsyncStream<QueryResponse<[any SportEventItem]>> {
+        query.profileRegistrations.stream(FootballProfileRegistrationsKey(profileId: profileId, limit: limit, includeEnded: true)).mapResponses { $0.items }
+    }
+
     func buildingEvents(accountId: String, profileId: String, buildingId: String, endedOnly: Bool) -> AsyncStream<QueryResponse<[any SportEventItem]>> {
         query.events.stream(FootballListKey(accountId: accountId, profileId: profileId, includeEnded: false, endedOnly: endedOnly, buildingId: buildingId))
             .mapResponses { $0.items }

@@ -38,6 +38,8 @@ enum LoopShellPages {
             MyCoachingView()
         case .tournaments:
             MyTournamentsView()
+        case .chatHub:
+            ChatHubView()
         default:
             PulsoComingSoonView(destination)
         }

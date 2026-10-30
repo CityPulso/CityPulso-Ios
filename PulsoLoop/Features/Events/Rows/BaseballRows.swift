@@ -20,6 +20,15 @@ extension BaseballMyRegistrationItem: SportRegistrationItem {
     }
 }
 
+/** 别人主页「参加的」（只要活动字段）。 */
+extension BaseballProfileRegistrationItem: SportEventItem {
+    var sport: LoopSport { .baseball }
+
+    var optionLabels: [Text] {
+        [Text(baseballVariant.labelKey), Text(verbatim: localizedFormat("sport_option_innings_value", innings))]
+    }
+}
+
 extension BaseballFullEvent: SportFullEvent {
     var sport: LoopSport { .baseball }
 

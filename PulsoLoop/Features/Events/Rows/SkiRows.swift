@@ -19,6 +19,15 @@ extension SkiMyRegistrationItem: SportRegistrationItem {
     }
 }
 
+/** 别人主页「参加的」（只要活动字段）。 */
+extension SkiProfileRegistrationItem: SportEventItem {
+    var sport: LoopSport { .ski }
+
+    var optionLabels: [Text] {
+        [Text(skiDiscipline.labelKey), Text(skiSkillLevel.labelKey), Text(includesLiftTicket ? "sport_option_includes_lift_ticket_yes" : "sport_option_includes_lift_ticket_no")]
+    }
+}
+
 extension SkiFullEvent: SportFullEvent {
     var sport: LoopSport { .ski }
 

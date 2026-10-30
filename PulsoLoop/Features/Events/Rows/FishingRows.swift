@@ -19,6 +19,15 @@ extension FishingMyRegistrationItem: SportRegistrationItem {
     }
 }
 
+/** 别人主页「参加的」（只要活动字段）。 */
+extension FishingProfileRegistrationItem: SportEventItem {
+    var sport: LoopSport { .fishing }
+
+    var optionLabels: [Text] {
+        [Text(fishingMethod.labelKey), Text(catchPolicy.labelKey), Text(requiresLicense ? "sport_option_requires_license_yes" : "sport_option_requires_license_no")]
+    }
+}
+
 extension FishingFullEvent: SportFullEvent {
     var sport: LoopSport { .fishing }
 

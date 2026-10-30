@@ -10,6 +10,17 @@ public struct AuthProfilesKey: Hashable, Sendable {
     }
 }
 
+/** 找人：在某一种身份里按关键词精确匹配（身份 id / 用户名 / 显示名）。 */
+public struct ProfileLookupKey: Hashable, Sendable {
+    public let kind: ProfileKind
+    public let keyword: String
+
+    public init(kind: ProfileKind, keyword: String) {
+        self.kind = kind
+        self.keyword = keyword
+    }
+}
+
 /** 「我的社区角色申请」：同一社区身份按申请的角色分别定位。 */
 public struct MyCommunityRoleApplicationKey: Hashable, Sendable {
     public let accountId: String
@@ -33,6 +44,8 @@ public final class AuthQueryStore: LogoutClearable {
     public let profiles: MemoryQuery<AuthProfilesKey, ProfileItemsByKind>
     /** key = 身份 id。 */
     public let publicCards: MemoryQuery<String, CommunityProfileItem>
+    /** 找人结果（Android `getProfileLookup`）。 */
+    public let lookups: MemoryQuery<ProfileLookupKey, [LookupProfileItem]>
     /** 没申请过是 nil。 */
     public let communityRoleApplications: MemoryQuery<MyCommunityRoleApplicationKey, CommunityRoleApplicationItem?>
 
@@ -67,6 +80,13 @@ public final class AuthQueryStore: LogoutClearable {
         }) { profileId in
             try await auth.getPublicProfileCard(profileId: profileId)
         }
+        lookups = MemoryQuery(invalidates: {
+            authEventBus.signals { event in
+                if case .logout = event { true } else { false }
+            }
+        }) { key in
+            try await auth.lookupProfiles(LookupProfilesRequest(profileScope: key.kind, keyword: key.keyword))
+        }
         communityRoleApplications = MemoryQuery(invalidates: {
             authEventBus.signals { event in
                 switch event {
@@ -83,6 +103,7 @@ public final class AuthQueryStore: LogoutClearable {
         await emails.clear()
         await profiles.clear()
         await publicCards.clear()
+        await lookups.clear()
         await communityRoleApplications.clear()
     }
 }

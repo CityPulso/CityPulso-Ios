@@ -96,7 +96,14 @@ extension Container {
     }
 
     public var authService: Factory<AuthService> {
-        self { AuthService(auth: self.authRepository(), authEventBus: self.authEventBus(), sessionStore: self.authSessionStore()) }.singleton
+        self {
+            AuthService(
+                auth: self.authRepository(),
+                authEventBus: self.authEventBus(),
+                sessionStore: self.authSessionStore(),
+                profileCards: ProfileCardRepository(auth: self.authRepository(), database: self.pulsoDatabase())
+            )
+        }.singleton
     }
 
     public var authQueryStore: Factory<AuthQueryStore> {
@@ -231,6 +238,31 @@ extension Container {
             let store = InboxIndicatorStore(sessionStore: self.authSessionStore(), communicationQuery: self.communicationQueryStore(), socialQuery: self.socialQueryStore())
             self.sessionTerminator().register(store)
             return store
+        }.singleton
+    }
+
+    public var realtimeEventBus: Factory<RealtimeEventBus> {
+        self { RealtimeEventBus() }.singleton
+    }
+
+    public var realtimePublicationDispatcher: Factory<RealtimePublicationDispatcher> {
+        self {
+            RealtimePublicationDispatcher(communicationBus: self.communicationEventBus(), socialBus: self.socialEventBus(), inbox: self.inboxIndicatorStore())
+        }.singleton
+    }
+
+    /** App 启动时 `start()` 一次（Android `PulsoLoopApplication.onCreate`）。 */
+    public var realtimeConnectionManager: Factory<RealtimeConnectionManager> {
+        self {
+            RealtimeConnectionManager(
+                communication: self.communicationRepository(),
+                sessionStore: self.authSessionStore(),
+                dispatcher: self.realtimePublicationDispatcher(),
+                realtimeBus: self.realtimeEventBus(),
+                communicationBus: self.communicationEventBus(),
+                socialBus: self.socialEventBus(),
+                inbox: self.inboxIndicatorStore()
+            )
         }.singleton
     }
 

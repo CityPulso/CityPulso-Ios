@@ -19,6 +19,15 @@ extension PickleballMyRegistrationItem: SportRegistrationItem {
     }
 }
 
+/** 别人主页「参加的」（只要活动字段）。 */
+extension PickleballProfileRegistrationItem: SportEventItem {
+    var sport: LoopSport { .pickleball }
+
+    var optionLabels: [Text] {
+        racketOptionLabels(matchFormat: matchFormat, eligibilityDivision: eligibilityDivision, courtCount: courtCount, playersPerCourt: playersPerCourt)
+    }
+}
+
 extension PickleballFullEvent: SportFullEvent {
     var sport: LoopSport { .pickleball }
 

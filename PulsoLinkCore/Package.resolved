@@ -1,5 +1,5 @@
 {
-  "originHash" : "c39fbeec84af1ef337aa589c1498397aec712c4012987909df607b4e1bbfd0fc",
+  "originHash" : "78fe3a26fb968063096a0a7cceb0d6b5bcb40ae900fe1cc6bd648a5c329a6349",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -17,6 +17,15 @@
       "state" : {
         "revision" : "61153170668db7a46a20a87e35e70f80b24d4eb5",
         "version" : "0.4.0"
+      }
+    },
+    {
+      "identity" : "centrifuge-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/centrifugal/centrifuge-swift.git",
+      "state" : {
+        "revision" : "072d41b6a8745057116747778e8bd40cc0c8dcab",
+        "version" : "0.11.0"
       }
     },
     {
@@ -89,6 +98,24 @@
       "state" : {
         "revision" : "f96b909e1a9e469620bc5037c1e24e00153f376f",
         "version" : "1.7.5"
+      }
+    },
+    {
+      "identity" : "swift-eventsource",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/launchdarkly/swift-eventsource.git",
+      "state" : {
+        "revision" : "430a39e5ac704650f9b42913b9dfc2aebb67dcf1",
+        "version" : "3.4.0"
+      }
+    },
+    {
+      "identity" : "swift-protobuf",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-protobuf",
+      "state" : {
+        "revision" : "3d537cb81aef272a03cb3be815439e9bf0eb3bd3",
+        "version" : "1.39.0"
       }
     }
   ],

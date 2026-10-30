@@ -23,6 +23,16 @@ extension HikingMyRegistrationItem: SportRegistrationItem {
     }
 }
 
+/** 别人主页「参加的」（只要活动字段）。 */
+extension HikingProfileRegistrationItem: SportEventItem {
+    var sport: LoopSport { .hiking }
+
+    var optionLabels: [Text] {
+        [Text(hikingDifficulty.labelKey), Text(verbatim: localizedFormat("sport_option_distance_km_value", String(format: "%.1f", locale: Locale(identifier: "en_US_POSIX"), distanceKm)))]
+            + (elevationGainM.map { [Text(verbatim: localizedFormat("sport_option_elevation_gain_m_value", $0))] } ?? [])
+    }
+}
+
 extension HikingFullEvent: SportFullEvent {
     var sport: LoopSport { .hiking }
 

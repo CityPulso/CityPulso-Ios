@@ -35,7 +35,7 @@ public final class PulsoDatabase: Sendable {
 
     private static let tables = [
         RemoteKeyRecord.databaseTableName, SocialConnectionRecord.databaseTableName, FriendRequestRecord.databaseTableName,
-        ConversationRecord.databaseTableName, NotificationRecord.databaseTableName,
+        ConversationRecord.databaseTableName, NotificationRecord.databaseTableName, ProfileCard.databaseTableName,
     ]
 
     private static var migrator: DatabaseMigrator {
@@ -83,6 +83,12 @@ public final class PulsoDatabase: Sendable {
                 t.column("readAt", .text)
                 t.column("payloadJson", .text).notNull()
                 t.primaryKey(["ownerProfileId", "notificationId"])
+            }
+            try db.create(table: ProfileCard.databaseTableName) { t in
+                t.column("profileId", .text).primaryKey()
+                t.column("displayName", .text)
+                t.column("avatarImageId", .text)
+                t.column("fetchedAt", .double).notNull()
             }
             try db.create(index: "notifications_order", on: NotificationRecord.databaseTableName, columns: ["ownerProfileId", "position"])
         }

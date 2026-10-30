@@ -20,6 +20,9 @@ let package = Package(
         .package(url: "https://github.com/iwill/generic-json-swift.git", from: "2.0.2"),
         // 本地库（Android Room）：社交列表、好友请求、聊天的离线缓存。
         .package(url: "https://github.com/groue/GRDB.swift.git", from: "7.4.0"),
+        // 实时推送（Android centrifuge-java + okhttp-sse）：WebSocket 优先，SSE 兜底。
+        .package(url: "https://github.com/centrifugal/centrifuge-swift.git", from: "0.7.0"),
+        .package(url: "https://github.com/launchdarkly/swift-eventsource.git", from: "3.3.0"),
     ],
     targets: [
         .target(
@@ -42,6 +45,12 @@ let package = Package(
                 "Semaphore",
                 .product(name: "GenericJSON", package: "generic-json-swift"),
                 .product(name: "GRDB", package: "GRDB.swift"),
+                .product(
+                    name: "SwiftCentrifuge",
+                    package: "centrifuge-swift",
+                    condition: .when(platforms: [.iOS, .macOS])
+                ),
+                .product(name: "LDSwiftEventSource", package: "swift-eventsource"),
             ]
         ),
         .testTarget(name: "PulsoLinkCoreTests", dependencies: ["PulsoLinkCore"]),

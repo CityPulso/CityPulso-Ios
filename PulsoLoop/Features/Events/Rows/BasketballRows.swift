@@ -20,6 +20,15 @@ extension BasketballMyRegistrationItem: SportRegistrationItem {
     }
 }
 
+/** 别人主页「参加的」（只要活动字段）。 */
+extension BasketballProfileRegistrationItem: SportEventItem {
+    var sport: LoopSport { .basketball }
+
+    var optionLabels: [Text] {
+        [Text(verbatim: localizedFormat("sport_option_court_count_value", courtCount)), Text(basketballFormat.labelKey), Text(eligibilityDivision.labelKey)]
+    }
+}
+
 extension BasketballFullEvent: SportFullEvent {
     var sport: LoopSport { .basketball }
 

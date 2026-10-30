@@ -81,3 +81,11 @@ public func geoCoordinate(_ geojson: WireJSON?, index: Int) -> Double? {
     if case let .number(value) = coordinates[index] { return value }
     return nil
 }
+
+extension Dictionary where Key == String, Value == WireJSON {
+    /** 载荷里的一段非空文字（通知等 JSON payload）。 */
+    public func text(_ key: String) -> String? {
+        guard let value = self[key]?.stringValue?.trimmingCharacters(in: .whitespaces), !value.isEmpty else { return nil }
+        return value
+    }
+}

@@ -1,3 +1,4 @@
+import Factory
 import PulsoLinkCore
 import PulsoLinkUI
 import SwiftUI
@@ -16,6 +17,8 @@ struct PulsoLoopApp: App {
             vault: KeychainSessionVault(service: "com.citypulso.pulsoloop.session")
         )
         PulsoUIBootstrap.start()
+        // 登录有效且选了身份时连 Centrifugo（Android `Application.onCreate`）。
+        Container.shared.realtimeConnectionManager().start()
     }
 
     var body: some Scene {

@@ -6,11 +6,25 @@ public struct AuthService: Sendable {
     private let authEventBus: AuthEventBus
 
     private let sessionStore: AuthSessionStore
+    private let profileCards: ProfileCardRepository
 
-    public init(auth: AuthRepository, authEventBus: AuthEventBus, sessionStore: AuthSessionStore) {
+    public init(auth: AuthRepository, authEventBus: AuthEventBus, sessionStore: AuthSessionStore, profileCards: ProfileCardRepository) {
         self.auth = auth
         self.authEventBus = authEventBus
         self.sessionStore = sessionStore
+        self.profileCards = profileCards
+    }
+
+    /* ------------------------------ 公开资料卡 ------------------------------ */
+
+    public func observeProfileCards(_ ids: [String]) -> AsyncStream<[String: ProfileCard]> { profileCards.observe(ids) }
+
+    /** 并发拉还没缓存的卡。 */
+    public func ensureProfileCards(_ ids: [String]) async throws { try await profileCards.ensure(ids) }
+
+    /** 已经知道的卡（比如当前身份）直接写，不拉网络。 */
+    public func cacheProfileCard(_ profileId: String, displayName: String?, avatarImageId: String?) async throws {
+        try await profileCards.put(profileId, displayName: displayName, avatarImageId: avatarImageId)
     }
 
     /* ------------------------------ 登录 / 注册 ------------------------------ */
