@@ -244,3 +244,13 @@ enum BookingSelectionError: CaseIterable, Codable, Sendable, Hashable {
 
 /** 自定义设施 / 装备要求的默认图标，也是未知图标 key 的回退（WEB `DEFAULT_CATALOG_ICON`）。 */
 let defaultCatalogIcon = "sparkles"
+
+/**
+ * Upper bound on the total length of one booking request: all spaces and all runs together.
+ * Mirrors API `MaxBookingTotalMinutes` and WEB `VENUE_LIMITS.bookingTotalMinutesMax`.
+ */
+let venueBookingTotalMinutesMax = 48 * 60
+
+let venueRadiusMultiplierOptions: [Double] = [1.0, 1.5, 2.0, 3.0, 5.0]
+
+let venueRadiusFixedKmOptions: [Int] = [2, 5, 10, 20, 50]

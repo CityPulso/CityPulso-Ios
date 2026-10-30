@@ -48,7 +48,7 @@ final class AgendaModel {
     private var pastBookings: [VenueSport: Loadable<[AgendaItem]>] = [:]
 
     @ObservationIgnored @Injected(\.loopSportServices) private var services
-    @ObservationIgnored @Injected(\.venueQueryStore) private var venueQueries
+    @ObservationIgnored @Injected(\.venueSportServices) private var venueServices
     @ObservationIgnored @Injected(\.venueEventBus) private var venueEventBus
     @ObservationIgnored @Injected(\.authSessionStore) private var sessionStore
     @ObservationIgnored @Injected(\.profileStore) private var profileStore
@@ -88,8 +88,8 @@ final class AgendaModel {
             }
         }
         for sport in VenueSport.allCases {
-            let upcoming = venueQueries.myBookings(sport, MyCourtBookingsKey(accountId: session.currentAccountId, profileId: session.currentProfileId, upcoming: true, limit: Self.agendaLimit))
-            let past = venueQueries.myBookings(sport, MyCourtBookingsKey(accountId: session.currentAccountId, profileId: session.currentProfileId, upcoming: false, limit: Self.pastLimit))
+            let upcoming = venueServices[sport]!.myBookings(MyCourtBookingsKey(accountId: session.currentAccountId, profileId: session.currentProfileId, upcoming: true, limit: Self.agendaLimit))
+            let past = venueServices[sport]!.myBookings(MyCourtBookingsKey(accountId: session.currentAccountId, profileId: session.currentProfileId, upcoming: false, limit: Self.pastLimit))
             operations.append {
                 for await response in upcoming {
                     self.bookings[sport] = (self.bookings[sport] ?? Loadable()).reduce(response.map { Self.bookingItems($0, sport: sport, past: false) })

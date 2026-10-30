@@ -2,10 +2,6 @@ import PulsoLinkCore
 import PulsoLinkUI
 import SwiftUI
 
-/** 球馆搜索距离：倍数和固定公里数的选项（Android `VENUE_RADIUS_MULTIPLIER_OPTIONS` / `VENUE_RADIUS_FIXED_KM_OPTIONS`）。 */
-private let venueRadiusMultiplierOptions: [Double] = [1, 1.5, 2, 3, 5]
-private let venueRadiusFixedKmOptions = [2, 5, 10, 20, 50]
-
 /**
  * 地图筛选（Android `ExploreFilterSheet`，WEB ExploreSidebar → Filters）：运动、关键词，然后「筛选活动」「筛选球馆」两段。
  * 两段和活动 / 球馆列表共用同一份已保存的筛选；地图按视野取范围，所以不显示距离和排序。改了马上生效。

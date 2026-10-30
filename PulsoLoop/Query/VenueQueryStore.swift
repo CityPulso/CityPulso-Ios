@@ -1,5 +1,13 @@
 import PulsoLinkCore
 
+/** 某运动入口某一天的可用性。 */
+struct VenueAvailabilityKey: Hashable, Sendable {
+    var venueId: String
+    var sport: VenueSport
+    var date: String
+    var profileId: String
+}
+
 /** 我的订场的一次有上限的读取（日程、活动中心）；订场页本身分页。 */
 struct MyCourtBookingsKey: Hashable, Sendable {
     var accountId: String
@@ -35,18 +43,15 @@ struct NearbyVenuesKey: Hashable, Sendable {
 }
 
 /**
- * 球馆读接口的缓存（对应 Android `VenueQueryStore`）。任何球馆写操作（[VenueEventBus]）全部失效。
+ * 球馆读接口的缓存（对应 Android `VenueQueryStore`；各运动入口那几项在 `<Sport>VenueQueryStore`）。任何球馆写操作（[VenueEventBus]）全部失效。
  * 浏览次数（计数接口的返回）直接盖到缓存的详情和地图针上。
  */
 final class VenueQueryStore: LogoutClearable {
     let detail: MemoryQuery<VenueKey, VenueDetail>
     let offerings: MemoryQuery<VenueKey, [VenueOffering]>
     let nearby: MemoryQuery<NearbyVenuesKey, NearbyVenuesPage>
-    let badmintonMyBookings: MemoryQuery<MyCourtBookingsKey, ListWithTotal<BadmintonMyCourtBooking>>
-    let tennisMyBookings: MemoryQuery<MyCourtBookingsKey, ListWithTotal<TennisMyCourtBooking>>
-    let pickleballMyBookings: MemoryQuery<MyCourtBookingsKey, ListWithTotal<PickleballMyCourtBooking>>
 
-    init(repository: VenueRepository, badminton: BadmintonEntryAPI, tennis: TennisEntryAPI, pickleball: PickleballEntryAPI, eventBus: VenueEventBus) {
+    init(repository: VenueRepository, eventBus: VenueEventBus) {
         let invalidates: @Sendable () -> AsyncStream<Void> = { eventBus.signals { _ in true } }
         detail = MemoryQuery(invalidates: invalidates) { key in try await repository.getVenue(key.venueId) }
         offerings = MemoryQuery(invalidates: invalidates) { key in try await repository.listOfferings(key.venueId) }
@@ -65,27 +70,6 @@ final class VenueQueryStore: LogoutClearable {
                 limit: key.limit,
                 summary: key.summary
             ))
-        }
-        badmintonMyBookings = MemoryQuery(invalidates: invalidates) { key in
-            try await badminton.listMyBadmintonCourtBookings(BadmintonMyCourtBookingsRequest(limit: key.limit, upcoming: key.upcoming))
-                .dataOrThrow("ListMyBadmintonCourtBookings")
-        }
-        tennisMyBookings = MemoryQuery(invalidates: invalidates) { key in
-            try await tennis.listMyTennisCourtBookings(TennisMyCourtBookingsRequest(limit: key.limit, upcoming: key.upcoming))
-                .dataOrThrow("ListMyTennisCourtBookings")
-        }
-        pickleballMyBookings = MemoryQuery(invalidates: invalidates) { key in
-            try await pickleball.listMyPickleballCourtBookings(PickleballMyCourtBookingsRequest(limit: key.limit, upcoming: key.upcoming))
-                .dataOrThrow("ListMyPickleballCourtBookings")
-        }
-    }
-
-    /** 某运动的我的订场，换成统一的行。 */
-    func myBookings(_ sport: VenueSport, _ key: MyCourtBookingsKey) -> AsyncStream<QueryResponse<[CourtBookingRowUi]>> {
-        switch sport {
-        case .badminton: badmintonMyBookings.stream(key).mapResponses { $0.items.map(CourtBookingRowUi.init) }
-        case .tennis: tennisMyBookings.stream(key).mapResponses { $0.items.map(CourtBookingRowUi.init) }
-        case .pickleball: pickleballMyBookings.stream(key).mapResponses { $0.items.map(CourtBookingRowUi.init) }
         }
     }
 
@@ -111,8 +95,5 @@ final class VenueQueryStore: LogoutClearable {
         await detail.clear()
         await offerings.clear()
         await nearby.clear()
-        await badmintonMyBookings.clear()
-        await tennisMyBookings.clear()
-        await pickleballMyBookings.clear()
     }
 }

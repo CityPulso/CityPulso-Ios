@@ -26,7 +26,7 @@ final class ActivityCenterModel {
     private(set) var bookings = Loadable<[CourtBookingRowUi]>()
 
     @ObservationIgnored @Injected(\.loopSportServices) private var services
-    @ObservationIgnored @Injected(\.venueQueryStore) private var venueQueries
+    @ObservationIgnored @Injected(\.venueSportServices) private var venueServices
     @ObservationIgnored @Injected(\.venueEventBus) private var venueEventBus
     @ObservationIgnored @Injected(\.authSessionStore) private var sessionStore
     @ObservationIgnored @Injected(\.profileStore) private var profileStore
@@ -176,8 +176,7 @@ final class ActivityCenterModel {
         bookingsTask?.cancel()
         bookings = Loadable()
         guard let scope = scope(), let venueSport else { return }
-        let stream = venueQueries.myBookings(
-            venueSport,
+        let stream = venueServices[venueSport]!.myBookings(
             MyCourtBookingsKey(accountId: scope.accountId, profileId: scope.profileId, upcoming: !filter.showEnded, limit: Self.pageSize)
         )
         bookingsTask = Task {

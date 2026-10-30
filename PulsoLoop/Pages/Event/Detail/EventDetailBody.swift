@@ -207,6 +207,7 @@ private struct EventInfoCard: View {
 }
 
 /** 「还有 N 个名额」/「还有 N 个名额 · M 人待退出」。 */
+@MainActor
 func seatsLeftLabel(_ model: EventDetailModel) -> String {
     model.leavingSeats > 0
         ? localizedFormat("event_detail_seats_left_leaving", model.remainingSeats, model.leavingSeats)

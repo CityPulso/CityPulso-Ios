@@ -38,6 +38,9 @@ TEMPLATES: list[tuple[str, set[str] | None]] = [
     # Same racket fields as badminton (match format, division, courts × players).
     ("Features/Events/Rows/BadmintonRows.swift", {"tennis", "pickleball"}),
     ("Features/Create/BadmintonCreate.swift", {"tennis", "pickleball"}),
+    # Sports with a venue entry (court booking): same DTOs as badminton.
+    ("Services/BadmintonVenueService.swift", {"tennis", "pickleball"}),
+    ("DI/Container+BadmintonVenue.swift", {"tennis", "pickleball"}),
 ]
 
 SOURCE = ("Badminton", "badminton", "badminton")

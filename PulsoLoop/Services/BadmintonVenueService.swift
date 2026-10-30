@@ -1,0 +1,265 @@
+import Foundation
+import PulsoLinkCore
+
+/**
+ * 球馆羽毛球入口的读缓存（Android `VenueQueryStore` 里羽毛球那几项）：规则、场地、价格方案、某天的可用性（15 秒过期）、
+ * 我的订场。任何球馆写操作（[VenueEventBus]）全部失效。
+ */
+final class BadmintonVenueQueryStore: LogoutClearable {
+    let entry: MemoryQuery<VenueKey, BadmintonEntry>
+    let courts: MemoryQuery<VenueKey, [BadmintonCourt]>
+    let ratePlans: MemoryQuery<VenueKey, [BadmintonRatePlan]>
+    let availability: MemoryQuery<VenueAvailabilityKey, BadmintonDayGrid>
+    let myBookings: MemoryQuery<MyCourtBookingsKey, ListWithTotal<BadmintonMyCourtBooking>>
+    let myBooking: MemoryQuery<String, BadmintonMyCourtBooking>
+
+    init(api: BadmintonEntryAPI, eventBus: VenueEventBus) {
+        let invalidates: @Sendable () -> AsyncStream<Void> = { eventBus.signals { _ in true } }
+        entry = MemoryQuery(invalidates: invalidates) { key in try await api.getEntry(venueId: key.venueId).dataOrThrow("GetBadmintonEntry") }
+        courts = MemoryQuery(invalidates: invalidates) { key in try await api.listCourts(venueId: key.venueId).dataOrThrow("ListBadmintonCourts") }
+        ratePlans = MemoryQuery(invalidates: invalidates) { key in try await api.listRatePlans(venueId: key.venueId).dataOrThrow("ListBadmintonRatePlans") }
+        availability = MemoryQuery(ttl: .seconds(15), invalidates: invalidates) { key in
+            try await api.getAvailability(venueId: key.venueId, date: key.date).dataOrThrow("GetBadmintonAvailability")
+        }
+        myBookings = MemoryQuery(invalidates: invalidates) { key in
+            try await api.listMyBadmintonCourtBookings(BadmintonMyCourtBookingsRequest(limit: key.limit, upcoming: key.upcoming)).dataOrThrow("ListMyCourtBookings")
+        }
+        myBooking = MemoryQuery(invalidates: invalidates) { bookingId in
+            try await api.getMyBadmintonCourtBooking(bookingId: bookingId).dataOrThrow("GetMyCourtBooking")
+        }
+    }
+
+    func onLogout() async throws {
+        await entry.clear()
+        await courts.clear()
+        await ratePlans.clear()
+        await availability.clear()
+        await myBookings.clear()
+        await myBooking.clear()
+    }
+}
+
+/** 球馆羽毛球入口的门面（Android `VenueService` 里羽毛球那几项）：写操作成功后一次 [VenueEventBus.invalidate]。 */
+struct BadmintonVenueService: VenueSportService {
+    let api: BadmintonEntryAPI
+    let query: BadmintonVenueQueryStore
+    let eventBus: VenueEventBus
+    let session: AuthSessionStore
+
+    var sport: VenueSport { .badminton }
+
+    private var profileId: String { session.state.value.currentProfileId }
+
+    func entry(venueId: String) -> AsyncStream<QueryResponse<CourtEntryUi>> {
+        query.entry.stream(VenueKey(venueId: venueId, profileId: profileId)).mapResponses(CourtEntryUi.init)
+    }
+
+    func courts(venueId: String) -> AsyncStream<QueryResponse<[CourtUi]>> {
+        query.courts.stream(VenueKey(venueId: venueId, profileId: profileId)).mapResponses { $0.map(CourtUi.init) }
+    }
+
+    func ratePlans(venueId: String) -> AsyncStream<QueryResponse<[CourtRatePlanUi]>> {
+        query.ratePlans.stream(VenueKey(venueId: venueId, profileId: profileId)).mapResponses { plans in
+            plans.map { CourtRatePlanUi(id: $0.id, name: $0.name, sortOrder: $0.sortOrder, courtIds: $0.courtIds) }
+        }
+    }
+
+    func availability(venueId: String, date: String) -> AsyncStream<QueryResponse<CourtDayUi>> {
+        query.availability.stream(VenueAvailabilityKey(venueId: venueId, sport: sport, date: date, profileId: profileId)).mapResponses(CourtDayUi.init)
+    }
+
+    func checkout(venueId: String, _ input: CourtCheckoutInput, idempotencyKey: String) async throws -> CourtCheckoutResultUi {
+        let body = BadmintonCheckoutRequest(
+            paymentMethod: input.paymentMethod,
+            selections: input.lines.map { BadmintonCourtSelection(courtId: $0.courtId, startsAt: $0.startsAt, endsAt: $0.endsAt) },
+            contactName: input.contactName,
+            contactPhone: input.contactPhone,
+            note: input.note,
+            bundleId: input.bundleId
+        )
+        let result = try await api.checkoutBadmintonCourtBooking(venueId: venueId, idempotencyKey: idempotencyKey, body).dataOrThrow("CheckoutCourtBooking")
+        eventBus.invalidate()
+        return CourtCheckoutResultUi(
+            bookingId: result.bookingId,
+            status: result.status,
+            paymentMethod: result.paymentMethod,
+            totalAmount: result.totalAmount,
+            currency: result.currency,
+            expiresAt: result.expiresAt,
+            payment: result.payment
+        )
+    }
+
+    func myBookings(_ key: MyCourtBookingsKey) -> AsyncStream<QueryResponse<[CourtBookingRowUi]>> {
+        query.myBookings.stream(key).mapResponses { $0.items.map(CourtBookingRowUi.init) }
+    }
+
+    /** 我的订场，每页 20 条；任何球馆写操作都让列表重拉。 */
+    @MainActor
+    func pageMyBookings(upcoming: Bool) -> PagedList<CourtBookingRowUi, Int> {
+        let api = api
+        return .offset(invalidates: { eventBus.signals { _ in true } }) { offset, limit in
+            let page = try await api.listMyBadmintonCourtBookings(BadmintonMyCourtBookingsRequest(offset: offset, limit: limit, upcoming: upcoming))
+                .dataOrThrow("ListMyCourtBookings")
+            return ListWithTotal(items: page.items.map(CourtBookingRowUi.init), total: page.total)
+        }
+    }
+
+    func myBooking(_ bookingId: String) -> AsyncStream<QueryResponse<MyCourtBookingUi>> {
+        query.myBooking.stream(bookingId).mapResponses(MyCourtBookingUi.init)
+    }
+
+    func refetchMyBooking(_ bookingId: String) async throws -> MyCourtBookingUi {
+        MyCourtBookingUi(try await query.myBooking.fresh(bookingId))
+    }
+
+    func bookingPayment(_ bookingId: String) async throws -> PaymentHoldSession {
+        try await api.getBadmintonCourtBookingPayment(bookingId: bookingId).dataOrThrow("GetCourtBookingPayment")
+    }
+
+    func payBooking(_ bookingId: String, paymentMethodId: String) async throws -> PaymentAttempt {
+        let attempt = try await api.payBadmintonCourtBookingPayment(bookingId: bookingId, PayPaymentRequest(paymentMethodId: paymentMethodId))
+            .dataOrThrow("PayCourtBookingPayment")
+        eventBus.invalidate()
+        return attempt
+    }
+
+    func refundPreview(_ bookingId: String) async throws -> CourtRefundPreviewUi {
+        let preview = try await api.getBadmintonCourtBookingRefundPreview(bookingId: bookingId).dataOrThrow("GetCourtBookingRefundPreview")
+        return CourtRefundPreviewUi(
+            refundAmount: preview.refundAmount,
+            totalAmount: preview.totalAmount,
+            providerFeeAmount: preview.providerFeeAmount,
+            currency: preview.currency,
+            policy: CourtRefundPolicy(wire: preview.policyType.rawValue),
+            policyNote: preview.policyNote,
+            tiers: preview.tiers.map { CourtRefundTierUi(hoursBeforeStart: $0.hoursBeforeStart, refundPercent: $0.refundPercent) },
+            restoreMinutes: preview.restoreMinutes
+        )
+    }
+
+    func cancelBooking(_ bookingId: String, reason: String?) async throws {
+        try await api.cancelMyBadmintonCourtBooking(bookingId: bookingId, BadmintonCancelReasonRequest(reason: reason))
+        eventBus.invalidate()
+    }
+}
+
+/* ------------------------------ 羽毛球 DTO → 运动无关的形状 ------------------------------ */
+
+extension CourtEntryUi {
+    init(_ entry: BadmintonEntry) {
+        self.init(
+            status: entry.status,
+            bookingWindowDays: entry.bookingWindowDays,
+            bookingLeadMinutes: entry.bookingLeadMinutes,
+            slotMinutes: entry.slotMinutes,
+            minBookingMinutes: entry.minBookingMinutes,
+            maxBookingMinutes: entry.maxBookingMinutes,
+            refundPolicy: CourtRefundPolicy(wire: entry.refundPolicyType.rawValue),
+            refundPolicyNote: entry.refundPolicyNote,
+            refundTiers: entry.refundTiers.map { CourtRefundTierUi(hoursBeforeStart: $0.hoursBeforeStart, refundPercent: $0.refundPercent) },
+            courtCount: entry.courtCount,
+            minHourlyPriceAmount: entry.minHourlyPriceAmount,
+            timezone: entry.timezone,
+            currency: entry.currency,
+            venueStatus: entry.venueStatus
+        )
+    }
+}
+
+extension CourtUi {
+    init(_ court: BadmintonCourt) {
+        self.init(
+            id: court.id,
+            name: court.name,
+            sortOrder: court.sortOrder,
+            surface: court.surface,
+            description: court.description,
+            isActive: court.isActive,
+            hours: venueWeek(court.hours.map { VenueDayHours(dayOfWeek: $0.dayOfWeek, opensAt: $0.opensAt, closesAt: $0.closesAt) }),
+            images: court.images
+        )
+    }
+}
+
+extension CourtDayUi {
+    init(_ grid: BadmintonDayGrid) {
+        self.init(
+            date: grid.date,
+            slotMinutes: grid.slotMinutes,
+            bookable: grid.bookable,
+            availableCount: grid.availableCount,
+            freeCourtCount: grid.freeCourtCount,
+            courts: grid.courts.map { court in
+                CourtColumnUi(
+                    courtId: court.courtId,
+                    name: court.name,
+                    sortOrder: court.sortOrder,
+                    slots: court.slots.map {
+                        CourtSlotUi(startsAt: $0.startsAt, endsAt: $0.endsAt, status: $0.status, priceCents: $0.priceCents, rateLabel: $0.rateLabel, occupancy: $0.occupancy, title: $0.title)
+                    }
+                )
+            }
+        )
+    }
+}
+
+extension MyCourtBookingUi {
+    init(_ booking: BadmintonMyCourtBooking) {
+        self.init(
+            id: booking.id,
+            sport: .badminton,
+            venueId: booking.venueId,
+            status: booking.status,
+            paymentMethod: booking.paymentMethod,
+            startsAt: booking.startsAt,
+            endsAt: booking.endsAt,
+            totalAmount: booking.totalAmount,
+            currency: booking.currency,
+            refundAmount: booking.refundAmount,
+            refundStatus: booking.refundStatus?.rawValue,
+            contactName: booking.contactName,
+            contactPhone: booking.contactPhone,
+            note: booking.note,
+            expiresAt: booking.expiresAt,
+            confirmedAt: booking.confirmedAt,
+            canceledAt: booking.canceledAt,
+            canceledBy: booking.canceledBy,
+            cancelReason: booking.cancelReason,
+            expiredAt: booking.expiredAt,
+            paidMarkedAt: booking.paidMarkedAt,
+            paymentId: booking.paymentId,
+            bundleId: booking.bundleId,
+            bundleMinutes: booking.bundleMinutes,
+            createdAt: booking.createdAt,
+            slots: booking.slots.map {
+                CourtBookingSlotUi(id: $0.id, courtId: $0.courtId, courtName: $0.courtName, startsAt: $0.startsAt, endsAt: $0.endsAt, priceAmount: $0.priceAmount, holdsSlot: $0.holdsSlot)
+            },
+            priceBreakdown: booking.priceBreakdown.map {
+                CourtPriceLineUi(courtId: $0.courtId, startsAt: $0.startsAt, endsAt: $0.endsAt, amount: $0.amount, rateLabel: $0.rateLabel)
+            },
+            refundPolicy: CourtRefundPolicy(wire: booking.refundPolicySnapshot.type.rawValue),
+            refundPolicyNote: booking.refundPolicySnapshot.note,
+            refundTiers: booking.refundPolicySnapshot.tiers.map { CourtRefundTierUi(hoursBeforeStart: $0.hoursBeforeStart, refundPercent: $0.refundPercent) },
+            venueName: booking.venueName,
+            venueAddress: booking.venueAddress,
+            venuePhone: booking.venuePhone,
+            venueTimezone: booking.venueTimezone,
+            venueLocationLat: booking.venueLocationLat,
+            venueLocationLng: booking.venueLocationLng,
+            venueBookingInstructions: booking.venueBookingInstructions,
+            venueCoverImageId: booking.venueCoverImageId
+        )
+    }
+}
+
+extension CourtBookingRowUi {
+    init(_ booking: BadmintonMyCourtBooking) {
+        self.init(
+            id: booking.id, venueName: booking.venueName, venueAddress: booking.venueAddress, venueCoverImageId: booking.venueCoverImageId,
+            venueTimezone: booking.venueTimezone, startsAt: booking.startsAt, endsAt: booking.endsAt, status: booking.status,
+            expiresAt: booking.expiresAt, courtCount: Set(booking.slots.map(\.courtId)).count, totalAmount: booking.totalAmount, currency: booking.currency,
+            courtNames: booking.slots.map(\.courtName).filter { !$0.isEmpty }.reduce(into: []) { if !$0.contains($1) { $0.append($1) } }
+        )
+    }
+}

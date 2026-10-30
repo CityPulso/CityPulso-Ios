@@ -399,11 +399,19 @@ def render_lists(text: str, enums: list[KotlinEnum], access: str) -> list[str]:
     """Top-level `const val` literals and `val NAME = listOf(Enum.A, Enum.B)` over an enum of this file → Swift constants."""
     names = {enum.name for enum in enums}
     lines: list[str] = []
-    for match in re.finditer(r"^const val (\w+)\s*=\s*(\"[^\"]*\"|-?[0-9][0-9_.]*[LfF]?)\s*$", text, re.M):
+    number = r"-?[0-9][0-9_.]*[LfF]?"
+    for match in re.finditer(rf"^const val (\w+)\s*=\s*(\"[^\"]*\"|{number}(?:\s*\*\s*{number})*)\s*$", text, re.M):
         before = text[: match.start()]
         tail = before[max(before.rfind("}"), before.rfind("\n\n")) + 1 :]
         doc = kdoc(tail) if "/**" in tail else None
-        lines += doc_lines(doc, "") + [f"{access}let {camel(match.group(1))} = {swift_value(match.group(2))}", ""]
+        value = " * ".join(swift_value(factor) for factor in match.group(2).split("*"))
+        lines += doc_lines(doc, "") + [f"{access}let {camel(match.group(1))} = {value}", ""]
+    for match in re.finditer(rf"^val (\w+)\s*=\s*listOf\(((?:\s*{number}\s*,?)+)\)\s*$", text, re.M):
+        before = text[: match.start()]
+        doc = kdoc(before[before.rfind("}") + 1 :]) if "/**" in before[before.rfind("}") + 1 :] else None
+        items = [swift_value(item) for item in match.group(2).split(",") if item.strip()]
+        kind = "Double" if any("." in item for item in items) else "Int"
+        lines += doc_lines(doc, "") + [f"{access}let {camel(match.group(1))}: [{kind}] = [{', '.join(items)}]", ""]
     for match in re.finditer(r"^val (\w+)\s*=\s*listOf\(([^)]*)\)", text, re.M):
         items = [item.strip() for item in match.group(2).split(",") if item.strip()]
         types = {item.split(".")[0] for item in items}

@@ -74,16 +74,55 @@ extension Container {
 
     var venueQueryStore: Factory<VenueQueryStore> {
         self {
+            let store = VenueQueryStore(repository: self.venueRepository(), eventBus: self.venueEventBus())
+            self.sessionTerminator().register(store)
+            return store
+        }.singleton
+    }
+
+    /** 开了球馆入口的运动各自的订场读写。 */
+    var venueSportServices: Factory<[VenueSport: any VenueSportService]> {
+        self {
+            [
+                .badminton: self.badmintonVenueService(),
+                .tennis: self.tennisVenueService(),
+                .pickleball: self.pickleballVenueService(),
+            ]
+        }.singleton
+    }
+
+    var membershipQueryStore: Factory<MembershipQueryStore> {
+        self {
             let client = self.protectedClient()
-            let store = VenueQueryStore(
-                repository: self.venueRepository(),
-                badminton: BadmintonEntryAPI(client: client),
-                tennis: TennisEntryAPI(client: client),
-                pickleball: PickleballEntryAPI(client: client),
+            let store = MembershipQueryStore(
+                memberships: MembershipRepository(api: MembershipAPI(client: client)),
+                bundles: BundleRepository(api: BundleAPI(client: client)),
                 eventBus: self.venueEventBus()
             )
             self.sessionTerminator().register(store)
             return store
+        }.singleton
+    }
+
+    var membershipService: Factory<MembershipService> {
+        self {
+            MembershipService(
+                repository: MembershipRepository(api: MembershipAPI(client: self.protectedClient())),
+                query: self.membershipQueryStore(),
+                eventBus: self.venueEventBus(),
+                session: self.authSessionStore()
+            )
+        }.singleton
+    }
+
+    var bundleService: Factory<BundleService> {
+        self {
+            BundleService(
+                repository: BundleRepository(api: BundleAPI(client: self.protectedClient())),
+                query: self.membershipQueryStore(),
+                eventBus: self.venueEventBus(),
+                session: self.authSessionStore()
+            )
         }.singleton
     }
 
