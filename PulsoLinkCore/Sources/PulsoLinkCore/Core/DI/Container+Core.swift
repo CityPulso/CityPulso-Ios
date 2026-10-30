@@ -127,8 +127,12 @@ extension Container {
 
     /* ------------------------------ Building ------------------------------ */
 
+    public var buildingRepository: Factory<BuildingRepository> {
+        self { BuildingRepository(api: BuildingAPI(client: self.publicClient()), favorites: FavoriteAPI(client: self.protectedClient())) }.singleton
+    }
+
     public var buildingService: Factory<BuildingService> {
-        self { BuildingService(buildings: BuildingRepository(api: BuildingAPI(client: self.publicClient()))) }.singleton
+        self { BuildingService(buildings: self.buildingRepository()) }.singleton
     }
 
     public var locationService: Factory<LocationService> {

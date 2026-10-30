@@ -253,6 +253,9 @@ private struct ExploreVenueSheetCard: View {
             .contentShape(.rect)
         }
         .buttonStyle(.plain)
+        .overlay(alignment: .topTrailing) {
+            FavoriteHeart(target: .venue, id: pin.id, name: pin.displayName).padding(.top, 24)
+        }
     }
 }
 

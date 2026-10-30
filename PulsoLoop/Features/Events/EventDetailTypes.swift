@@ -51,18 +51,7 @@ struct EventEquipment: Hashable, Sendable {
     let icon: String
 
     /** Lucide 图标名 → SF Symbol（Android `catalogIcon`）。 */
-    var systemImage: String {
-        switch icon {
-        case "box": "shippingbox"
-        case "circle-check": "checkmark.circle"
-        case "cup-soda": "cup.and.saucer"
-        case "droplet": "drop"
-        case "hand-coins": "dollarsign.circle"
-        case "hand-grab": "hand.raised"
-        case "shield-check": "checkmark.shield"
-        default: "tag"
-        }
-    }
+    var systemImage: String { catalogSystemImage(icon) }
 }
 
 /** 活动页上的一格事实（Android `OptionFact`）。 */

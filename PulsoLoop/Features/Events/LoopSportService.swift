@@ -25,6 +25,9 @@ protocol LoopSportService: SportEventDetailService, SportChecklistService, Sport
     func myRegistrations(_ query: SportRegistrationsQuery) -> AsyncStream<QueryResponse<[any SportRegistrationItem]>>
 
     func freshMyRegistrations(_ query: SportRegistrationsQuery) async throws
+
+    /** 在 [buildingId] 这栋建筑办的活动；[endedOnly] 时只要已结束的（球馆详情的「活动」分段）。 */
+    func buildingEvents(accountId: String, profileId: String, buildingId: String, endedOnly: Bool) -> AsyncStream<QueryResponse<[any SportEventItem]>>
 }
 
 extension AsyncStream {

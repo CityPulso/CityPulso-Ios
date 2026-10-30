@@ -21,6 +21,11 @@ extension FishingService: LoopSportService {
         _ = try await self.query.myRegistrations.fresh(Self.registrationsKey(query))
     }
 
+    func buildingEvents(accountId: String, profileId: String, buildingId: String, endedOnly: Bool) -> AsyncStream<QueryResponse<[any SportEventItem]>> {
+        query.events.stream(FishingListKey(accountId: accountId, profileId: profileId, includeEnded: false, endedOnly: endedOnly, buildingId: buildingId))
+            .mapResponses { $0.items }
+    }
+
     private static func hostedKey(_ accountId: String, _ profileId: String, _ hostedProfileId: String, _ limit: Int) -> FishingListKey {
         FishingListKey(accountId: accountId, profileId: profileId, limit: limit, includeEnded: true, hostedProfileId: hostedProfileId, hostedProfileScope: .community)
     }

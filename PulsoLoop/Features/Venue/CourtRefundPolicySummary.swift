@@ -40,3 +40,11 @@ func formatBundleHours(_ minutes: Int, locale: Locale = .current) -> String {
     formatter.numberFormatter.maximumFractionDigits = 1
     return formatter.string(from: Measurement(value: Double(minutes) / 60, unit: UnitDuration.hours))
 }
+
+/** 分钟 → 只有数字的小时数（「1.5」），大数字旁边已经写了单位。 */
+func formatBundleHourCount(_ minutes: Int, locale: Locale = .current) -> String {
+    let formatter = NumberFormatter()
+    formatter.locale = locale
+    formatter.maximumFractionDigits = 1
+    return formatter.string(from: NSNumber(value: Double(minutes) / 60)) ?? ""
+}

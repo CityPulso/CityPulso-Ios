@@ -159,13 +159,14 @@ struct CourtBookingView: View {
     }
 
     private func timelineSection(_ booking: MyCourtBookingUi) -> some View {
-        let events: [(LocalizedStringKey, String)] = [
-            booking.createdAt.isEmpty ? nil : ("court_booking_timeline_created", booking.createdAt),
-            booking.confirmedAt.map { ("court_booking_timeline_confirmed", $0) },
-            booking.paidMarkedAt.map { ("court_booking_timeline_paid_marked", $0) },
-            booking.canceledAt.map { ("court_booking_timeline_canceled", $0) },
-            booking.expiredAt.map { ("court_booking_timeline_expired", $0) },
-        ].compactMap { $0 }
+        let candidates: [(LocalizedStringKey, String?)] = [
+            (LocalizedStringKey("court_booking_timeline_created"), booking.createdAt.isEmpty ? nil : booking.createdAt),
+            (LocalizedStringKey("court_booking_timeline_confirmed"), booking.confirmedAt),
+            (LocalizedStringKey("court_booking_timeline_paid_marked"), booking.paidMarkedAt),
+            (LocalizedStringKey("court_booking_timeline_canceled"), booking.canceledAt),
+            (LocalizedStringKey("court_booking_timeline_expired"), booking.expiredAt),
+        ]
+        let events: [(LocalizedStringKey, String)] = candidates.compactMap { label, at in at.map { (label, $0) } }
         return Section("court_booking_timeline_title") {
             ForEach(events.indices, id: \.self) { index in
                 LabeledContent {

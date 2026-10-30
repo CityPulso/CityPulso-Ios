@@ -126,6 +126,18 @@ extension Container {
         }.singleton
     }
 
+    var favoriteService: Factory<FavoriteService> {
+        self { FavoriteService(buildings: self.buildingRepository(), venues: self.venueRepository()) }.singleton
+    }
+
+    var coachService: Factory<CoachService> {
+        self { CoachService(repository: CoachRepository(api: CoachAPI(client: self.protectedClient())), eventBus: self.venueEventBus(), profileStore: self.profileStore()) }.singleton
+    }
+
+    var courseService: Factory<CourseService> {
+        self { CourseService(repository: CourseRepository(api: CourseAPI(client: self.protectedClient())), eventBus: self.venueEventBus()) }.singleton
+    }
+
     var venueRepository: Factory<VenueRepository> {
         self { VenueRepository(publicAPI: VenuePublicAPI(client: self.publicClient()), api: VenueAPI(client: self.protectedClient())) }.singleton
     }

@@ -8,7 +8,8 @@ import SwiftUI
  */
 struct EventFeedCard: View {
     let item: any SportEventItem
-    let badge: EventFeedBadge
+    /** 主持 / 已报名角标；nil 不显示（球馆页的活动列表）。 */
+    var badge: EventFeedBadge?
     let imageURL: URL?
 
     @Environment(\.locale) private var locale
@@ -20,12 +21,14 @@ struct EventFeedCard: View {
                 .clipped()
                 .overlay(alignment: .top) {
                     HStack {
-                        Label { Text(badge.labelKey) } icon: { Image(systemName: badge == .host ? "star" : "checkmark.circle") }
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color.accentColor, in: .capsule)
+                        if let badge {
+                            Label { Text(badge.labelKey) } icon: { Image(systemName: badge == .host ? "star" : "checkmark.circle") }
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.accentColor, in: .capsule)
+                        }
                         Spacer()
                         Label { Text(item.sport.labelKey) } icon: { Image(item.sport.iconAsset).resizable().frame(width: 14, height: 14) }
                             .font(.caption.weight(.medium))

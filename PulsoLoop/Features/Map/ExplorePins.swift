@@ -448,14 +448,5 @@ private func venuePinSummary(_ pin: NearbyVenuePin) -> String {
 
 extension VenueAmenityPreset {
     /** 设施图标 → SF Symbol。 */
-    var systemImage: String {
-        switch self {
-        case .parking: "car"
-        case .showers: "shower"
-        case .lockers: "lock"
-        case .racketRental: "dollarsign.circle"
-        case .proShop: "cart"
-        case .wheelchairAccess: "figure.roll"
-        }
-    }
+    var systemImage: String { catalogSystemImage(icon) }
 }
