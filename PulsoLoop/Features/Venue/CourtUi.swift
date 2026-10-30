@@ -1,5 +1,6 @@
 import Foundation
 import PulsoLinkCore
+import PulsoLinkUI
 import SwiftUI
 
 /*
@@ -272,9 +273,9 @@ func validateCourtSelection(_ lines: [CourtLineUi], minBookingMinutes: Int, maxB
 extension BookingSelectionError {
     func text(minBookingMinutes: Int, maxBookingMinutes: Int) -> String {
         switch self {
-        case .selectionTooShort: localizedFormat("venue_board_error_too_short", minBookingMinutes)
-        case .selectionTooLong: localizedFormat("venue_board_error_too_long", maxBookingMinutes)
-        case .selectionTotalTooLong: localizedFormat("venue_board_error_total_too_long", venueBookingTotalMinutesMax / 60)
+        case .selectionTooShort: localizedFormat("venue_board_error_too_short", String(minBookingMinutes))
+        case .selectionTooLong: localizedFormat("venue_board_error_too_long", String(maxBookingMinutes))
+        case .selectionTotalTooLong: localizedFormat("venue_board_error_total_too_long", String(venueBookingTotalMinutesMax / 60))
         }
     }
 }

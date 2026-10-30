@@ -22,10 +22,12 @@ enum LoopRoute: Hashable {
     case event(sport: LoopSport, eventId: String)
     /** 从地图卡片点「报名」进来：加载完还能报名就直接打开报名弹层。 */
     case joinEvent(sport: LoopSport, eventId: String)
-    /** 球馆详情（第 8 组）。 */
-    case venue(venueId: String)
-    /** 在球馆订某个运动的场（第 8 组）。 */
+    /** 球馆详情；[sheet] 进来后直接打开会员 / 时长包面板。 */
+    case venue(venueId: String, sheet: VenueDetailSheet? = nil)
+    /** 在球馆订某个运动的场。 */
     case venueBook(venueId: String, sport: VenueSport)
+    /** 确认订场：选好的日期和几段场地。 */
+    case venueConfirm(venueId: String, sport: VenueSport, date: String, ranges: [VenueConfirmRange])
     /** 没有球馆的场馆建筑（第 8 组）。 */
     case building(buildingId: String)
     /** 赛事详情（第 12 组）。 */
@@ -40,8 +42,10 @@ enum LoopRoute: Hashable {
     case placeRequests
     /** 一场活动的收款清单。 */
     case checklist(sport: LoopSport, eventId: String)
-    /** 一条订场（第 8 组接上订场详情）。 */
+    /** 我的一条订场。 */
     case courtBooking(sport: VenueSport, bookingId: String)
+    /** 我的订场列表（底栏没有放「我的订场」时从这里进）。 */
+    case courtBookings
     case paymentMethods
     /** 选附近搜索的中心点。 */
     case locationPick
@@ -66,7 +70,8 @@ enum LoopRoute: Hashable {
         case let .event(sport, eventId): EventDetailView(sport: sport, eventId: eventId)
         case let .joinEvent(sport, eventId): EventDetailView(sport: sport, eventId: eventId, openJoin: true)
         case .venue: PulsoComingSoonView(title: "explore_sheet_tag_venue", systemImage: "building.2")
-        case let .venueBook(_, sport): PulsoComingSoonView(title: sport.loopSport.labelKey, systemImage: "sportscourt")
+        case let .venueBook(venueId, sport): VenueBookView(venueId: venueId, sport: sport)
+        case let .venueConfirm(venueId, sport, date, ranges): VenueConfirmView(venueId: venueId, sport: sport, dateKey: date, ranges: ranges)
         case .building: PulsoComingSoonView(title: "explore_sheet_tag_building", systemImage: "building")
         case .tournament: PulsoComingSoonView(title: "explore_layers_tournaments", systemImage: "trophy")
         case .socialProfile: PulsoComingSoonView(title: "event_detail_participants_view_profile", systemImage: "person.crop.circle")
@@ -74,7 +79,8 @@ enum LoopRoute: Hashable {
         case let .resubmitPlace(requestId): MarkPlaceView(requestId: requestId)
         case .placeRequests: PlaceRequestsView()
         case let .checklist(sport, eventId): ChecklistView(sport: sport, eventId: eventId)
-        case let .courtBooking(sport, _): PulsoComingSoonView(title: sport.loopSport.labelKey, systemImage: "sportscourt")
+        case let .courtBooking(sport, bookingId): CourtBookingView(sport: sport, bookingId: bookingId)
+        case .courtBookings: CourtBookingsView()
         case .paymentMethods: PaymentMethodsView()
         case .locationPick: LocationPickView()
         case let .comingSoon(title, systemImage):

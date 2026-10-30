@@ -254,3 +254,6 @@ let venueBookingTotalMinutesMax = 48 * 60
 let venueRadiusMultiplierOptions: [Double] = [1.0, 1.5, 2.0, 3.0, 5.0]
 
 let venueRadiusFixedKmOptions: [Int] = [2, 5, 10, 20, 50]
+
+/** 占用桌台 / 房间的预订状态（hold 或已确认）。 */
+let spaceBookingActiveStatuses: Set<SpaceBookingStatus> = [.pending, .awaitingPayment, .confirmed]

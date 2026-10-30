@@ -412,15 +412,17 @@ def render_lists(text: str, enums: list[KotlinEnum], access: str) -> list[str]:
         items = [swift_value(item) for item in match.group(2).split(",") if item.strip()]
         kind = "Double" if any("." in item for item in items) else "Int"
         lines += doc_lines(doc, "") + [f"{access}let {camel(match.group(1))}: [{kind}] = [{', '.join(items)}]", ""]
-    for match in re.finditer(r"^val (\w+)\s*=\s*listOf\(([^)]*)\)", text, re.M):
-        items = [item.strip() for item in match.group(2).split(",") if item.strip()]
+    for match in re.finditer(r"^val (\w+)\s*=\s*(listOf|setOf)\(([^)]*)\)", text, re.M):
+        items = [item.strip() for item in re.sub(r"//[^\n]*", "", match.group(3)).split(",") if item.strip()]
         types = {item.split(".")[0] for item in items}
         if len(types) != 1 or not types <= names or not all(item.count(".") == 1 for item in items):
             continue
         before = text[: match.start()]
         doc = kdoc(before[before.rfind("}") + 1 :]) if "/**" in before[before.rfind("}") + 1 :] else None
         cases = ", ".join(f".{camel(item.split('.')[1])}" for item in items)
-        lines += doc_lines(doc, "") + [f"{access}let {camel(match.group(1))}: [{types.pop()}] = [{cases}]", ""]
+        kind = types.pop()
+        swift_type = f"Set<{kind}>" if match.group(2) == "setOf" else f"[{kind}]"
+        lines += doc_lines(doc, "") + [f"{access}let {camel(match.group(1))}: {swift_type} = [{cases}]", ""]
     return lines
 
 
