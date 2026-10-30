@@ -54,7 +54,11 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 - Near 其余也写完（2026-10-30）：钱包（会员卡 / 等门店确认，没有时长包）、我的会员卡 / 会员申请、账单、收藏、地图设置、
   清除本地数据、论坛（信息流 / 详情 / 帖子 / 发帖编辑 / 管理 / 发现 / 我的 / 赞过）、社交 / 聊天 / 通知（按 Near 的资源类型跳转）、
   个人页活动数（15 种活动类型发起 + 参加）、`youneary://` 深链和聊天卡片交给跃圈。通用分页列表移到 PulsoLinkUI（`PulsoPagedList`）。
-- 还差：等 CI 全绿后逐页看 iPhone / iPad 截图修布局；最后 `screenshots/` 截图（iPhone + iPad）。
+- **2026-10-30 CI 全绿**（Loop + Near 全部页面编译通过，核心测试 84 个）。Android 截至 `ba36e7d` 的提交都已同步
+  （论坛卡片 / 帖子页改版、置顶聊天、群头像、收款清单滑动操作、底栏去掉私教加我的地点、即将开始筛选、地图筛选分组、活动中心订场筛选和滑动换标签）。
+- 截图：`ScreenshotTests` 覆盖两个 App 的全部底栏页和不需要 id 的页面（iPhone + iPad），`gh workflow run iOS -f screenshots=true` 触发，
+  下载到 `screenshots/iPhone`、`screenshots/iPad`。不连后端，只看布局。
+- 还差：逐页看截图修布局（iPad 宽屏）；之后用户真机连后端验收。
 
 ## 状态
 
@@ -62,7 +66,7 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 |---|---|
 | ⬜ | 未开始 |
 | 🟨 | 进行中 |
-| 🟦 | 已实现（代码写完，CI 还没过） |
+| 🟦 | 已实现（代码写完，CI 全绿，截图还没逐页看） |
 | 🟩 | 编译验证（CI 全绿 + 截图看过） |
 | ✅ | 功能验证（用户在 iPhone 上连真后端验收过） |
 | ⛔ | 阻塞（写明原因） |
@@ -103,13 +107,13 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 | 会话 / token 刷新 / Keychain | `base/auth/session` | `PulsoLinkCore/Base/Auth` | 🟩 |
 | 身份 / 偏好同步 | `base/preferences`、`base/stores/ProfileStore` | `PulsoLinkCore/Core/Profile` | 🟩 |
 | 查询缓存 / 分页 / invalidate | `core/query/*` | `PulsoLinkCore/Core/Query`（MemoryQuery、Loadable、PagedList） | 🟦 |
-| 本地库（聊天、会话、通知、好友、请求、资料卡） | `base/data/local`（Room） | — | ⬜ 第 10 组（GRDB） |
+| 本地库（聊天、会话、通知、好友、请求、资料卡） | `base/data/local`（Room） | `PulsoLinkCore/Base/Storage`（GRDB `PulsoDatabase`、`PersistedQuery`、`MediatedList`） | 🟦 |
 | Asset 上传 | `base/data/asset`、`AssetService` | `PulsoLinkCore/Base/Data/Asset` | 🟦 |
 | 图片加载 + 退出清缓存 | Coil、`ImageCacheLogoutClearable` | `PulsoLinkUI/Images`（Nuke） | 🟦 |
-| 深链 `youloopy://open/panel/...` | `navigation/LoopDeepLinks.kt` | — | ⬜ 第 5 组 |
-| 实时（Centrifugo） | `base/realtime/*` | — | ⬜ 第 10 组 |
+| 深链 `youloopy://` / `youneary://open/panel/...` | `navigation/LoopDeepLinks.kt`、`NearDeepLinks.kt` | `Navigation/LoopDeepLinks`、`NearDeepLinks`（inbox，登录后推进当前栈） | 🟦 |
+| 实时（Centrifugo） | `base/realtime/*` | `PulsoLinkCore/Base/Realtime`（centrifuge-swift，SSE 兜底） | 🟦 |
 | 设备定位 / 附近搜索中心 | `stores/DeviceLocationStore`、`NearbyQueryLocationStore`、`features/location` | `Stores/LocationStores`、`Features/Location`（CoreLocation + MapKit 反查地名） | 🟦 |
-| 支付 | `base/data/payments`、`features/payments` | — | ⬜ 第 9 组 |
+| 支付 | `base/data/payments`、`features/payments` | `Features/Payments`（stripe-ios PaymentSheet / Connect） | 🟦 |
 | 枚举（wire 值、选项） | `*/enums/*.kt` | `Scripts/android_enums.py` 生成 `Enums/Generated` | 🟦 |
 | DTO / API | `*/dto/*.kt`、`*/api/*.kt`（Retrofit） | `Scripts/android_dtos.py`、`android_apis.py` 生成 `Data/Generated` | 🟩 |
 | 各运动数据层（仓储 / 缓存 / Service） | `data/<sport>`、`query`、`services` | 羽毛球手写，`Scripts/fork_sport.py` 生成其余 10 种 | 🟦 |
@@ -124,20 +128,17 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 | CALENDAR | `pages/event/calendar` + `features/activity` | `Pages/Event/Calendar`、`Features/Activity` | 4 | 🟦 |
 | SEARCH | `pages/event/search` + `features/search` | `Pages/Event/Search`、`Features/Search` | 4 | 🟦 |
 | VENUE_SEARCH | `pages/venue/search` | `Pages/Venue/Search`（每个运动一页、存着的球馆筛选、收藏星、左滑看地图） | 8 | 🟦 |
-| SOCIAL | `pages/social/overview` | | 10 | ⬜ |
 | CREATE | `pages/event/create` | `Pages/Event/Create`（一个向导给 11 种运动；各运动只差 `SportSettingsDetails` 和 `Features/Create/<Sport>Create.swift`） | 5 / 6 | 🟦 |
 | SETTINGS | `pages/settings/overview` | `Pages/Settings/Overview` | 2 | 🟩 |
-| BILLING | `pages/billing` | | 9 | ⬜ |
-| NOTIFICATIONS | `pages/social/notifications` | | 10 | ⬜ |
-| CHAT_HUB | `pages/social/chat/hub` | | 10 | ⬜ |
+| BILLING | `pages/billing` | `Pages/Billing`（运动 / 范围 / 状态，收款清单和我的付款） | 9 | 🟦 |
+| CHAT_HUB | `pages/social/chat/hub` | `Pages/Social/Chat/Hub`（私聊 / 群聊、置顶栏可收起、铃铛进通知、+ 进社交） | 10 | 🟦 |
 | PROFILE | `pages/profile/overview` | `Pages/Profile/Overview`（含活动中心、发起 / 参加数） | 3–4 | 🟦 |
-| WALLET | `pages/wallet` | | 9 | ⬜ |
-| COURSES | `pages/program/mine` | | 12 | ⬜ |
-| COACHING | `pages/program/mine` | | 12 | ⬜ |
-| TOURNAMENTS | `pages/tournament/mine` | | 12 | ⬜ |
-| COURT_BOOKINGS | `pages/venue/bookings` | `Pages/Venue/Bookings` | 8 | 🟦 |
-| FAVORITES | `pages/venue/favorites` | `Pages/Venue/Favorites`（球馆 / 建筑：搜索、排序、筛选带数量、左滑取消收藏；论坛 / 帖子 / 评论等第 11 组） | 8 | 🟨 |
-| FORUM | `pages/discussion/feed` | | 11 | ⬜ |
+| WALLET | `pages/wallet` | `Pages/Wallet`（会员卡 / 时长包，付款方式和收款账户入口） | 9 | 🟦 |
+| COURSES | `pages/program/mine` | `Pages/Program/Mine`（我的课程，右上角进我的私教） | 12 | 🟦 |
+| TOURNAMENTS | `pages/tournament/mine` | `Pages/Tournament/List`（公开赛事、搜索、运动标签，右上角我的赛事） | 12 | 🟦 |
+| FAVORITES | `pages/venue/favorites` | `Pages/Venue/Favorites`（球馆 / 建筑 / 论坛 / 帖子 / 评论） | 8 | 🟦 |
+| FORUM | `pages/discussion/feed` | `Pages/Discussion/Feed`（信息流卡片按 Android 改版） | 11 | 🟦 |
+| PLACE_REQUESTS | `pages/place/requests` | `Pages/Place/Requests`（原在设置里） | 7 | 🟦 |
 
 ## Loop：导航命令（`navigation/LoopNavCommand.kt`）
 
@@ -162,9 +163,9 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 | OpenEvent | `pages/event/detail/<sport>` | `Pages/Event/Detail`（所有运动共用，差别在 `SportEventDetailService` / `SportFullEvent`） | 5 / 6 | 🟦 |
 | OpenCreatedEvent | `pages/event/detail/<sport>` | `Pages/Event/Detail`（发起人视角：编辑、结束、收款清单入口） | 5 / 6 | 🟦 |
 | OpenChecklist | `pages/event/checklist/<sport>` | `Pages/Event/Checklist`（所有运动共用，`SportChecklistService`） | 5 / 6 | 🟦 |
-| OpenMapSettings | `pages/settings/map` | | 7 | ⬜ |
-| OpenMapStyle | `pages/settings/map` | | 7 | ⬜ |
-| OpenLocationMarker | `pages/settings/map` | | 7 | ⬜ |
+| OpenMapSettings | `pages/settings/map` | `Pages/Settings/Map` | 7 | 🟦 |
+| OpenMapStyle | `pages/settings/map` | `Pages/Settings/Map` | 7 | 🟦 |
+| OpenLocationMarker | `pages/settings/map` | `Pages/Settings/Map` | 7 | 🟦 |
 | OpenLocationPick | `pages/location` | `Pages/Location`（`LoopMapView` + MapLibre；搜索 / 反查走核心 `LocationService`） | 7 | 🟦 |
 | OpenPlaceRequests | `pages/place/requests` | `Pages/Place/Requests`（状态分段、按住撤回、重新提交、打开建筑） | 7 | 🟦 |
 | OpenMarkPlace | `pages/place/mark` | `Pages/Place/Mark`（新标记 / 被拒的重新提交；地图预览 + 选点页、照片上传、联系方式） | 7 | 🟦 |
@@ -173,36 +174,37 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 | OpenVenueBook | `pages/venue/book/<sport>` | `Pages/Venue/Book`（三种运动一页；`<Sport>VenueService` 由 `fork_sport.py` 从羽毛球生成） | 8 | 🟦 |
 | OpenVenueConfirm | `pages/venue/confirm/<sport>` | `Pages/Venue/Confirm` | 8 | 🟦 |
 | OpenCourtBooking | `pages/venue/booking/<sport>` | `Pages/Venue/Booking` | 8 | 🟦 |
-| OpenWallet | `pages/wallet` | | 9 | ⬜ |
-| OpenPaymentAccounts | `pages/billing/paymentaccounts` | | 9 | ⬜ |
-| OpenPaymentMethods | `pages/billing/paymentmethods` | | 9 | ⬜ |
-| OpenVenueMembership | `pages/membership/detail` | | 9 | ⬜ |
-| OpenMyMembership | `pages/membership/list` | | 9 | ⬜ |
-| OpenMyMembershipPurchase | `pages/membership` | | 9 | ⬜ |
-| OpenVenueBundle | `pages/bundle/detail` | | 9 | ⬜ |
-| OpenMyBundle | `pages/bundle/list` | | 9 | ⬜ |
-| OpenAddFriend | `pages/social/addfriend` | | 10 | ⬜ |
-| OpenFriendRequests | `pages/social/requests` | | 10 | ⬜ |
-| OpenBlockedList | `pages/social/blocked` | | 10 | ⬜ |
-| OpenSocialProfile | `pages/social/profile` | | 10 | ⬜ |
-| OpenCreateChat | `pages/social/chat/create` | | 10 | ⬜ |
-| OpenChatConversation | `pages/social/chat/room` | | 10 | ⬜ |
-| OpenChatSettings | `pages/social/chat/settings` | | 10 | ⬜ |
-| OpenGroupMembers / OpenGroupAddMembers | `pages/social/chat/settings` | | 10 | ⬜ |
-| OpenChatLocationPick / OpenChatLocationView | `pages/social/chat/picker` | | 10 | ⬜ |
-| OpenChatEventPicker / OpenChatFavoritePicker | `pages/social/chat/picker` | | 10 | ⬜ |
-| OpenForum | `pages/discussion/detail` | `Pages/Discussion/Detail` | 11 | 🟨 |
-| OpenForumManage | `pages/discussion/manage` | `Pages/Discussion/Manage` | 11 | 🟨 |
-| OpenForumSearch | `pages/discussion/search` | `Pages/Discussion/Lists/ForumListViews` | 11 | 🟨 |
-| OpenForumCreate | `pages/discussion/create` | `Pages/Discussion/Create` | 11 | 🟨 |
-| OpenPost | `pages/discussion/post/detail` | `Pages/Discussion/Post/PostDetailView` | 11 | 🟨 |
-| OpenPostCreate / OpenPostEdit | `pages/discussion/post/create`、`edit` | `Pages/Discussion/Post/PostCreateView`、`PostEditView` | 11 | 🟨 |
-| OpenLikedPosts | `pages/discussion/liked` | `Pages/Discussion/Lists/ForumListViews` | 11 | 🟨 |
-| OpenMyForums | `pages/discussion/mine` | `Pages/Discussion/Lists/ForumListViews` | 11 | 🟨 |
-| OpenCourse | `pages/program/course` | | 12 | ⬜ |
-| OpenCoach | `pages/program/coach` | | 12 | ⬜ |
-| OpenCoachPanel | `pages/coach/panel` | `Pages/Coach/Panel` | 12 | 🟨 |
-| OpenTournament | `pages/tournament/detail` | | 12 | ⬜ |
+| OpenWallet | `pages/wallet` | `Pages/Wallet` | 9 | 🟦 |
+| OpenPaymentAccounts | `pages/billing/paymentaccounts` | `Pages/Billing/PaymentAccounts`（Stripe Connect 开通） | 9 | 🟦 |
+| OpenPaymentMethods | `pages/billing/paymentmethods` | `Pages/Billing/PaymentMethods` | 9 | 🟦 |
+| OpenVenueMembership | `pages/membership/detail` | `Pages/Venue/Detail`（会员面板） | 9 | 🟦 |
+| OpenMyMembership | `pages/membership/list` | `Pages/Wallet/Detail` | 9 | 🟦 |
+| OpenMyMembershipPurchase | `pages/membership` | `Pages/Wallet/Detail` | 9 | 🟦 |
+| OpenVenueBundle | `pages/bundle/detail` | `Pages/Venue/Detail`（时长包面板） | 9 | 🟦 |
+| OpenMyBundle | `pages/bundle/list` | `Pages/Wallet/Detail` | 9 | 🟦 |
+| OpenAddFriend | `pages/social/addfriend` | `Pages/Social/AddFriend` | 10 | 🟦 |
+| OpenFriendRequests | `pages/social/requests` | `Pages/Social/Requests` | 10 | 🟦 |
+| OpenBlockedList | `pages/social/blocked` | `Pages/Social/Blocked` | 10 | 🟦 |
+| OpenSocialProfile | `pages/social/profile` | `Pages/Social/Profile` | 10 | 🟦 |
+| OpenChatConversation | `pages/social/chat/room` | `Pages/Social/Chat/Room` | 10 | 🟦 |
+| OpenChatSettings | `pages/social/chat/settings` | `Pages/Social/Chat/Settings`（群主改群名 / 群头像） | 10 | 🟦 |
+| OpenGroupMembers / OpenGroupAddMembers | `pages/social/chat/settings` | `Pages/Social/Chat/Settings` | 10 | 🟦 |
+| OpenChatLocationPick / OpenChatLocationView | `pages/social/chat/picker` | `Pages/Social/Chat/Picker` | 10 | 🟦 |
+| OpenChatEventPicker / OpenChatFavoritePicker | `pages/social/chat/picker` | `Pages/Social/Chat/Picker` | 10 | 🟦 |
+| OpenForum | `pages/discussion/detail` | `Pages/Discussion/Detail` | 11 | 🟦 |
+| OpenForumManage | `pages/discussion/manage` | `Pages/Discussion/Manage` | 11 | 🟦 |
+| OpenForumSearch | `pages/discussion/search` | `Pages/Discussion/Lists/ForumListViews` | 11 | 🟦 |
+| OpenForumCreate | `pages/discussion/create` | `Pages/Discussion/Create` | 11 | 🟦 |
+| OpenPost | `pages/discussion/post/detail` | `Pages/Discussion/Post/PostDetailView`（关注作者、楼中楼回复、相关内容） | 11 | 🟦 |
+| OpenPostCreate / OpenPostEdit | `pages/discussion/post/create`、`edit` | `Pages/Discussion/Post/PostCreateView`、`PostEditView` | 11 | 🟦 |
+| OpenLikedPosts | `pages/discussion/liked` | `Pages/Discussion/Lists/ForumListViews` | 11 | 🟦 |
+| OpenMyForums | `pages/discussion/mine` | `Pages/Discussion/Lists/ForumListViews` | 11 | 🟦 |
+| OpenCourse | `pages/program/course` | `Pages/Program/Course` | 12 | 🟦 |
+| OpenCoach | `pages/program/coach` | `Pages/Program/Coach` | 12 | 🟦 |
+| OpenCoachPanel | `pages/coach/panel` | `Pages/Coach/Panel` | 12 | 🟦 |
+| OpenTournament | `pages/tournament/detail` | `Pages/Tournament/Detail` | 12 | 🟦 |
+| OpenMyCoaching | `pages/program/mine` | `Pages/Program/Mine`（课程页右上角进） | 12 | 🟦 |
+| OpenMyTournaments | `pages/tournament/mine` | `Pages/Tournament/Mine`（我的报名 / 组队邀请 / 获得的奖品） | 12 | 🟦 |
 | （日程，左边缘右滑） | `pages/agenda` | `Pages/Agenda`（系统 sheet） | 4 | 🟦 |
 | OpenComingSoon | `navigation/ComingSoonRoute.kt` | `PulsoComingSoonView` | — | 🟩 |
 
