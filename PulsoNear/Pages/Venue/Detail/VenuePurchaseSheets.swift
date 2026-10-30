@@ -54,7 +54,7 @@ struct MembershipPurchaseSheet: View {
                                 HStack(alignment: .top) {
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text(verbatim: membershipTermLabel(offer.durationMonths)).font(.subheadline.weight(.semibold)).foregroundStyle(Color.primary)
-                                        if let sessions = offer.breakEvenSessions {
+                                        if let sessions = offer.breakEvenActivities {
                                             Text(verbatim: localizedFormat("venue_membership_break_even", sessions)).font(.caption).foregroundStyle(.secondary)
                                         }
                                         if let save = offer.saveVersusMonthly, save > 0 {
