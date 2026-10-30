@@ -1,4 +1,5 @@
 import PulsoLinkCore
+import PulsoLinkUI
 import SwiftUI
 
 /**

@@ -1,4 +1,5 @@
 import PulsoLinkCore
+import PulsoLinkUI
 import SwiftUI
 
 /* 标签顺序与 Android `GolfOptions.labels()` 一致。 */

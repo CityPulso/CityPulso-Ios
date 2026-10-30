@@ -125,9 +125,10 @@ struct HoldPaymentPanel: View {
     private func handleNextAction(_ clientSecret: String) async {
         let client = STPAPIClient(publishableKey: session.publishableKey)
         client.stripeAccount = session.stripeAccountId
-        let handler = STPPaymentHandler(apiClient: client)
+        let handler = STPPaymentHandler.shared()
+        handler.apiClient = client
         let status: STPPaymentHandlerActionStatus = await withCheckedContinuation { continuation in
-            handler.handleNextAction(forPayment: clientSecret, with: StripeAuthenticationContext(), returnURL: nil) { status, _, _ in
+            handler.handleNextAction(forPayment: clientSecret, with: StripeAuthenticationContext(), returnURL: nil as String?) { status, _, _ in
                 continuation.resume(returning: status)
             }
         }

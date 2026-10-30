@@ -18,6 +18,17 @@ struct MapCameraIdle: Equatable {
     let zoom: Double
 }
 
+/** 一个搜索范围圈（Explore 有活动、球馆两个，选点页一个）。 */
+struct MapRange: Equatable {
+    let source: String
+    let layer: String
+    let hex: String
+    var visible: Bool
+    var latitude: Double
+    var longitude: Double
+    var radiusM: Int
+}
+
 /** 地图坐标 ↔ 屏幕坐标，给盖在地图上的 SwiftUI 标记用；[version] 每次相机移动 +1。 */
 @MainActor
 @Observable
@@ -44,17 +55,18 @@ struct LoopMapView: UIViewRepresentable {
     var initialCenter: (latitude: Double, longitude: Double)
     var initialZoom = 13.0
     var camera: MapCameraRequest?
-    /** 半径圈：显示时的圆心和半径。 */
-    var range: (latitude: Double, longitude: Double, radiusM: Int)?
+    var ranges: [MapRange] = []
     var projection: LoopMapProjection?
     var onIdle: (MapCameraIdle) -> Void = { _ in }
     var onTap: () -> Void = {}
+    /** 长按某点（Explore：在那里标记地点）。 */
+    var onLongPress: ((Double, Double) -> Void)?
+    /** 用户用手拖 / 缩地图（程序飞过去不算）。 */
+    var onGestureMove: () -> Void = {}
+    /** 样式加载完，可以开始拉图层数据了。 */
+    var onStyleReady: () -> Void = {}
 
     @Environment(\.colorScheme) private var colorScheme
-
-    private static let rangeSource = "location-pick-range"
-    private static let rangeLayer = "location-pick-range-layer"
-    private static let rangeColor = "#3B82F6"
 
     func makeCoordinator() -> Coordinator { Coordinator() }
 
@@ -74,6 +86,8 @@ struct LoopMapView: UIViewRepresentable {
         let tap = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.tapped))
         tap.cancelsTouchesInView = false
         view.addGestureRecognizer(tap)
+        let longPress = UILongPressGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.longPressed(_:)))
+        view.addGestureRecognizer(longPress)
         context.coordinator.parent = self
         context.coordinator.styleURL = styleURL
         projection?.mapView = view
@@ -112,11 +126,13 @@ struct LoopMapView: UIViewRepresentable {
 
     fileprivate func applyLayers(_ style: MLNStyle) {
         Buildings3d.apply(style: style, enabled: map.map3d, light: map.mapLightStyle, dark: map.mapDarkStyle, isDark: isDark)
-        MapRangeLayer.ensure(style: style, source: Self.rangeSource, layer: Self.rangeLayer, hex: Self.rangeColor)
-        MapRangeLayer.show(
-            style: style, source: Self.rangeSource, layer: Self.rangeLayer,
-            visible: range != nil, latitude: range?.latitude ?? 0, longitude: range?.longitude ?? 0, radiusM: range?.radiusM ?? 0
-        )
+        for range in ranges {
+            MapRangeLayer.ensure(style: style, source: range.source, layer: range.layer, hex: range.hex)
+            MapRangeLayer.show(
+                style: style, source: range.source, layer: range.layer,
+                visible: range.visible, latitude: range.latitude, longitude: range.longitude, radiusM: range.radiusM
+            )
+        }
     }
 
     @MainActor
@@ -129,6 +145,12 @@ struct LoopMapView: UIViewRepresentable {
         func mapView(_: MLNMapView, didFinishLoading style: MLNStyle) {
             styleReady = true
             parent?.applyLayers(style)
+            parent?.onStyleReady()
+        }
+
+        func mapView(_: MLNMapView, regionWillChangeWith reason: MLNCameraChangeReason, animated _: Bool) {
+            let gestures: MLNCameraChangeReason = [.gesturePan, .gesturePinch, .gestureRotate, .gestureZoomIn, .gestureZoomOut, .gestureOneFingerZoom, .gestureTilt]
+            if !reason.intersection(gestures).isEmpty { parent?.onGestureMove() }
         }
 
         func mapViewRegionIsChanging(_: MLNMapView) {
@@ -152,6 +174,12 @@ struct LoopMapView: UIViewRepresentable {
 
         @objc func tapped() {
             parent?.onTap()
+        }
+
+        @objc func longPressed(_ recognizer: UILongPressGestureRecognizer) {
+            guard recognizer.state == .began, let mapView = recognizer.view as? MLNMapView, let onLongPress = parent?.onLongPress else { return }
+            let coordinate = mapView.convert(recognizer.location(in: mapView), toCoordinateFrom: mapView)
+            onLongPress(coordinate.latitude, coordinate.longitude)
         }
     }
 }

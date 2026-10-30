@@ -30,7 +30,10 @@ struct LocationPickView: View {
                 initialCenter: model.initialCenter,
                 initialZoom: model.cameraZoom,
                 camera: model.camera,
-                range: model.map.mapNearbyRange ? (model.center.latitude, model.center.longitude, model.radiusM) : nil,
+                ranges: [MapRange(
+                    source: "location-pick-range", layer: "location-pick-range-layer", hex: "#3B82F6",
+                    visible: model.map.mapNearbyRange, latitude: model.center.latitude, longitude: model.center.longitude, radiusM: model.radiusM
+                )],
                 projection: projection,
                 onIdle: { model.onCameraIdle($0) },
                 onTap: {

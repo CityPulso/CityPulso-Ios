@@ -1,5 +1,6 @@
 import Foundation
 import PulsoLinkCore
+import PulsoLinkUI
 import SwiftUI
 
 /* 标签顺序与 Android `HikingOptions.labels()` 一致。 */

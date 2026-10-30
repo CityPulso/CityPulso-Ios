@@ -1,5 +1,6 @@
 import Foundation
 import PulsoLinkCore
+import PulsoLinkUI
 
 /** 一场活动最多几张照片，第一张是封面（Android `EVENT_PHOTOS_MAX`，WEB `MAX_PHOTOS`）。 */
 let eventPhotosMax = 6
