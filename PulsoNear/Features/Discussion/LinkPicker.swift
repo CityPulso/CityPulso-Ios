@@ -95,7 +95,7 @@ final class LinkPickerModel {
             }
             .mapped { pin in
                 LinkPickerRow(
-                    link: PostLink(type: .activity, id: pin.id, activityType: NearActivityKind.fromActivityType(pin.activityType)),
+                    link: PostLink(type: .activity, id: pin.id, activityType: pin.activityType),
                     title: pin.title,
                     meta: [DateTimeFormatters.monthDayTime(pin.startsAt, locale: locale), pin.venueName].compactMap { $0 }.joined(separator: " · "),
                     coverImageId: pin.imageId

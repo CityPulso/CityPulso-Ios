@@ -76,7 +76,7 @@ final class PostCreateModel {
                 // 描述在前，活动作为读者能点开的卡片；活动照片放在下面一排。
                 draft.sections = [
                     .newText(RichTextHTML.attributed(paragraphsHTML(description))),
-                    .newLink(PostLink(type: .activity, id: activityId, activityType: activityType)),
+                    .newLink(PostLink(type: .activity, id: activityId, activityType: activityType.activityType)),
                 ]
                 draft.setStoredPhotos(detail.imageIds)
                 activityTitle = detail.activity.title

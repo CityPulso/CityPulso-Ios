@@ -80,7 +80,7 @@ enum PostLinkLoader {
                     at: post.firstPublishedAt ?? post.createdAt
                 )
             case .activity:
-                guard let activityType = link.activityType, let service = container.nearActivityServices()[activityType] else { return nil }
+                guard let activityType = link.activityType, let service = container.nearActivityServices()[NearActivityKind.fromActivityType(activityType)] else { return nil }
                 for await response in service.detail(activityId: link.id) {
                     switch response {
                     case .loading: continue
@@ -127,7 +127,7 @@ enum PostLinkLoader {
         if let groups = match("/panel/discussion/post-detail/([^/?#]+)") { return PostLink(type: .post, id: groups[0]) }
         if let groups = match("/panel/activity-detail/([^/?#]+)/([^/?#]+)") {
             guard let activityType = NearActivityKind.allCases.first(where: { $0.rawValue == groups[0] }) else { return nil }
-            return PostLink(type: .activity, id: groups[1], activityType: activityType)
+            return PostLink(type: .activity, id: groups[1], activityType: activityType.activityType)
         }
         if let groups = match("/panel/venue-detail/([^/?#]+)") { return PostLink(type: .venue, id: groups[0]) }
         if let groups = match("/panel/building-detail/([^/?#]+)") { return PostLink(type: .building, id: groups[0]) }
@@ -138,7 +138,7 @@ enum PostLinkLoader {
     static func route(_ link: PostLink) -> NearRoute? {
         switch link.type {
         case .post: .post(postId: link.id)
-        case .activity: link.activityType.map { .activity(activityType: $0, activityId: link.id) }
+        case .activity: link.activityType.map { .activity(activityType: NearActivityKind.fromActivityType($0), activityId: link.id) }
         case .venue: .venue(venueId: link.id, sheet: nil)
         case .building: .building(buildingId: link.id)
         }
