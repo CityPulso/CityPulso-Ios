@@ -23,7 +23,7 @@ struct LinkCardInfo: Hashable, Sendable {
     /** 行标题下的一行说明：活动是时间 · 地点，门店 / 建筑是地址，帖子是作者 · 时间。 */
     func meta(_ type: PostLinkType, locale: Locale = .current) -> String {
         switch type {
-        case .activity: [startsAt.map { formatEventWhen($0, nil, locale: locale) }, place].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
+        case .activity: [startsAt.map { formatActivityWhen($0, nil, locale: locale) }, place].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
         case .venue, .building: address ?? ""
         case .post: [byline, at.flatMap { DateTimeFormatters.monthDayTime($0) }].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
         }
