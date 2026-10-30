@@ -19,6 +19,10 @@ struct TournamentAPI: Sendable {
         try await client.request(.get, "loop-tournament/tournaments/\(id)/bracket")
     }
 
+    func listPublic(_ body: PublicTournamentsRequest) async throws -> DataResponse<ListWithTotal<TournamentItem>> {
+        try await client.request(.post, "loop-tournament/tournaments/public/list", body: body)
+    }
+
     func listNearby(_ body: NearbyTournamentsRequest) async throws -> DataResponse<[TournamentPin]> {
         try await client.request(.post, "loop-tournament/tournaments/nearby", body: body)
     }

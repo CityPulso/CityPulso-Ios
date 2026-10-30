@@ -539,6 +539,123 @@ struct NearbyTournamentsRequest: Codable, Sendable, Hashable {
     }
 }
 
+/** 赛事页（公开列表）一张卡用到的球馆。 */
+struct TournamentVenueRef: Codable, Sendable, Hashable {
+    var venueId: String
+    var venueName: String
+
+    init(venueId: String, venueName: String = "") {
+        self.venueId = venueId
+        self.venueName = venueName
+    }
+
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: WireKey.self)
+        venueId = try container.wireRequired(String.self, "venueId")
+        venueName = try container.wire(String.self, "venueName") ?? ""
+    }
+
+    func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: WireKey.self)
+        try container.wire(venueId, "venueId")
+        try container.wire(venueName, "venueName", default: "")
+    }
+}
+
+/** 赛事页（公开列表）一行：封面、状态、日期、球馆、组别 / 报名数与最低报名费。 */
+struct TournamentItem: Codable, Sendable, Hashable {
+    var id: String
+    var title: String
+    var status: TournamentStatus
+    var startsAt: String
+    var endsAt: String
+    var currency: String
+    var coverImageId: String?
+    var divisionCount: Int
+    var entryCount: Int
+    var minFeeAmount: Double?
+    var venues: [TournamentVenueRef]
+    var sports: [TournamentSport]
+
+    init(id: String, title: String = "", status: TournamentStatus = .fallback, startsAt: String = "", endsAt: String = "", currency: String = "", coverImageId: String? = nil, divisionCount: Int = 0, entryCount: Int = 0, minFeeAmount: Double? = nil, venues: [TournamentVenueRef] = [], sports: [TournamentSport] = []) {
+        self.id = id
+        self.title = title
+        self.status = status
+        self.startsAt = startsAt
+        self.endsAt = endsAt
+        self.currency = currency
+        self.coverImageId = coverImageId
+        self.divisionCount = divisionCount
+        self.entryCount = entryCount
+        self.minFeeAmount = minFeeAmount
+        self.venues = venues
+        self.sports = sports
+    }
+
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: WireKey.self)
+        id = try container.wireRequired(String.self, "id")
+        title = try container.wire(String.self, "title") ?? ""
+        status = try container.wire(TournamentStatus.self, "status") ?? .fallback
+        startsAt = try container.wire(String.self, "startsAt") ?? ""
+        endsAt = try container.wire(String.self, "endsAt") ?? ""
+        currency = try container.wire(String.self, "currency") ?? ""
+        coverImageId = try container.wire(String.self, "coverImageId")
+        divisionCount = try container.wire(Int.self, "divisionCount") ?? 0
+        entryCount = try container.wire(Int.self, "entryCount") ?? 0
+        minFeeAmount = try container.wire(Double.self, "minFeeAmount")
+        venues = try container.wire([TournamentVenueRef].self, "venues") ?? []
+        sports = try container.wire([TournamentSport].self, "sports") ?? []
+    }
+
+    func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: WireKey.self)
+        try container.wire(id, "id")
+        try container.wire(title, "title", default: "")
+        try container.wire(status, "status", default: .fallback)
+        try container.wire(startsAt, "startsAt", default: "")
+        try container.wire(endsAt, "endsAt", default: "")
+        try container.wire(currency, "currency", default: "")
+        try container.wireOptional(coverImageId, "coverImageId")
+        try container.wire(divisionCount, "divisionCount", default: 0)
+        try container.wire(entryCount, "entryCount", default: 0)
+        try container.wireOptional(minFeeAmount, "minFeeAmount")
+        try container.wire(venues, "venues", default: [])
+        try container.wire(sports, "sports", default: [])
+    }
+}
+
+/** 公开赛事列表：按标题 / 球馆名搜，[sport] 只留有该运动组别的赛事。 */
+struct PublicTournamentsRequest: Codable, Sendable, Hashable {
+    var limit: Int
+    var offset: Int
+    var search: String?
+    var sport: TournamentSport?
+
+    init(limit: Int, offset: Int = 0, search: String? = nil, sport: TournamentSport? = nil) {
+        self.limit = limit
+        self.offset = offset
+        self.search = search
+        self.sport = sport
+    }
+
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: WireKey.self)
+        limit = try container.wireRequired(Int.self, "limit")
+        offset = try container.wire(Int.self, "offset") ?? 0
+        search = try container.wire(String.self, "search")
+        sport = try container.wire(TournamentSport.self, "sport")
+    }
+
+    func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: WireKey.self)
+        try container.wire(limit, "limit")
+        try container.wire(offset, "offset", default: 0)
+        try container.wireOptional(search, "search")
+        try container.wireOptional(sport, "sport")
+    }
+}
+
 /** 球馆主页：在本馆有比赛的赛事。 */
 struct VenueTournament: Codable, Sendable, Hashable {
     var id: String

@@ -177,3 +177,13 @@ extension Container {
         self { ChatShareDraftStore() }.singleton
     }
 }
+
+extension Container {
+    var discussionEventBus: Factory<DiscussionEventBus> {
+        self { DiscussionEventBus() }.singleton
+    }
+
+    var discussionService: Factory<DiscussionService> {
+        self { DiscussionService(repository: DiscussionRepository(api: DiscussionAPI(client: self.protectedClient())), bus: self.discussionEventBus()) }.singleton
+    }
+}

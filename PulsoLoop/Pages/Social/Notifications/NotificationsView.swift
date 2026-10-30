@@ -33,9 +33,9 @@ enum NotificationTarget: Hashable {
         case let .socialProfile(id): .socialProfile(profileId: id)
         case .identities: .identities
         case .placeRequests: .placeRequests
-        case .post: .comingSoon(title: "shell_dest_forum", systemImage: "text.bubble")
-        case .forum: .comingSoon(title: "shell_dest_forum", systemImage: "text.bubble")
-        case .forumManage: .comingSoon(title: "shell_dest_forum", systemImage: "text.bubble")
+        case let .post(id): .post(postId: id)
+        case let .forum(id): .forum(forumId: id)
+        case let .forumManage(id): .forumManage(forumId: id)
         }
     }
 }

@@ -99,12 +99,17 @@ struct MemoryQueryTests {
 
     @Test func setPushesToActiveStreams() async throws {
         let query = MemoryQuery<String, Int> { _ in 1 }
-        let stream = query.stream("a", refresh: false)
-        let collector = Task { await take(3, from: stream) }
-        try await Task.sleep(for: .milliseconds(20))
+        var iterator = query.stream("a", refresh: false).makeAsyncIterator()
+        var seen: [Int] = []
+        // 先等到网络那一份，再写，避免 set 和首次拉取赛跑。
+        while seen.isEmpty, let response = await iterator.next() {
+            if let value = value(response) { seen.append(value) }
+        }
         await query.set("a", 9)
-        let responses = await collector.value
-        #expect(responses.compactMap(value) == [1, 9])
+        while seen.count < 2, let response = await iterator.next() {
+            if let value = value(response) { seen.append(value) }
+        }
+        #expect(seen == [1, 9])
     }
 
     @Test func updateAllRewritesCacheAndPushes() async throws {

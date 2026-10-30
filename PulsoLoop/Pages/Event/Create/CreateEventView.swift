@@ -92,10 +92,10 @@ struct CreateEventView: View {
         shell?.push(LoopRoute.event(sport: created.sport, eventId: created.eventId))
     }
 
-    /** 「发个帖子」：论坛发帖在第 11 组移植。 */
+    /** 「发个帖子」：带着这场活动去发帖，类型默认「找球友」（Android `openPostCreate`）。 */
     private func postAbout(_ created: CreatedEventPrompt) {
         model.createdEvent = nil
-        shell?.push(LoopRoute.comingSoon(title: "create_post_prompt_confirm", systemImage: "square.and.pencil"))
+        shell?.push(LoopRoute.postCreate(prefill: PostCreatePrefill(eventSport: created.sport, eventId: created.eventId, kind: .playersWanted)))
     }
 }
 

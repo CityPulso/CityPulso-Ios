@@ -244,7 +244,7 @@ func quotePreview(_ quote: ChatQuoteUi) -> String {
     return conversationPreview(row) ?? ""
 }
 
-/** 分享卡片（Android `bubbles/cards/*`）：封面、类型、标题、副标题和按钮；我发的在主色上。 */
+/** 分享卡片（Android `bubbles/cards` 下的卡片）：封面、类型、标题、副标题和按钮；我发的在主色上。 */
 struct ChatShareCard: View {
     let type: MessageType
     let card: ChatSharedCardContent

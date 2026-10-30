@@ -45,11 +45,23 @@ enum LoopRoute: Hashable {
     case addFriend
     /** 黑名单。 */
     case blocked
+    /** 论坛（第 11 组）。 */
+    case forum(forumId: String)
+    case forumManage(forumId: String)
+    case forumSearch
+    case forumCreate
+    case myForums
+    case likedPosts
+    case post(postId: String)
+    case postCreate(prefill: PostCreatePrefill)
+    case postEdit(postId: String)
     /** 通知收件箱（消息页的铃铛）。 */
     case notifications
     /** 聊天室。 */
     case conversation(conversationId: String, isGroup: Bool)
     case chatSettings(conversationId: String, isGroup: Bool)
+    case groupMembers(conversationId: String)
+    case groupAddMembers(conversationId: String)
     /** 聊天里选位置发出去。 */
     case chatLocationPick(conversationId: String)
     /** 聊天里点开的位置。 */
@@ -127,12 +139,16 @@ enum LoopRoute: Hashable {
         case .addFriend: AddFriendView()
         case .blocked: BlockedListView()
         case .notifications: NotificationsView()
+        case .forum, .forumManage, .forumSearch, .forumCreate, .myForums, .likedPosts, .post, .postCreate, .postEdit:
+            PulsoComingSoonView(title: "shell_dest_forum", systemImage: "text.bubble")
         case let .conversation(conversationId, isGroup): ChatConversationView(conversationId: conversationId, isGroup: isGroup)
-        case .chatSettings: PulsoComingSoonView(title: "chat_settings_title", systemImage: "gearshape")
+        case let .chatSettings(conversationId, isGroup): ChatSettingsView(conversationId: conversationId, isGroup: isGroup)
+        case let .groupMembers(conversationId): GroupMembersView(conversationId: conversationId)
+        case let .groupAddMembers(conversationId): GroupAddMembersView(conversationId: conversationId)
         case let .chatLocationPick(conversationId): ChatLocationPickView(conversationId: conversationId)
         case let .chatLocationView(latitude, longitude, label, address): ChatLocationView(latitude: latitude, longitude: longitude, label: label, address: address)
-        case .chatEventPicker: PulsoComingSoonView(title: "shell_chat_plus_hosted_events", systemImage: "calendar")
-        case .chatFavoritePicker: PulsoComingSoonView(title: "shell_chat_plus_favorites", systemImage: "heart")
+        case let .chatEventPicker(conversationId, hosted): ChatEventPickerView(conversationId: conversationId, hosted: hosted)
+        case let .chatFavoritePicker(conversationId): ChatFavoritePickerView(conversationId: conversationId)
         case let .socialProfile(profileId): SocialProfileView(profileId: profileId)
         case let .markPlace(latitude, longitude): MarkPlaceView(latitude: latitude, longitude: longitude)
         case let .resubmitPlace(requestId): MarkPlaceView(requestId: requestId)

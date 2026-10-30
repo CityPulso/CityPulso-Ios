@@ -112,7 +112,8 @@ struct ChatConversationView: View {
         case .eventShare: card.subtype.map { .event(sport: LoopSport.fromEventType(LoopEventType.fromWire($0)), eventId: card.targetId) }
         case .venueShare: .venue(venueId: card.targetId, sheet: nil)
         case .buildingShare: .building(buildingId: card.targetId)
-        case .postShare, .forumShare: .comingSoon(title: "shell_dest_forum", systemImage: "text.bubble")
+        case .postShare: .post(postId: card.targetId)
+        case .forumShare: .forum(forumId: card.targetId)
         default: nil
         }
     }

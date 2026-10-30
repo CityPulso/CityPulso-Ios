@@ -40,6 +40,8 @@ enum LoopShellPages {
             MyTournamentsView()
         case .chatHub:
             ChatHubView()
+        case .forum:
+            ForumFeedView()
         default:
             PulsoComingSoonView(destination)
         }
