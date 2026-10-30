@@ -34,6 +34,8 @@ enum NearShellPages {
             BillingView()
         case .forum:
             ForumFeedView()
+        case .chatHub:
+            ChatHubView()
         default:
             PulsoComingSoonView(destination)
         }

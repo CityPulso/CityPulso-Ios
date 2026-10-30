@@ -87,6 +87,10 @@ extension Container {
         self { ActivityNearbyFilterStore() }.singleton
     }
 
+    var chatShareDraftStore: Factory<ChatShareDraftStore> {
+        self { ChatShareDraftStore() }.singleton
+    }
+
     var discussionEventBus: Factory<DiscussionEventBus> {
         self { DiscussionEventBus() }.singleton
     }

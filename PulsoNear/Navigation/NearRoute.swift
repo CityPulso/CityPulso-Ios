@@ -72,10 +72,31 @@ enum NearRoute: Hashable {
     case post(postId: String)
     case postCreate(prefill: PostCreatePrefill)
     case postEdit(postId: String)
-    /** 别人的主页（社交那组移植前是占位页）。 */
+    /** 别人的主页。 */
     case socialProfile(profileId: String)
     /** 社交：好友 / 关注 / 粉丝，停在 [tab]。 */
     case social(tab: SocialConnectionsTab)
+    /** 好友请求（收到的 / 发出的）。 */
+    case friendRequests
+    /** 找人加好友。 */
+    case addFriend
+    /** 黑名单。 */
+    case blocked
+    /** 通知收件箱（消息页的铃铛）。 */
+    case notifications
+    /** 聊天室。 */
+    case conversation(conversationId: String, isGroup: Bool)
+    case chatSettings(conversationId: String, isGroup: Bool)
+    case groupMembers(conversationId: String)
+    case groupAddMembers(conversationId: String)
+    /** 聊天里选位置发出去。 */
+    case chatLocationPick(conversationId: String)
+    /** 聊天里点开的位置。 */
+    case chatLocationView(latitude: Double, longitude: Double, label: String?, address: String?)
+    /** 分享我发起的 / 参加的活动。 */
+    case chatActivityPicker(conversationId: String, hosted: Bool)
+    /** 分享收藏（建筑 / 门店 / 帖子 / 论坛）。 */
+    case chatFavoritePicker(conversationId: String)
     /** 还没移植的页面：[title] 是文案 key。 */
     case comingSoon(title: String, systemImage: String)
 
@@ -125,7 +146,20 @@ enum NearRoute: Hashable {
         case .likedPosts: LikedPostsView()
         case let .forumManage(forumId): ForumManageView(forumId: forumId)
         case .forumCreate: ForumCreateView()
-        case .social, .socialProfile: PulsoComingSoonView(title: "shell_dest_social", systemImage: "person.2")
+        case let .social(tab): SocialOverviewView(initialTab: tab)
+        case let .socialProfile(profileId): SocialProfileView(profileId: profileId)
+        case .friendRequests: FriendRequestsView()
+        case .addFriend: AddFriendView()
+        case .blocked: BlockedListView()
+        case .notifications: NotificationsView()
+        case let .conversation(conversationId, isGroup): ChatConversationView(conversationId: conversationId, isGroup: isGroup)
+        case let .chatSettings(conversationId, isGroup): ChatSettingsView(conversationId: conversationId, isGroup: isGroup)
+        case let .groupMembers(conversationId): GroupMembersView(conversationId: conversationId)
+        case let .groupAddMembers(conversationId): GroupAddMembersView(conversationId: conversationId)
+        case let .chatLocationPick(conversationId): ChatLocationPickView(conversationId: conversationId)
+        case let .chatLocationView(latitude, longitude, label, address): ChatLocationView(latitude: latitude, longitude: longitude, label: label, address: address)
+        case let .chatActivityPicker(conversationId, hosted): ChatActivityPickerView(conversationId: conversationId, hosted: hosted)
+        case let .chatFavoritePicker(conversationId): ChatFavoritePickerView(conversationId: conversationId)
         case let .comingSoon(title, systemImage):
             PulsoComingSoonView(title: LocalizedStringKey(title), systemImage: systemImage)
         }
