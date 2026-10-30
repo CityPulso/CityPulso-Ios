@@ -1,10 +1,10 @@
 import PulsoLinkCore
 
 /**
- * 跨运动的页面（日历、资料、场馆建筑…）读某一运动活动的统一入口。Android 在这些页面里对 11 个 Service 写
+ * 跨活动类型的页面（日历、资料、场馆建筑…）读某一活动类型活动的统一入口。Android 在这些页面里对 11 个 Service 写
  * `when (activityType)`；iOS 让每个 Service 遵守这个协议（`Services/<ActivityType>Service+ActivityType.swift`），按 [NearActivityKind] 取。
  */
-/** 我的报名查询（对应各运动的 `My<ActivityType>RegistrationsKey`，账号 / 身份由调用方给）。 */
+/** 我的报名查询（对应各活动类型的 `My<ActivityType>RegistrationsKey`，账号 / 身份由调用方给）。 */
 struct ActivityTypeRegistrationsQuery: Hashable, Sendable {
     var accountId: String
     var profileId: String
@@ -29,7 +29,7 @@ protocol NearActivityService: ActivityDetailService, ActivityTypeChecklistServic
 
     func freshMyRegistrations(_ query: ActivityTypeRegistrationsQuery) async throws
 
-    /** 在 [buildingId] 这栋建筑办的活动；[endedOnly] 时只要已结束的（球馆详情的「活动」分段）。 */
+    /** 在 [buildingId] 这栋建筑办的活动；[endedOnly] 时只要已结束的（门店详情的「活动」分段）。 */
     func buildingActivities(accountId: String, profileId: String, buildingId: String, endedOnly: Bool) -> AsyncStream<QueryResponse<[any ActivityItem]>>
 
     /** 账单「我主持的」：我主持的活动的收款清单，分页。 */

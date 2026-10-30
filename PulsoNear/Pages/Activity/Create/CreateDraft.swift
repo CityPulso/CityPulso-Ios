@@ -9,7 +9,7 @@ let activityPhotosMax = 6
 let mahjongVariantMaxLength = 60
 
 extension CreatePaymentMethodKind {
-    /** 各运动 `<ActivityType>PaymentMethodKind` 的 wire 值（四种一样）。 */
+    /** 各活动类型 `<ActivityType>PaymentMethodKind` 的 wire 值（四种一样）。 */
     var wire: String {
         switch self {
         case .etransfer: "etransfer"

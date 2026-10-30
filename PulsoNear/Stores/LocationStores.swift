@@ -47,7 +47,7 @@ final class DeviceLocationStore: Sendable {
 }
 
 /**
- * 附近搜索的中心（活动和球馆列表、发起、选点）：本次打开 App 时用户选的地点，否则是设备自己的位置
+ * 附近搜索的中心（活动和门店列表、发起、选点）：本次打开 App 时用户选的地点，否则是设备自己的位置
  *（对应 Android `NearbyQueryLocationStore`）。选的地点只在本次有效，下次打开又围绕用户自己搜索。
  */
 final class NearbyQueryLocationStore: Sendable {
@@ -90,7 +90,7 @@ final class NearbyQueryLocationStore: Sendable {
     }
 }
 
-/** 搜索 / 球馆搜索把一个点交给地图页 flyTo 的一次性焦点（Android `ExploreFocusStore`）。 */
+/** 搜索 / 门店搜索把一个点交给地图页 flyTo 的一次性焦点（Android `ExploreFocusStore`）。 */
 struct ExploreFocus: Hashable, Sendable {
     var activityId: String?
     var latitude: Double

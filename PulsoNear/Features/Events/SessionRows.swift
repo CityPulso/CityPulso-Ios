@@ -3,7 +3,7 @@ import PulsoLinkUI
 import SwiftUI
 
 /**
- * 混合了各种活动的列表里的一场活动（对应 Android `HostedSessionRow`）。各运动保留自己的 DTO，
+ * 混合了各种活动的列表里的一场活动（对应 Android `HostedSessionRow`）。各活动类型保留自己的 DTO，
  * 列表项遵守这个协议（`Rows/<ActivityType>Rows.swift`）。
  */
 protocol ActivityItem: Sendable {

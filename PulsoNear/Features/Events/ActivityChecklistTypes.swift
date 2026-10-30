@@ -4,7 +4,7 @@ import PulsoLinkCore
 /** 与后端 `RemindCooldown` / WEB `REMIND_COOLDOWN_MS` 一致：10 分钟。 */
 private let remindCooldown: TimeInterval = 10 * 60
 
-/** 一场活动的收款清单（各运动 `<ActivityType>PaymentChecklistResponse` 的共同部分）。 */
+/** 一场活动的收款清单（各活动类型 `<ActivityType>PaymentChecklistResponse` 的共同部分）。 */
 struct ActivityChecklist: Sendable {
     let hostProfileId: String
     let isAllSettled: Bool
@@ -28,7 +28,7 @@ struct ActivityChecklistEntry: Sendable, Identifiable {
     }
 }
 
-/** 收款清单的读写（每个运动的 Service 遵守）。 */
+/** 收款清单的读写（每种活动的 Service 遵守）。 */
 protocol ActivityTypeChecklistService: Sendable {
     func checklist(activityId: String) -> AsyncStream<QueryResponse<ActivityChecklist>>
     func markChecklistItem(itemId: String, paid: Bool) async throws

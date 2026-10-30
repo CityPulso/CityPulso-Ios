@@ -1,6 +1,6 @@
 import PulsoLinkCore
 
-/** 所有运动的附近活动针（对应 Android `ExploreRepository`、WEB `ApiExploreRepository`）。 */
+/** 所有活动类型的附近活动针（对应 Android `ExploreRepository`、WEB `ApiExploreRepository`）。 */
 struct ExploreRepository: Sendable {
     let publicAPI: ExplorePublicAPI
 

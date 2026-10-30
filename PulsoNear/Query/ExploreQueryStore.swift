@@ -15,7 +15,7 @@ struct NearbyPinsKey: Hashable, Sendable {
     var offset = 0
     var limit = 15
     var summary = false
-    /** 空 = 所有已上线的运动。 */
+    /** 空 = 所有已上线的活动类型。 */
     var activityTypes: [NearActivityType] = []
     /** 只看还有空位的活动。 */
     var openSpotsOnly = false
@@ -23,13 +23,13 @@ struct NearbyPinsKey: Hashable, Sendable {
 }
 
 /**
- * 所有运动的附近活动针（对应 Android `ExploreQueryStore`、WEB `hooks/explore.ts`）：一页混合了各运动，
- * 任何一个运动有写操作都让它失效。本地加的浏览数叠在缓存上，直到下次拉取。
+ * 所有活动类型的附近活动针（对应 Android `ExploreQueryStore`、WEB `hooks/explore.ts`）：一页混合了各活动类型，
+ * 任何一个活动类型有写操作都让它失效。本地加的浏览数叠在缓存上，直到下次拉取。
  */
 final class ExploreQueryStore: LogoutClearable {
     let nearby: MemoryQuery<NearbyPinsKey, NearbyPinsPage>
 
-    /** [activityTypeInvalidations]：每个运动的失效脉冲（各运动的事件类型不同，所以传工厂）。 */
+    /** [activityTypeInvalidations]：每种活动的失效脉冲（各活动类型的事件类型不同，所以传工厂）。 */
     init(repository: ExploreRepository, activityTypeInvalidations: [@Sendable () -> AsyncStream<Void>]) {
         nearby = MemoryQuery(invalidates: {
             let streams = activityTypeInvalidations.map { $0() }

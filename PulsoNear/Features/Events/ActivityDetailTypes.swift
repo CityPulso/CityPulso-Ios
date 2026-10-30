@@ -3,11 +3,11 @@ import PulsoLinkCore
 import SwiftUI
 
 /*
- * 活动详情跨运动的形状。Android 每个运动复制一整套详情页；iOS 写一份详情页，各运动的 DTO 遵守这里的协议
+ * 活动详情跨活动类型的形状。Android 每种活动复制一整套详情页；iOS 写一份详情页，各活动类型的 DTO 遵守这里的协议
  * （`Rows/<ActivityType>Rows.swift`），Service 遵守 [NearActivityService]（`Services/<ActivityType>Service+ActivityType.swift`）。
  */
 
-/** 收费方式（各运动的 `<ActivityType>PaymentMethodKind` wire 值相同）。 */
+/** 收费方式（各活动类型的 `<ActivityType>PaymentMethodKind` wire 值相同）。 */
 enum ActivityPaymentKind: String, Sendable, Hashable {
     case etransfer
     case wechat
@@ -39,7 +39,7 @@ struct ActivityPaymentMethod: Hashable, Sendable {
     let account: String
 }
 
-/** 退款进度（各运动的 `<ActivityType>RefundStatus` wire 值相同）。 */
+/** 退款进度（各活动类型的 `<ActivityType>RefundStatus` wire 值相同）。 */
 enum ActivityRefundStatus: String, Sendable {
     case pending
     case succeeded
@@ -53,7 +53,7 @@ struct OptionFact: Sendable {
     let value: Text
 }
 
-/** 某运动的完整活动（`<ActivityType>FullActivity`）。 */
+/** 某活动类型的完整活动（`<ActivityType>FullActivity`）。 */
 protocol ActivityTypeFullActivity: Sendable {
     var activityType: NearActivityKind { get }
     var id: String { get }
@@ -81,13 +81,13 @@ protocol ActivityTypeFullActivity: Sendable {
     var pendingExitCount: Int { get }
     var awaitingPaymentCount: Int { get }
     var paymentMethodList: [ActivityPaymentMethod] { get }
-    /** 标题下的标签（运动特有字段）。 */
+    /** 标题下的标签（活动类型特有字段）。 */
     var optionLabels: [Text] { get }
     /** 「详情」里的事实格子。 */
     var facts: [OptionFact] { get }
 }
 
-/** 某运动的一条报名（`<ActivityType>Registration`）。 */
+/** 某活动类型的一条报名（`<ActivityType>Registration`）。 */
 protocol ActivityTypeRegistration: Sendable {
     var id: String { get }
     var profileId: String { get }
@@ -135,7 +135,7 @@ enum PayeePatch: Sendable {
     }
 }
 
-/** 活动详情要的读写（每个运动的 Service 遵守）。 */
+/** 活动详情要的读写（每种活动的 Service 遵守）。 */
 protocol ActivityDetailService: Sendable {
     func detail(activityId: String) -> AsyncStream<QueryResponse<ActivityDetail>>
     func roster(activityId: String) -> AsyncStream<QueryResponse<RosterPage>>
@@ -145,7 +145,8 @@ protocol ActivityDetailService: Sendable {
     func join(activityId: String, waitlistHoursBeforeStart: Int?, playerNote: String?, payByCard: Bool) async throws -> JoinResult
     func exitActivity(activityId: String) async throws -> any ActivityTypeRegistration
     func endActivity(activityId: String) async throws
-    func patchBasic(activityId: String, title: String?, venueName: String?, description: String?, payee: PayeePatch) async throws
+    /** [mahjongVariant] 只有麻将会发（其他活动没有这个字段，忽略它）。 */
+    func patchBasic(activityId: String, title: String?, mahjongVariant: String?, venueName: String?, description: String?, payee: PayeePatch) async throws
     func myRegistrationPayment(activityId: String) async throws -> PaymentHoldActivity
     func payMyRegistration(activityId: String, paymentMethodId: String) async throws -> PaymentAttempt
     func invalidate()

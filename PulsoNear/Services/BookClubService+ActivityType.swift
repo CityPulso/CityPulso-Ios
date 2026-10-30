@@ -81,7 +81,7 @@ extension BookClubService: ActivityDetailService {
         try await end(activityId: activityId)
     }
 
-    func patchBasic(activityId: String, title: String?, venueName: String?, description: String?, payee: PayeePatch) async throws {
+    func patchBasic(activityId: String, title: String?, mahjongVariant: String?, venueName: String?, description: String?, payee: PayeePatch) async throws {
         try await patchBasic(activityId: activityId, PatchBookClubActivityBasicRequest(
             title: title, venueName: venueName, description: description, payeePaymentAccountId: payee.wire
         ))

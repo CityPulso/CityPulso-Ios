@@ -26,14 +26,15 @@ IOS_ROOT = Path(__file__).resolve().parent.parent
 NEAR = IOS_ROOT / "PulsoNear"
 
 # Board game files every type gets a copy of (paths contain "BoardGame"), with the types (wire values) that do NOT take
-# the copy. Mahjong carries its rule set (`mahjongVariant`), so its rows and create request are written by hand.
+# the copy. Mahjong carries its rule set (`mahjongVariant`), so its rows, create request and service glue (basic edit
+# sends the rule set) are written by hand.
 TEMPLATES: list[tuple[str, set[str]]] = [
     ("Data/BoardGame/BoardGameRepository.swift", set()),
     ("Events/BoardGameEventBus.swift", set()),
     ("Query/BoardGameQueryKeys.swift", set()),
     ("Query/BoardGameQueryStore.swift", set()),
     ("Services/BoardGameService.swift", set()),
-    ("Services/BoardGameService+ActivityType.swift", set()),
+    ("Services/BoardGameService+ActivityType.swift", {"mahjong"}),
     ("DI/Container+BoardGame.swift", set()),
     ("Features/Events/Rows/BoardGameRows.swift", {"mahjong"}),
     ("Features/Create/BoardGameCreate.swift", {"mahjong"}),
