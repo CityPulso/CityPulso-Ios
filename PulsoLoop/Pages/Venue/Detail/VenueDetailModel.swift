@@ -22,13 +22,6 @@ struct MembershipPurchaseState {
     var paymentMethod: MembershipPaymentMethod?
 }
 
-/** 一场在这栋建筑办的活动（任何运动）。 */
-struct HostedEventRow: Identifiable {
-    let item: any SportEventItem
-
-    var id: String { "\(item.sport.rawValue):\(item.id)" }
-}
-
 /**
  * 球馆详情（Android `VenueDetailViewModel`）：球馆、每个已上线运动的规则和场地、商品服务、会员方案和我的会员、
  * 这栋建筑办的活动；会员购买。打开一次计一次浏览（工作人员打开不计）。
@@ -43,8 +36,8 @@ final class VenueDetailModel {
 
     private(set) var venue = Loadable<VenueDetail>()
     var tab = VenueInfoTab.overview
-    private(set) var sessionFilter = BuildingSessionFilter.upcoming
-    private(set) var events = Loadable<[HostedEventRow]>(isLoading: false)
+    /** 这栋建筑办的活动（「活动」分段）。 */
+    let buildingEvents = BuildingEvents()
     private(set) var sport: VenueSport?
     private(set) var entries: [VenueSport: Loadable<CourtEntryUi>] = [:]
     private(set) var courts: [VenueSport: [CourtUi]] = [:]
@@ -66,13 +59,10 @@ final class VenueDetailModel {
     @ObservationIgnored @Injected(\.preferenceService) private var preferenceService
     @ObservationIgnored @Injected(\.pulsoCoreConfig) private var config
     @ObservationIgnored private let venueServices = Container.shared.venueSportServices()
-    @ObservationIgnored private let sportServices = Container.shared.loopSportServices()
     @ObservationIgnored private var session = AuthSession.loggedOut
     @ObservationIgnored private var sportsTask: Task<Void, Never>?
-    @ObservationIgnored private var eventsTask: Task<Void, Never>?
     @ObservationIgnored private var quoteTask: Task<Void, Never>?
     @ObservationIgnored private var loadedSports: [VenueSport] = []
-    @ObservationIgnored private var eventsKey: String?
     @ObservationIgnored private var viewCounted = false
     @ObservationIgnored private var membershipSheetAutoOpened = false
 
@@ -115,7 +105,7 @@ final class VenueDetailModel {
                     let sports = self.sports
                     if self.sport == nil || !sports.contains(self.sport!) { self.sport = sports.first }
                     if sports != self.loadedSports { self.loadSports(sports) }
-                    self.loadEvents()
+                    self.buildingEvents.load(buildingId: self.venue.data?.building.id ?? "", session: self.session)
                 }
             },
             {
@@ -143,7 +133,7 @@ final class VenueDetailModel {
                 for await session in self.sessionStore.state.values() {
                     self.session = session
                     let signedIn = session.isAuthValid && !session.currentProfileId.isEmpty
-                    self.loadEvents()
+                    self.buildingEvents.load(buildingId: self.venue.data?.building.id ?? "", session: session)
                     guard signedIn != self.signedIn || mineTask == nil else { continue }
                     self.signedIn = signedIn
                     mineTask?.cancel()
@@ -163,7 +153,7 @@ final class VenueDetailModel {
             },
         ])
         sportsTask?.cancel()
-        eventsTask?.cancel()
+        buildingEvents.cancel()
     }
 
     /** 每个已上线运动的规则和场地：场地分段显示选中的那个，须知分段全部列出。 */
@@ -191,51 +181,6 @@ final class VenueDetailModel {
         sportsTask = Task { await concurrently(operations) }
     }
 
-    /** 这栋建筑办的活动，所有运动合在一起，按开始时间排。 */
-    private func loadEvents() {
-        let buildingId = venue.data?.building.id ?? ""
-        let key = "\(buildingId)|\(sessionFilter)|\(session.currentProfileId)"
-        guard key != eventsKey else { return }
-        eventsKey = key
-        eventsTask?.cancel()
-        guard !buildingId.isEmpty else {
-            events = Loadable(isLoading: false)
-            return
-        }
-        events = Loadable(data: events.data, isLoading: true)
-        let endedOnly = sessionFilter == .history
-        var answers: [LoopSport: QueryResponse<[any SportEventItem]>] = [:]
-        let streams = LoopSport.allCases.compactMap { sport in
-            sportServices[sport].map { (sport, $0.buildingEvents(accountId: session.currentAccountId, profileId: session.currentProfileId, buildingId: buildingId, endedOnly: endedOnly)) }
-        }
-        let total = streams.count
-        eventsTask = Task {
-            await concurrently(streams.map { sport, stream in
-                {
-                    for await response in stream {
-                        answers[sport] = response
-                        self.mergeEvents(answers, total: total)
-                    }
-                }
-            })
-        }
-    }
-
-    private func mergeEvents(_ answers: [LoopSport: QueryResponse<[any SportEventItem]>], total: Int) {
-        var rows: [any SportEventItem] = []
-        var firstError: UiError?
-        var pending = total - answers.count
-        for answer in answers.values {
-            switch answer {
-            case let .data(items): rows += items
-            case let .error(error): firstError = firstError ?? error
-            case .loading: pending += 1
-            }
-        }
-        rows.sort { ($0.startsAt, $0.id) < ($1.startsAt, $1.id) }
-        events = Loadable(data: rows.map(HostedEventRow.init), isLoading: pending > 0 && rows.isEmpty, error: rows.isEmpty && pending == 0 ? firstError : nil)
-    }
-
     /** 打开一次计一次；工作人员打开不计。 */
     private func maybeIncrementView(isPublicViewer: Bool) {
         guard !viewCounted, isPublicViewer else { return }
@@ -246,11 +191,6 @@ final class VenueDetailModel {
     }
 
     /* ------------------------------ 操作 ------------------------------ */
-
-    func selectSessionFilter(_ filter: BuildingSessionFilter) {
-        sessionFilter = filter
-        loadEvents()
-    }
 
     func selectSport(_ value: VenueSport) {
         sport = value

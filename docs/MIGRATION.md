@@ -14,9 +14,11 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 - 为 Explore 先补了第 8 / 12 组的数据层：`VenueRepository` / `VenueService` / `VenueQueryStore`（详情、附近、浏览数）、
   `TournamentRepository` / `TournamentService`、`ExploreLayerStore`、`VenueNearbyFilterStore`、营业时间。
 - 标记地点、我标记的地点也写完了（`PlaceRequestService`，设置页入口接上）。
-- 还差：深链 inbox；球馆收藏心形（第 8 组）；发布后的「发个帖子」等第 11 组；
+- 还差：深链 inbox；发布后的「发个帖子」等第 11 组；
   社交主页入口等第 10 组。球馆 / 建筑 / 赛事 / 订场 / 社交主页的路由已经有了，先进占位页。
-- 下一步：第 8 组球馆（详情、订场、我的订场、收藏、场馆建筑）。
+- 第 8 组球馆写完：详情、选场（点选 / 长按拖选）、确认（会员价、时长包）、订场详情（付款 / 取消 / 退款预估）、我的订场、
+  建筑、附近球馆、收藏（球馆 / 建筑）。会员和时长包的数据层、购买面板也已写好（第 9 组的「我的会员」「钱包」页还没做）。
+- 下一步：第 9 组钱包、账单、我的会员 / 时长包详情、收款账户（Stripe Connect）。
 
 ## 状态
 
@@ -86,7 +88,7 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 | EXPLORE | `pages/event/explore` + `features/map` | `Pages/Event/Explore`、`Features/Map`（针是叠在 MapLibre 上的 SwiftUI 视图，按投影摆；底部面板用系统 sheet 的两个高度，聚合面板用 popover） | 7 | 🟦 |
 | CALENDAR | `pages/event/calendar` + `features/activity` | `Pages/Event/Calendar`、`Features/Activity` | 4 | 🟦 |
 | SEARCH | `pages/event/search` + `features/search` | `Pages/Event/Search`、`Features/Search` | 4 | 🟦 |
-| VENUE_SEARCH | `pages/venue/search` | | 8 | ⬜ |
+| VENUE_SEARCH | `pages/venue/search` | `Pages/Venue/Search`（每个运动一页、存着的球馆筛选、收藏星、左滑看地图） | 8 | 🟦 |
 | SOCIAL | `pages/social/overview` | | 10 | ⬜ |
 | CREATE | `pages/event/create` | `Pages/Event/Create`（一个向导给 11 种运动；各运动只差 `SportSettingsDetails` 和 `Features/Create/<Sport>Create.swift`） | 5 / 6 | 🟦 |
 | SETTINGS | `pages/settings/overview` | `Pages/Settings/Overview` | 2 | 🟩 |
@@ -98,8 +100,8 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 | COURSES | `pages/program/mine` | | 12 | ⬜ |
 | COACHING | `pages/program/mine` | | 12 | ⬜ |
 | TOURNAMENTS | `pages/tournament/mine` | | 12 | ⬜ |
-| COURT_BOOKINGS | `pages/venue/bookings` | | 8 | ⬜ |
-| FAVORITES | `pages/venue/favorites` | | 8 | ⬜ |
+| COURT_BOOKINGS | `pages/venue/bookings` | `Pages/Venue/Bookings` | 8 | 🟦 |
+| FAVORITES | `pages/venue/favorites` | `Pages/Venue/Favorites`（球馆 / 建筑：搜索、排序、筛选带数量、左滑取消收藏；论坛 / 帖子 / 评论等第 11 组） | 8 | 🟨 |
 | FORUM | `pages/discussion/feed` | | 11 | ⬜ |
 
 ## Loop：导航命令（`navigation/LoopNavCommand.kt`）
@@ -131,11 +133,11 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 | OpenLocationPick | `pages/location` | `Pages/Location`（`LoopMapView` + MapLibre；搜索 / 反查走核心 `LocationService`） | 7 | 🟦 |
 | OpenPlaceRequests | `pages/place/requests` | `Pages/Place/Requests`（状态分段、按住撤回、重新提交、打开建筑） | 7 | 🟦 |
 | OpenMarkPlace | `pages/place/mark` | `Pages/Place/Mark`（新标记 / 被拒的重新提交；地图预览 + 选点页、照片上传、联系方式） | 7 | 🟦 |
-| OpenVenue | `pages/venue/detail` | | 8 | ⬜ |
-| OpenBuilding | `pages/venue/detail` | | 8 | ⬜ |
-| OpenVenueBook | `pages/venue/book/<sport>` | | 8 | ⬜ |
-| OpenVenueConfirm | `pages/venue/confirm/<sport>` | | 8 | ⬜ |
-| OpenCourtBooking | `pages/venue/booking/<sport>` | | 8 | ⬜ |
+| OpenVenue | `pages/venue/detail` | `Pages/Venue/Detail`（9 个分段、会员 / 时长包购买走 connected account 的 PaymentSheet、收藏、导航 / 电话 / 分享；课程 / 教练 / 赛事详情等第 12 组） | 8 | 🟦 |
+| OpenBuilding | `pages/venue/detail` | `Pages/Venue/Building` | 8 | 🟦 |
+| OpenVenueBook | `pages/venue/book/<sport>` | `Pages/Venue/Book`（三种运动一页；`<Sport>VenueService` 由 `fork_sport.py` 从羽毛球生成） | 8 | 🟦 |
+| OpenVenueConfirm | `pages/venue/confirm/<sport>` | `Pages/Venue/Confirm` | 8 | 🟦 |
+| OpenCourtBooking | `pages/venue/booking/<sport>` | `Pages/Venue/Booking` | 8 | 🟦 |
 | OpenWallet | `pages/wallet` | | 9 | ⬜ |
 | OpenPaymentAccounts | `pages/billing/paymentaccounts` | | 9 | ⬜ |
 | OpenPaymentMethods | `pages/billing/paymentmethods` | | 9 | ⬜ |

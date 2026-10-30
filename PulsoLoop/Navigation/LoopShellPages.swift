@@ -26,6 +26,12 @@ enum LoopShellPages {
             ExploreView()
         case .courtBookings:
             CourtBookingsView()
+        case .venueSearch:
+            VenueSearchView()
+        case .favorites:
+            FavoritesView()
+        case .wallet:
+            WalletView()
         default:
             PulsoComingSoonView(destination)
         }

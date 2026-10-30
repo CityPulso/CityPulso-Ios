@@ -48,8 +48,14 @@ enum LoopRoute: Hashable {
     case coachPanel
     /** 我的一张会员卡（第 9 组）。 */
     case myMembership(membershipId: String)
-    /** 钱包的某个分段（第 9 组）。 */
+    /** 钱包，打开时停在 [tab]。 */
     case wallet(tab: WalletTab)
+    /** 我的一笔会员申请（等球馆确认）。 */
+    case myMembershipPurchase(purchaseId: String)
+    /** 我的一个时长包。 */
+    case myBundle(bundleId: String)
+    /** 收款账户（Stripe Connect）。 */
+    case paymentAccounts
     /** 一场活动的收款清单。 */
     case checklist(sport: LoopSport, eventId: String)
     /** 我的一条订场。 */
@@ -82,7 +88,7 @@ enum LoopRoute: Hashable {
         case let .venue(venueId, sheet): VenueDetailView(venueId: venueId, sheet: sheet)
         case let .venueBook(venueId, sport): VenueBookView(venueId: venueId, sport: sport)
         case let .venueConfirm(venueId, sport, date, ranges): VenueConfirmView(venueId: venueId, sport: sport, dateKey: date, ranges: ranges)
-        case .building: PulsoComingSoonView(title: "explore_sheet_tag_building", systemImage: "building")
+        case let .building(buildingId): BuildingDetailView(buildingId: buildingId)
         case .tournament: PulsoComingSoonView(title: "explore_layers_tournaments", systemImage: "trophy")
         case .socialProfile: PulsoComingSoonView(title: "event_detail_participants_view_profile", systemImage: "person.crop.circle")
         case let .markPlace(latitude, longitude): MarkPlaceView(latitude: latitude, longitude: longitude)
@@ -92,7 +98,10 @@ enum LoopRoute: Hashable {
         case .coach: PulsoComingSoonView(title: "venue_programs_coaches", systemImage: "figure.strengthtraining.traditional")
         case .coachPanel: PulsoComingSoonView(title: "venue_programs_coach_panel", systemImage: "rectangle.stack")
         case .myMembership: PulsoComingSoonView(title: "venue_membership_title", systemImage: "person.text.rectangle")
-        case .wallet: PulsoComingSoonView(title: "shell_dest_wallet", systemImage: "wallet.bifold")
+        case let .wallet(tab): WalletView(tab: tab)
+        case .myMembershipPurchase: PulsoComingSoonView(title: "my_memberships_purchase_title", systemImage: "hourglass")
+        case .myBundle: PulsoComingSoonView(title: "wallet_tab_bundles", systemImage: "ticket")
+        case .paymentAccounts: PulsoComingSoonView(title: "wallet_payment_accounts", systemImage: "building.columns")
         case let .checklist(sport, eventId): ChecklistView(sport: sport, eventId: eventId)
         case let .courtBooking(sport, bookingId): CourtBookingView(sport: sport, bookingId: bookingId)
         case .courtBookings: CourtBookingsView()

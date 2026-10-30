@@ -360,10 +360,6 @@ struct VenueOfferingsSection: View {
     }
 }
 
-extension String {
-    var nilIfEmpty: String? { isEmpty ? nil : self }
-}
-
 /** 在本馆举办的赛事，分页。 */
 struct VenueTournamentsSection: View {
     let programs: VenueProgramsModel
@@ -483,34 +479,36 @@ private struct ProgramRow: View {
     }
 }
 
-/** 球友在这栋建筑办的活动：即将开始 / 历史。 */
-struct VenueSessionsSection: View {
-    let model: VenueDetailModel
+/** 球友在这栋建筑办的活动：即将开始 / 历史（球馆详情和建筑详情共用）。 */
+struct BuildingEventsSection: View {
+    let events: BuildingEvents
+    let imageURL: (String?) -> URL?
+    let onRetry: () -> Void
 
     var body: some View {
         Section {
-            Picker(selection: Binding(get: { model.sessionFilter }, set: { model.selectSessionFilter($0) })) {
+            Picker(selection: Binding(get: { events.filter }, set: { events.select($0) })) {
                 Text("building_detail_events_upcoming").tag(BuildingSessionFilter.upcoming)
                 Text("building_detail_events_history").tag(BuildingSessionFilter.history)
             } label: {
                 EmptyView()
             }
             .pickerStyle(.segmented)
-            if let rows = model.events.data, !rows.isEmpty {
+            if let rows = events.events.data, !rows.isEmpty {
                 ForEach(rows) { row in
                     NavigationLink(value: LoopRoute.event(sport: row.item.sport, eventId: row.item.id)) {
-                        EventFeedCard(item: row.item, imageURL: model.imageURL(row.item.coverImageId))
+                        EventFeedCard(item: row.item, imageURL: imageURL(row.item.coverImageId))
                     }
                 }
-            } else if model.events.isLoading {
+            } else if events.events.isLoading {
                 ProgressView().frame(maxWidth: .infinity)
-            } else if let error = model.events.error {
-                PulsoLoadErrorView(error) { model.refresh() }
+            } else if let error = events.events.error {
+                PulsoLoadErrorView(error, retry: onRetry)
             } else {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text((model.sessionFilter == .upcoming ? "building_detail_events_empty" : "building_detail_events_history_empty") as LocalizedStringKey)
+                    Text((events.filter == .upcoming ? "building_detail_events_empty" : "building_detail_events_history_empty") as LocalizedStringKey)
                         .font(.subheadline.weight(.semibold))
-                    Text((model.sessionFilter == .upcoming ? "building_detail_events_empty_body" : "building_detail_events_history_empty_body") as LocalizedStringKey)
+                    Text((events.filter == .upcoming ? "building_detail_events_empty_body" : "building_detail_events_history_empty_body") as LocalizedStringKey)
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }

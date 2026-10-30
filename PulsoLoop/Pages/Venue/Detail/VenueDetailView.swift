@@ -255,7 +255,7 @@ struct VenueDetailView: View {
         case .tournaments: VenueTournamentsSection(programs: programs, imageURL: { model.imageURL($0) })
         case .courses: VenueCoursesSection(programs: programs, imageURL: { model.imageURL($0) })
         case .coaches: VenueCoachesSection(programs: programs, imageURL: { model.imageURL($0) })
-        case .sessions: VenueSessionsSection(model: model)
+        case .sessions: BuildingEventsSection(events: model.buildingEvents, imageURL: { model.imageURL($0) }, onRetry: { model.refresh() })
         case .policies: VenuePoliciesSection(model: model, venue: venue)
         }
     }
