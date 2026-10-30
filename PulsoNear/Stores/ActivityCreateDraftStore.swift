@@ -6,7 +6,7 @@ import PulsoLinkCore
  * 读不了的旧草稿当作没有。
  */
 final class ActivityCreateDraftStore: LogoutClearable {
-    private static let key = "loop-activity-create-draft"
+    private static let key = "near-activity-create-draft"
 
     private nonisolated(unsafe) let defaults: UserDefaults
 

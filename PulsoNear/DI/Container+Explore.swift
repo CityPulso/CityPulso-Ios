@@ -70,6 +70,18 @@ extension Container {
         self { DeviceLocationBootstrap(store: self.deviceLocationStore()) }.singleton
     }
 
+    var placeRequestService: Factory<PlaceRequestService> {
+        self { PlaceRequestService(repository: PlaceRequestRepository(api: PlaceRequestAPI(client: self.protectedClient()))) }.singleton
+    }
+
+    var exploreLayerStore: Factory<ExploreLayerStore> {
+        self { ExploreLayerStore() }.singleton
+    }
+
+    var venueNearbyFilterStore: Factory<VenueNearbyFilterStore> {
+        self { VenueNearbyFilterStore() }.singleton
+    }
+
     var activityNearbyFilterStore: Factory<ActivityNearbyFilterStore> {
         self { ActivityNearbyFilterStore() }.singleton
     }

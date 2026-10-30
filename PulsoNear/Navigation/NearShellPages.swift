@@ -22,6 +22,8 @@ enum NearShellPages {
             CalendarView(initialTab: nil)
         case .search:
             ActivitySearchView()
+        case .explore:
+            ExploreView()
         default:
             PulsoComingSoonView(destination)
         }

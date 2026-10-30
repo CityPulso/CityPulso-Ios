@@ -506,25 +506,25 @@ public struct AddMembersRequest: Codable, Sendable, Hashable {
     }
 }
 
-/** PATCH 群信息请求 */
+/** PATCH 群信息请求：只改带上的字段（core Json `explicitNulls=false` 省略 null），改群名不会动群头像，换头像也不会动群名。 */
 public struct UpdateGroupRequest: Codable, Sendable, Hashable {
-    public var title: String
+    public var title: String?
     public var avatarImageId: String?
 
-    public init(title: String, avatarImageId: String? = nil) {
+    public init(title: String? = nil, avatarImageId: String? = nil) {
         self.title = title
         self.avatarImageId = avatarImageId
     }
 
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: WireKey.self)
-        title = try container.wireRequired(String.self, "title")
+        title = try container.wire(String.self, "title")
         avatarImageId = try container.wire(String.self, "avatarImageId")
     }
 
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: WireKey.self)
-        try container.wire(title, "title")
+        try container.wireOptional(title, "title")
         try container.wireOptional(avatarImageId, "avatarImageId")
     }
 }

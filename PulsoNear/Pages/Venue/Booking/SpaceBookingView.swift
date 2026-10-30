@@ -19,7 +19,7 @@ struct SpaceBookingView: View {
 
     var body: some View {
         content
-            .navigationTitle(Text(model.activityType.loopActivityType.labelKey))
+            .navigationTitle(Text(model.activityType.kind.labelKey))
             .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: Binding(get: { model.cancel != nil }, set: { if !$0 { model.cancel = nil } })) {
                 if let booking = model.booking.data { cancelSheet(booking) }

@@ -33,6 +33,16 @@ enum NearRoute: Hashable {
     case spaceBooking(activityType: VenueActivityType, bookingId: String)
     /** 门店详情（门店那组移植前是占位页）。 */
     case venue(venueId: String)
+    /** 没有门店的场馆建筑（门店那组移植前是占位页）。 */
+    case building(buildingId: String)
+    /** 标记地图上缺的地点；从地图长按进来时预填那个位置。 */
+    case markPlace(latitude: Double?, longitude: Double?)
+    /** 把被拒的地点改了重新提交。 */
+    case resubmitPlace(requestId: String)
+    /** 我标记的地点。 */
+    case placeRequests
+    /** 在门店订某种业态（门店那组移植前是占位页）。 */
+    case venueBook(venueId: String, activityType: VenueActivityType)
     /** 收款账户（Stripe Connect）。 */
     case paymentAccounts
     /** 付款方式（保存的卡）。 */
@@ -65,7 +75,10 @@ enum NearRoute: Hashable {
         case .locationPick: LocationPickView()
         case let .calendar(tab): CalendarView(initialTab: tab)
         case let .spaceBooking(activityType, bookingId): SpaceBookingView(activityType: activityType, bookingId: bookingId)
-        case .venue: PulsoComingSoonView(title: "shell_dest_venue_search", systemImage: "building.2")
+        case .venue, .venueBook, .building: PulsoComingSoonView(title: "shell_dest_venue_search", systemImage: "building.2")
+        case let .markPlace(latitude, longitude): MarkPlaceView(latitude: latitude, longitude: longitude)
+        case let .resubmitPlace(requestId): MarkPlaceView(requestId: requestId)
+        case .placeRequests: PlaceRequestsView()
         case .paymentAccounts: PaymentAccountsView()
         case .paymentMethods: PaymentMethodsView()
         case .social, .socialProfile: PulsoComingSoonView(title: "shell_dest_social", systemImage: "person.2")
