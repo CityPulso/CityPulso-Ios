@@ -18,7 +18,7 @@ struct EventNearbyFilters: Codable, Sendable, Hashable {
     var includeEnded: Bool
     var sort: EventNearbySort
 
-    init(datePreset: EventDatePreset = .any, customFrom: String = "", customTo: String = "", priceCap: EventPriceCap = .any, distance: NearbyDistance = .any, openSpotsOnly: Bool = false, includeEnded: Bool = false, sort: EventNearbySort = .distance) {
+    init(datePreset: EventDatePreset = .upcoming, customFrom: String = "", customTo: String = "", priceCap: EventPriceCap = .any, distance: NearbyDistance = .any, openSpotsOnly: Bool = false, includeEnded: Bool = false, sort: EventNearbySort = .distance) {
         self.datePreset = datePreset
         self.customFrom = customFrom
         self.customTo = customTo
@@ -31,7 +31,7 @@ struct EventNearbyFilters: Codable, Sendable, Hashable {
 
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: WireKey.self)
-        datePreset = try container.wire(EventDatePreset.self, "datePreset") ?? .any
+        datePreset = try container.wire(EventDatePreset.self, "datePreset") ?? .upcoming
         customFrom = try container.wire(String.self, "customFrom") ?? ""
         customTo = try container.wire(String.self, "customTo") ?? ""
         priceCap = try container.wire(EventPriceCap.self, "priceCap") ?? .any
@@ -43,7 +43,7 @@ struct EventNearbyFilters: Codable, Sendable, Hashable {
 
     func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: WireKey.self)
-        try container.wire(datePreset, "datePreset", default: .any)
+        try container.wire(datePreset, "datePreset", default: .upcoming)
         try container.wire(customFrom, "customFrom", default: "")
         try container.wire(customTo, "customTo", default: "")
         try container.wire(priceCap, "priceCap", default: .any)

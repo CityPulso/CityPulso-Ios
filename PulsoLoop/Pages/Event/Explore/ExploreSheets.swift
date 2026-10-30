@@ -8,20 +8,38 @@ import SwiftUI
  */
 struct ExploreFilterSheet: View {
     @Bindable var model: ExploreModel
+    @State private var group = ExploreFilterGroup.events
 
     var body: some View {
         NavigationStack {
             Form {
-                Section("explore_filter_sport") {
-                    ExploreSportChipRow(selected: model.sport, glass: false) { model.selectSport($0) }
-                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                    Toggle("explore_filter_sport_row", isOn: Binding(get: { model.sportRowVisible }, set: { model.setSportRowVisible($0) }))
+                Section {
+                    Picker(selection: $group) {
+                        ForEach(ExploreFilterGroup.allCases, id: \.self) { option in
+                            Text(verbatim: groupLabel(option)).tag(option)
+                        }
+                    } label: {
+                        EmptyView()
+                    }
+                    .pickerStyle(.segmented)
                 }
-                Section("explore_filter_search") {
-                    TextField("explore_filter_search_hint", text: $model.search)
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets())
+                // 一次只显示一组，免得活动和球馆的筛选混在一起看错。
+                switch group {
+                case .events:
+                    Section("explore_filter_sport") {
+                        ExploreSportChipRow(selected: model.sport, glass: false) { model.selectSport($0) }
+                            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                        Toggle("explore_filter_sport_row", isOn: Binding(get: { model.sportRowVisible }, set: { model.setSportRowVisible($0) }))
+                    }
+                    Section("explore_filter_search") {
+                        TextField("explore_filter_search_hint", text: $model.search)
+                    }
+                    eventSection
+                case .venues:
+                    venueSection
                 }
-                eventSection
-                venueSection
             }
             .navigationTitle("explore_filter_title")
             .navigationBarTitleDisplayMode(.inline)
@@ -36,6 +54,13 @@ struct ExploreFilterSheet: View {
             }
         }
         .presentationDetents([.medium, .large])
+    }
+
+    /** 切换上带着这一组启用的筛选数。 */
+    private func groupLabel(_ option: ExploreFilterGroup) -> String {
+        let count = option == .events ? (model.search.trimmingCharacters(in: .whitespaces).isEmpty ? 0 : 1) + model.eventFilters.mapActiveCount : model.venueFilters.mapActiveCount
+        let name = String(localized: option.labelResource)
+        return count > 0 ? localizedFormat("explore_filter_group_count", name, count) : name
     }
 
     private var eventFilters: Binding<EventNearbyFilters> {

@@ -18,3 +18,23 @@ enum ExploreClusterTab: CaseIterable, Codable, Sendable, Hashable {
     case events
     case tournaments
 }
+
+/** The filter set the map's filter sheet shows: events or venues, one at a time so they are not mixed up. */
+enum ExploreFilterGroup: CaseIterable, Codable, Sendable, Hashable {
+    case events
+    case venues
+
+    var labelKey: LocalizedStringKey {
+        switch self {
+        case .events: "explore_filter_group_events"
+        case .venues: "explore_filter_group_venues"
+        }
+    }
+
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .events: "explore_filter_group_events"
+        case .venues: "explore_filter_group_venues"
+        }
+    }
+}

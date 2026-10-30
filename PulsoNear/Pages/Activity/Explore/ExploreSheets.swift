@@ -8,20 +8,38 @@ import SwiftUI
  */
 struct ExploreFilterSheet: View {
     @Bindable var model: ExploreModel
+    @State private var group = ExploreFilterGroup.activities
 
     var body: some View {
         NavigationStack {
             Form {
-                Section("explore_filter_activity_type") {
-                    ExploreActivityTypeChipRow(selected: model.activityType, glass: false) { model.selectActivityType($0) }
-                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                    Toggle("explore_filter_activity_type_row", isOn: Binding(get: { model.activityTypeRowVisible }, set: { model.setActivityTypeRowVisible($0) }))
+                Section {
+                    Picker(selection: $group) {
+                        ForEach(ExploreFilterGroup.allCases, id: \.self) { option in
+                            Text(verbatim: groupLabel(option)).tag(option)
+                        }
+                    } label: {
+                        EmptyView()
+                    }
+                    .pickerStyle(.segmented)
                 }
-                Section("explore_filter_search") {
-                    TextField("explore_filter_search_hint", text: $model.search)
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets())
+                // 一次只显示一组，免得活动和门店的筛选混在一起看错。
+                switch group {
+                case .activities:
+                    Section("explore_filter_activity_type") {
+                        ExploreActivityTypeChipRow(selected: model.activityType, glass: false) { model.selectActivityType($0) }
+                            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                        Toggle("explore_filter_activity_type_row", isOn: Binding(get: { model.activityTypeRowVisible }, set: { model.setActivityTypeRowVisible($0) }))
+                    }
+                    Section("explore_filter_search") {
+                        TextField("explore_filter_search_hint", text: $model.search)
+                    }
+                    activitySection
+                case .venues:
+                    venueSection
                 }
-                activitySection
-                venueSection
             }
             .navigationTitle("explore_filter_title")
             .navigationBarTitleDisplayMode(.inline)
@@ -36,6 +54,13 @@ struct ExploreFilterSheet: View {
             }
         }
         .presentationDetents([.medium, .large])
+    }
+
+    /** 切换上带着这一组启用的筛选数。 */
+    private func groupLabel(_ option: ExploreFilterGroup) -> String {
+        let count = option == .activities ? (model.search.trimmingCharacters(in: .whitespaces).isEmpty ? 0 : 1) + model.activityFilters.mapActiveCount : model.venueFilters.mapActiveCount
+        let name = String(localized: option.labelResource)
+        return count > 0 ? localizedFormat("explore_filter_group_count", name, count) : name
     }
 
     private var activityFilters: Binding<ActivityNearbyFilters> {

@@ -4,9 +4,12 @@ import PulsoLinkCore
 /* Android `NearbyFilters.kt` 里类体的成员。 */
 
 extension EventNearbyFilters {
+    /** 「即将开始」的起点按几分钟取整。 */
+    static let upcomingStepMinutes = 5
+
     /** 和默认值不同的筛选项数；排序不算。 */
     var activeCount: Int {
-        [datePreset != .`any`, priceCap != .`any`, distance != .`any`, openSpotsOnly, includeEnded].filter { $0 }.count
+        [datePreset != .upcoming, priceCap != .`any`, distance != .`any`, openSpotsOnly, includeEnded].filter { $0 }.count
     }
 
     /** 去掉距离（地图不用距离）的 [activeCount]。 */
@@ -15,7 +18,8 @@ extension EventNearbyFilters {
     }
 
     /**
-     * `[from, to)` 两个 RFC3339 时刻；ANY 时都是 nil。按本地日历日取整，一天之内查询 key 不变；一周到周日结束。
+     * `[from, to)` 两个 RFC3339 时刻。「即将开始」从现在起、没有结束，向下取整到 [upcomingStepMinutes]，一段时间内查询 key 不变；
+     * 按天的选项按本地日历日取整；一周到周日结束。
      */
     func startsAtRange(today: Date = .now, calendar: Calendar = .current) -> (String?, String?) {
         func dayStart(_ date: Date) -> String {
@@ -23,8 +27,9 @@ extension EventNearbyFilters {
         }
         let start = calendar.startOfDay(for: today)
         switch datePreset {
-        case .`any`:
-            return (nil, nil)
+        case .upcoming:
+            let minute = Int(today.timeIntervalSince1970) / 60
+            return (DateTimeFormatters.rfc3339(Date(timeIntervalSince1970: TimeInterval((minute - minute % Self.upcomingStepMinutes) * 60))), nil)
         case .today:
             return (dayStart(start), dayStart(calendar.date(byAdding: .day, value: 1, to: start)!))
         case .thisWeek:
