@@ -13,11 +13,14 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
   - 等 Android 做完：设置 → 清除本地数据（iOS 对应 GRDB 表、Nuke 缓存、聊天壁纸、草稿、筛选、内存查询缓存）。
   - Near 资料页的「活动」数要等 Near 活动移植后才有，现在一直是 `-`。
 - 第 9 组写完：钱包、我的会员 / 会员购买记录 / 时长包详情、收款账户（Stripe Connect 开通）、付款方式、账单（我主持的 / 我的付款）。
-- 第 12 组进行中：课程详情、教练主页、我的课程、我的私教已写（页面路由还没接）；赛事详情 / 报名 / 我的赛事、教练面板没写。
 - 第 10 组开始：GRDB 本地库（`PulsoDatabase`、`PersistedQuery`）、社交 DTO / API 改成生成、`SocialRepository` / `SocialLocalStore` /
   `SocialQueryStore` / `SocialService` 全量移植（Linux 测试通过）。还差：好友请求红点（`InboxIndicatorStore`）、聊天、通知、社交页面。
 - 地图设置（样式、定位标记）写完。
-- 还差：深链 inbox；第 11 组论坛；Near 全部分叉；最后 `screenshots/` 截图。
+- **iPad（用户要求，2026-10-30）**：三个 App 改成通用（`TARGETED_DEVICE_FAMILY = 1,2`，iPad 四个方向、分屏 / 台前调度）。
+  页面用系统 List / Form / sheet，宽屏下自动加阅读边距、sheet 变表单弹窗；还要逐页看 iPad 截图，修固定宽度的地方，
+  CI 截图加一台 iPad。苹果没有折叠屏 iPhone，不需要「折叠屏」适配；iPad 的窗口任意缩放就覆盖了大小屏切换。
+- 第 12 组：课程详情、教练主页、我的课程、我的私教、赛事详情 / 报名（好友里选队友）/ 我的赛事都写完并接上路由；教练面板没写。
+- 还差：深链 inbox；第 10 组页面；第 11 组论坛；教练面板；Near 全部分叉；最后 `screenshots/` 截图（iPhone + iPad）。
 
 ## 状态
 

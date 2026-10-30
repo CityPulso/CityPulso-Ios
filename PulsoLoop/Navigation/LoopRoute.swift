@@ -39,6 +39,14 @@ enum LoopRoute: Hashable {
     /** 社交：好友 / 关注 / 粉丝，停在 [tab]。 */
     case social(tab: SocialConnectionsTab)
     case socialProfile(profileId: String)
+    /** 好友请求（收到的 / 发出的）。 */
+    case friendRequests
+    /** 找人加好友。 */
+    case addFriend
+    /** 黑名单。 */
+    case blocked
+    /** 聊天室。 */
+    case conversation(conversationId: String)
     /** 标记地图上缺的地点；从地图长按进来时预填那个位置。 */
     case markPlace(latitude: Double?, longitude: Double?)
     /** 把被拒的地点改了重新提交。 */
@@ -103,7 +111,11 @@ enum LoopRoute: Hashable {
         case let .building(buildingId): BuildingDetailView(buildingId: buildingId)
         case let .tournament(tournamentId): TournamentDetailView(tournamentId: tournamentId)
         case .myTournaments: MyTournamentsView()
-        case .social: PulsoComingSoonView(title: "shell_dest_social", systemImage: "person.2")
+        case let .social(tab): SocialOverviewView(initialTab: tab)
+        case .friendRequests: FriendRequestsView()
+        case .addFriend: PulsoComingSoonView(title: "shell_social_find_people", systemImage: "person.crop.circle.badge.magnifyingglass")
+        case .blocked: BlockedListView()
+        case .conversation: PulsoComingSoonView(title: "shell_dest_chat_hub", systemImage: "bubble.left.and.bubble.right")
         case .socialProfile: PulsoComingSoonView(title: "event_detail_participants_view_profile", systemImage: "person.crop.circle")
         case let .markPlace(latitude, longitude): MarkPlaceView(latitude: latitude, longitude: longitude)
         case let .resubmitPlace(requestId): MarkPlaceView(requestId: requestId)

@@ -196,7 +196,52 @@ extension Container {
                 query: self.socialQueryStore(),
                 bus: self.socialEventBus(),
                 local: self.socialLocalStore(),
-                sessionStore: self.authSessionStore()
+                sessionStore: self.authSessionStore(),
+                inbox: self.inboxIndicatorStore()
+            )
+        }.singleton
+    }
+
+    /* ------------------------------ Communication ------------------------------ */
+
+    public var communicationEventBus: Factory<CommunicationEventBus> {
+        self { CommunicationEventBus() }.singleton
+    }
+
+    public var communicationRepository: Factory<CommunicationRepository> {
+        self {
+            CommunicationRepository(api: CommunicationAPI(client: self.protectedClient()), realtimeAPI: RealtimeAPI(client: self.protectedClient()))
+        }.singleton
+    }
+
+    public var communicationLocalStore: Factory<CommunicationLocalStore> {
+        self { CommunicationLocalStore(database: self.pulsoDatabase()) }.singleton
+    }
+
+    public var communicationQueryStore: Factory<CommunicationQueryStore> {
+        self {
+            let store = CommunicationQueryStore(communication: self.communicationRepository(), local: self.communicationLocalStore(), bus: self.communicationEventBus())
+            self.sessionTerminator().register(store)
+            return store
+        }.singleton
+    }
+
+    public var inboxIndicatorStore: Factory<InboxIndicatorStore> {
+        self {
+            let store = InboxIndicatorStore(sessionStore: self.authSessionStore(), communicationQuery: self.communicationQueryStore(), socialQuery: self.socialQueryStore())
+            self.sessionTerminator().register(store)
+            return store
+        }.singleton
+    }
+
+    public var communicationService: Factory<CommunicationService> {
+        self {
+            CommunicationService(
+                communication: self.communicationRepository(),
+                query: self.communicationQueryStore(),
+                bus: self.communicationEventBus(),
+                inbox: self.inboxIndicatorStore(),
+                local: self.communicationLocalStore()
             )
         }.singleton
     }

@@ -45,7 +45,12 @@ public final class PersistedQuery<Key: Hashable & Sendable, Network: Sendable, O
                 for await _ in pulses {
                     await refresh(key, into: continuation)
                 }
-                local.cancel()
+                // 没有更多失效时继续推本地变化，直到订阅方取消。
+                await withTaskCancellationHandler {
+                    await local.value
+                } onCancel: {
+                    local.cancel()
+                }
                 continuation.finish()
             }
             continuation.onTermination = { _ in task.cancel() }

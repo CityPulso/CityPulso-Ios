@@ -56,7 +56,7 @@ extension LoadErrorKind {
         }
     }
 
-    fileprivate var systemImage: String {
+    var systemImage: String {
         switch self {
         case .notFound: "magnifyingglass"
         case .unauthorized: "lock"

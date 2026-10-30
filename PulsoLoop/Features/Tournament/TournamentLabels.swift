@@ -170,11 +170,6 @@ extension TournamentPrizeDistribution {
     }
 }
 
-extension TournamentSport {
-    /** 赛事运动背后的 Loop 运动（图标 + 名称），wire 值相同。 */
-    var loopSport: LoopSport { LoopSport.fromWire(rawValue) }
-}
-
 /** 队名，否则队员名字，否则短 id（Android `TournamentEntryLabel.displayName`，WEB `entryLabel`）。 */
 func tournamentEntryName(_ label: TournamentEntryLabel?, fallback: String) -> String {
     guard let label else { return fallback }

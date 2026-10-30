@@ -33,7 +33,10 @@ public final class PulsoDatabase: Sendable {
         }
     }
 
-    private static let tables = [RemoteKeyRecord.databaseTableName, SocialConnectionRecord.databaseTableName, FriendRequestRecord.databaseTableName]
+    private static let tables = [
+        RemoteKeyRecord.databaseTableName, SocialConnectionRecord.databaseTableName, FriendRequestRecord.databaseTableName,
+        ConversationRecord.databaseTableName, NotificationRecord.databaseTableName,
+    ]
 
     private static var migrator: DatabaseMigrator {
         var migrator = DatabaseMigrator()
@@ -64,6 +67,24 @@ public final class PulsoDatabase: Sendable {
                 t.primaryKey(["ownerProfileId", "listKey", "friendRequestId"])
             }
             try db.create(index: "friend_requests_order", on: FriendRequestRecord.databaseTableName, columns: ["ownerProfileId", "listKey", "position"])
+            try db.create(table: ConversationRecord.databaseTableName) { t in
+                t.column("ownerProfileId", .text).notNull()
+                t.column("conversationId", .text).notNull()
+                t.column("isGroup", .boolean).notNull()
+                t.column("position", .integer).notNull()
+                t.column("payloadJson", .text).notNull()
+                t.primaryKey(["ownerProfileId", "conversationId"])
+            }
+            try db.create(index: "conversations_order", on: ConversationRecord.databaseTableName, columns: ["ownerProfileId", "isGroup", "position"])
+            try db.create(table: NotificationRecord.databaseTableName) { t in
+                t.column("ownerProfileId", .text).notNull()
+                t.column("notificationId", .text).notNull()
+                t.column("position", .integer).notNull()
+                t.column("readAt", .text)
+                t.column("payloadJson", .text).notNull()
+                t.primaryKey(["ownerProfileId", "notificationId"])
+            }
+            try db.create(index: "notifications_order", on: NotificationRecord.databaseTableName, columns: ["ownerProfileId", "position"])
         }
         return migrator
     }

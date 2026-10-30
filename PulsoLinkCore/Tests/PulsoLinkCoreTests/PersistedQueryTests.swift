@@ -70,3 +70,37 @@ struct PersistedQueryTests {
         #expect(await pages.calls == 2)
     }
 }
+
+@MainActor
+struct MediatedListTests {
+    @Test func pagesFillTheLocalTableAndTheListReadsIt() async throws {
+        let local = SocialLocalStore(database: try .inMemory())
+        let all = (0 ..< 5).map { friend("p\($0)") }
+        let list = MediatedList<FriendItem>(pageSize: 2, reader: { local.observeConnections("me", .friends) }) { offset, limit in
+            let items = Array(all[offset ..< min(offset + limit, all.count)])
+            let page = ListWithTotal(items: items, total: all.count)
+            if offset == 0 {
+                try await local.replaceConnections("me", .friends, page)
+            } else {
+                try await local.appendConnections("me", .friends, items, start: offset, total: all.count)
+            }
+            return nextOffset(after: offset, count: items.count, total: all.count)
+        }
+        let observing = Task { await list.observe() }
+        defer { observing.cancel() }
+        try await waitUntil { list.items.count == 2 }
+        list.loadMore()
+        try await waitUntil { list.items.count == 4 }
+        list.loadMore()
+        try await waitUntil { list.items.count == 5 && list.endReached }
+        #expect(list.items.map(\.friendProfileId) == all.map(\.friendProfileId))
+    }
+
+    private func waitUntil(_ condition: () -> Bool) async throws {
+        for _ in 0 ..< 200 where !condition() {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        #expect(condition())
+    }
+}
+

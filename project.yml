@@ -25,7 +25,8 @@ settings:
     SWIFT_VERSION: "6.0"
     SWIFT_STRICT_CONCURRENCY: complete
     CODE_SIGN_STYLE: Automatic
-    TARGETED_DEVICE_FAMILY: "1"
+    # iPhone + iPad（iPad 上可旋转、可分屏 / 台前调度缩放窗口）。
+    TARGETED_DEVICE_FAMILY: "1,2"
     ENABLE_USER_SCRIPT_SANDBOXING: "YES"
     LOCALIZATION_PREFERS_STRING_CATALOGS: "YES"
 
@@ -74,6 +75,11 @@ targetTemplates:
         NSPhotoLibraryUsageDescription: 用于聊天从相册选择图片发送。
         NSMicrophoneUsageDescription: 用于聊天发送语音。
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
         ITSAppUsesNonExemptEncryption: false
         NSAppTransportSecurity:
           # Debug 连局域网里的 dev Traefik（http://<ip>:10101）；线上是 https，不受影响。

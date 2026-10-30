@@ -22,38 +22,43 @@ public struct SocialService: Sendable {
     private let bus: SocialEventBus
     private let local: SocialLocalStore
     private let sessionStore: AuthSessionStore
+    private let inbox: InboxIndicatorStore
 
-    public init(social: SocialRepository, query: SocialQueryStore, bus: SocialEventBus, local: SocialLocalStore, sessionStore: AuthSessionStore) {
+    public init(social: SocialRepository, query: SocialQueryStore, bus: SocialEventBus, local: SocialLocalStore, sessionStore: AuthSessionStore, inbox: InboxIndicatorStore) {
         self.social = social
         self.query = query
         self.bus = bus
         self.local = local
         self.sessionStore = sessionStore
+        self.inbox = inbox
     }
 
     /* ------------------------------ paged relation tabs ------------------------------ */
 
     @MainActor
-    public func pageFriends(_ profileId: String, _ filter: SocialRelationFilter = SocialRelationFilter()) -> PagedList<FriendItem, Int> {
+    public func pageFriends(_ profileId: String, _ filter: SocialRelationFilter = SocialRelationFilter()) -> any PagedRows<FriendItem> {
         pager(profileId, filter, .friends, .invalidateFriends) { try await social.listFriends($0) }
     }
 
     @MainActor
-    public func pageFollowing(_ profileId: String, _ filter: SocialRelationFilter = SocialRelationFilter()) -> PagedList<FollowingItem, Int> {
+    public func pageFollowing(_ profileId: String, _ filter: SocialRelationFilter = SocialRelationFilter()) -> any PagedRows<FollowingItem> {
         pager(profileId, filter, .following, .invalidateFollowing) { try await social.listFollowing($0) }
     }
 
     @MainActor
-    public func pageFollowers(_ profileId: String, _ filter: SocialRelationFilter = SocialRelationFilter()) -> PagedList<FollowerItem, Int> {
+    public func pageFollowers(_ profileId: String, _ filter: SocialRelationFilter = SocialRelationFilter()) -> any PagedRows<FollowerItem> {
         pager(profileId, filter, .followers, .invalidateFollowers) { try await social.listFollowers($0) }
     }
 
     @MainActor
-    public func pageBlocked(_ profileId: String, _ filter: SocialRelationFilter = SocialRelationFilter()) -> PagedList<BlockedItem, Int> {
+    public func pageBlocked(_ profileId: String, _ filter: SocialRelationFilter = SocialRelationFilter()) -> any PagedRows<BlockedItem> {
         pager(profileId, filter, .blocked, .invalidateBlocked) { try await social.listBlocked($0) }
     }
 
-    /** 默认视图（无关键字、最新在前）每页都写回本地库；搜索或换排序只走网络。对应的失效会让列表重拉。 */
+    /**
+     * 默认视图（无关键字、最新在前）以本地库为准，旧行留着显示、网络刷新它；搜索或换排序只走网络。
+     * 对应的失效会让列表重拉。
+     */
     @MainActor
     private func pager<T: Codable & Sendable>(
         _ profileId: String,
@@ -61,23 +66,29 @@ public struct SocialService: Sendable {
         _ spec: SocialConnectionSpec<T>,
         _ invalidation: SocialEvent,
         _ fetch: @escaping @Sendable (SocialPaginationRequest) async throws -> ListWithTotal<T>
-    ) -> PagedList<T, Int> {
+    ) -> any PagedRows<T> {
         let bus = bus
-        let local = local
-        let keyword = filter.keyword.trimmingCharacters(in: .whitespaces)
-        let sort = filter.sort
-        let persist = filter.isDefault
-        return .offset(pageSize: Self.relationPageSize, invalidates: { bus.signals { $0 == invalidation } }) { offset, limit in
-            guard persist else {
-                return try await fetch(SocialPaginationRequest(limit: limit, offset: offset, keyword: keyword, sort: sort))
+        let invalidates: @Sendable () -> AsyncStream<Void> = { bus.signals { $0 == invalidation } }
+        guard filter.isDefault else {
+            let keyword = filter.keyword.trimmingCharacters(in: .whitespaces)
+            let sort = filter.sort
+            return PagedList<T, Int>.offset(pageSize: Self.relationPageSize, invalidates: invalidates) { offset, limit in
+                try await fetch(SocialPaginationRequest(limit: limit, offset: offset, keyword: keyword, sort: sort))
             }
+        }
+        let local = local
+        return MediatedList<T>(
+            pageSize: Self.relationPageSize,
+            invalidates: invalidates,
+            reader: { local.observeConnections(profileId, spec) }
+        ) { offset, limit in
             let page = try await fetch(SocialPaginationRequest(limit: limit, offset: offset))
             if offset == 0 {
                 try await local.replaceConnections(profileId, spec, page)
             } else {
                 try await local.appendConnections(profileId, spec, page.items, start: offset, total: page.total)
             }
-            return page
+            return nextOffset(after: offset, count: page.items.count, total: page.total)
         }
     }
 
@@ -171,6 +182,7 @@ public struct SocialService: Sendable {
         let response = try await social.sendFriendRequest(body)
         bus.emit(.invalidateFriendRequests(.outgoing))
         bus.emit(.invalidateRelationStatus)
+        try? await inbox.recheckFriendRequestIncoming()
         return response
     }
 
@@ -178,6 +190,7 @@ public struct SocialService: Sendable {
         try await social.acceptFriendRequest(friendRequestId)
         try await local.removeRequest(owner, friendRequestId)
         bus.invalidateFriendRequestAccepted()
+        try? await inbox.recheckFriendRequestIncoming()
     }
 
     public func rejectFriendRequest(_ friendRequestId: String) async throws {
@@ -185,6 +198,7 @@ public struct SocialService: Sendable {
         try await local.removeRequest(owner, friendRequestId)
         bus.emit(.invalidateFriendRequests(.incoming))
         bus.emit(.invalidateRelationStatus)
+        try? await inbox.recheckFriendRequestIncoming()
     }
 
     public func cancelFriendRequest(_ friendRequestId: String) async throws {
