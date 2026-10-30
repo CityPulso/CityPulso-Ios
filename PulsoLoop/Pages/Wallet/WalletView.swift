@@ -74,7 +74,8 @@ struct WalletView: View {
         .navigationTitle("shell_dest_wallet")
         .refreshable {
             switch model.tab {
-            case .memberships: await (model.membershipsTab == .cards ? model.memberships : model.waiting).refresh()
+            case .memberships:
+                if model.membershipsTab == .cards { await model.memberships.refresh() } else { await model.waiting.refresh() }
             case .bundles: await model.bundles.refresh()
             }
         }

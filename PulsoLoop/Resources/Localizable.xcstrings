@@ -46654,25 +46654,25 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Shown on your profile and in other people’s connection lists."
+            "value": "Pick up to 3. They show on your profile and in other people’s connection lists."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Affichés sur votre profil et dans les listes de relations des autres."
+            "value": "Jusqu’à 3. Ils s’affichent sur votre profil et dans les listes de relations des autres."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "会显示在你的资料页和别人的社交列表里"
+            "value": "最多选 3 个，会显示在你的资料页和别人的社交列表里"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "會顯示在你的資料頁和別人的社交列表裏"
+            "value": "最多選 3 個，會顯示在你的資料頁和別人的社交列表裏"
           }
         }
       }

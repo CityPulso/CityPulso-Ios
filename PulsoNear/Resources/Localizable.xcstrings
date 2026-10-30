@@ -37920,6 +37920,35 @@
         }
       }
     },
+    "profile_favorite_activities_empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "None yet"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune pour l’instant"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "还没选"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "還沒選"
+          }
+        }
+      }
+    },
     "profile_favorite_activities_hint": {
       "extractionState": "manual",
       "localizations": {
@@ -37932,7 +37961,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Jusqu’à 3. Ils s’affichent sur votre profil et dans les listes de relations des autres."
+            "value": "Jusqu’à 3. Elles s’affichent sur votre profil et dans les listes de relations des autres."
           }
         },
         "zh-Hans": {
@@ -38106,7 +38135,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Activités préférés"
+            "value": "Activités préférées"
           }
         },
         "zh-Hans": {

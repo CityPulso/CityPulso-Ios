@@ -63,6 +63,10 @@ enum LoopRoute: Hashable {
     /** 我的订场列表（底栏没有放「我的订场」时从这里进）。 */
     case courtBookings
     case paymentMethods
+    /** 地图设置：样式、定位标记。 */
+    case mapSettings
+    case mapStyle
+    case locationMarker
     /** 选附近搜索的中心点。 */
     case locationPick
     /** 还没移植的页面：[title] 是文案 key。 */
@@ -97,16 +101,19 @@ enum LoopRoute: Hashable {
         case .course: PulsoComingSoonView(title: "venue_programs_courses", systemImage: "book")
         case .coach: PulsoComingSoonView(title: "venue_programs_coaches", systemImage: "figure.strengthtraining.traditional")
         case .coachPanel: PulsoComingSoonView(title: "venue_programs_coach_panel", systemImage: "rectangle.stack")
-        case .myMembership: PulsoComingSoonView(title: "venue_membership_title", systemImage: "person.text.rectangle")
+        case let .myMembership(membershipId): MyMembershipView(membershipId: membershipId)
         case let .wallet(tab): WalletView(tab: tab)
-        case .myMembershipPurchase: PulsoComingSoonView(title: "my_memberships_purchase_title", systemImage: "hourglass")
-        case .myBundle: PulsoComingSoonView(title: "wallet_tab_bundles", systemImage: "ticket")
-        case .paymentAccounts: PulsoComingSoonView(title: "wallet_payment_accounts", systemImage: "building.columns")
+        case let .myMembershipPurchase(purchaseId): MyMembershipPurchaseView(purchaseId: purchaseId)
+        case let .myBundle(bundleId): MyBundleView(bundleId: bundleId)
+        case .paymentAccounts: PaymentAccountsView()
         case let .checklist(sport, eventId): ChecklistView(sport: sport, eventId: eventId)
         case let .courtBooking(sport, bookingId): CourtBookingView(sport: sport, bookingId: bookingId)
         case .courtBookings: CourtBookingsView()
         case .paymentMethods: PaymentMethodsView()
         case .locationPick: LocationPickView()
+        case .mapSettings: MapSettingsView()
+        case .mapStyle: MapStyleView()
+        case .locationMarker: LocationMarkerView()
         case let .comingSoon(title, systemImage):
             PulsoComingSoonView(title: LocalizedStringKey(title), systemImage: systemImage)
         }

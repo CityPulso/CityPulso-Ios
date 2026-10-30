@@ -66,7 +66,7 @@ struct SettingsView: View {
             }
 
             Section("settings_section_preferences") {
-                NavigationLink(value: LoopRoute.comingSoon(title: "settings_map_defaults", systemImage: "map")) {
+                NavigationLink(value: LoopRoute.mapSettings) {
                     Label("settings_map_defaults", systemImage: "map")
                 }
                 NavigationLink(value: LoopRoute.eventPreferences) {

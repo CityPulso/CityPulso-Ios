@@ -150,7 +150,8 @@ extension Container {
             let service = PaymentsService(
                 api: PaymentsAPI(client: self.protectedClient()),
                 publicAPI: PaymentsPublicAPI(client: self.publicClient()),
-                bus: self.paymentsEventBus()
+                bus: self.paymentsEventBus(),
+                location: self.locationService()
             )
             self.sessionTerminator().register(service)
             return service
