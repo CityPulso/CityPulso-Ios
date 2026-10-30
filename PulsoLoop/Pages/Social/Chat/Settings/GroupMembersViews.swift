@@ -77,8 +77,10 @@ final class GroupMembersModel {
     }
 
     func observe() async {
+        // 先订阅再拉：拉的过程中来的失效不会丢。
+        let pulses = bus.signals(where: { $0 == .invalidateGroupMembers })
         await refresh()
-        for await _ in bus.signals(where: { $0 == .invalidateGroupMembers }) {
+        for await _ in pulses {
             await refresh()
         }
     }

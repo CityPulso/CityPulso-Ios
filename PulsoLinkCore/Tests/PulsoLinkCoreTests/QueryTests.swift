@@ -114,11 +114,17 @@ struct MemoryQueryTests {
 
     @Test func updateAllRewritesCacheAndPushes() async throws {
         let query = MemoryQuery<String, Int> { _ in 1 }
-        let stream = query.stream("a", refresh: false)
-        let collector = Task { await take(3, from: stream) }
-        try await Task.sleep(for: .milliseconds(20))
+        var iterator = query.stream("a", refresh: false).makeAsyncIterator()
+        var seen: [Int] = []
+        // 先等到网络那一份写进缓存，再改写；只睡一会儿的话，机器忙时 updateAll 会落空。
+        while seen.isEmpty, let response = await iterator.next() {
+            if let value = value(response) { seen.append(value) }
+        }
         await query.updateAll { $0 + 10 }
-        #expect(await collector.value.compactMap(value) == [1, 11])
+        while seen.count < 2, let response = await iterator.next() {
+            if let value = value(response) { seen.append(value) }
+        }
+        #expect(seen == [1, 11])
         #expect(try await query.get("a") == 11)
     }
 
@@ -192,7 +198,6 @@ struct PagedListTests {
         }
         let observing = Task { await pager.observe() }
         while pager.items.isEmpty { await Task.yield() }
-        try await Task.sleep(for: .milliseconds(20))
         bus.emit(())
         while pager.items.first?.id != 2 { await Task.yield() }
         observing.cancel()

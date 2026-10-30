@@ -60,8 +60,10 @@ public final class PagedList<Item: Sendable, Cursor: Sendable> {
 
     /** 加载第一页，之后每次失效都从头重拉；页面消失时随 `.task` 取消。 */
     public func observe() async {
+        // 先订阅再拉第一页：拉的过程中来的失效不会丢。
+        let pulses = invalidates()
         if items.isEmpty { await refresh() }
-        for await _ in invalidates() {
+        for await _ in pulses {
             await refresh()
         }
     }

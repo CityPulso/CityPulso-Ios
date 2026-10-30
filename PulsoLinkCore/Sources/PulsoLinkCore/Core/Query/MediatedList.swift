@@ -79,9 +79,11 @@ public final class MediatedList<Item: Sendable>: PagedRows {
                 if value != nil, !items.isEmpty { isLoading = false }
             }
         }
+        // 先订阅再拉第一页：拉的过程中来的失效不会丢。
+        let pulses = invalidates()
         await withTaskCancellationHandler {
             await refresh()
-            for await _ in invalidates() {
+            for await _ in pulses {
                 await refresh()
             }
             // 没有更多失效时也一直读本地行，直到页面消失（调用方被取消）。
