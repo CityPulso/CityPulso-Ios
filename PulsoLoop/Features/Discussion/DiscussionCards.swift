@@ -286,9 +286,6 @@ struct PostCardView<Post: PostCardFields>: View {
             if layout == .row { photoRow }
             if !post.topics.isEmpty { TopicChipRow(topics: post.topics, onOpen: onOpenTopic) }
             if let repost = post.repostOf { RepostQuote(repost: repost) }
-            if post.links.contains(where: { $0.type == .event }) {
-                Label("discussion_linked_event", systemImage: "calendar").font(.caption).foregroundStyle(.tint)
-            }
             if let reason, !reason.isEmpty { Text(verbatim: reason).font(.caption).foregroundStyle(.red) }
             PostActionBar(
                 likedByMe: post.likedByMe, likeCount: post.likeCount, commentCount: post.commentCount, repostCount: post.repostCount,
