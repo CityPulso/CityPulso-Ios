@@ -52,6 +52,59 @@ final class ScreenshotTests: XCTestCase {
         try await capture(NavigationStack { ProfileIdentitiesView() }, name: "loop-identities")
     }
 
+    /** 每个底栏页面（没有后端时显示加载 / 空状态 / 出错，看布局用）。 */
+    func testShellPages() async throws {
+        Container.shared.profileStore().set(.community(try sampleAccount()))
+        let session = PulsoSessionModel()
+        for destination in ShellDestination.allCases where Container.shared.pulsoCoreConfig().shellDestinations.contains(destination) {
+            try await capture(NavigationStack { LoopShellPages.page(for: destination) }.environment(session), name: "loop-tab-\(destination.rawValue.lowercased())")
+        }
+    }
+
+    /** 不需要 id 的二级页面。 */
+    func testRoutes() async throws {
+        Container.shared.profileStore().set(.community(try sampleAccount()))
+        let session = PulsoSessionModel()
+        let routes: [(String, LoopRoute)] = [
+            ("theme", LoopRoute.theme),
+            ("appIcon", LoopRoute.appIcon),
+            ("navEdit", LoopRoute.navEdit),
+            ("eventPreferences", LoopRoute.eventPreferences),
+            ("storage", LoopRoute.storage),
+            ("privacy", LoopRoute.privacy),
+            ("permissions", LoopRoute.permissions),
+            ("accountSecurity", LoopRoute.accountSecurity),
+            ("emails", LoopRoute.emails),
+            ("changePassword", LoopRoute.changePassword),
+            ("profileEdit", LoopRoute.profileEdit),
+            ("backgrounds", LoopRoute.backgrounds),
+            ("identities", LoopRoute.identities),
+            ("tournaments", LoopRoute.tournaments),
+            ("myTournaments", LoopRoute.myTournaments),
+            ("friendRequests", LoopRoute.friendRequests),
+            ("addFriend", LoopRoute.addFriend),
+            ("blocked", LoopRoute.blocked),
+            ("forumSearch", LoopRoute.forumSearch),
+            ("forumCreate", LoopRoute.forumCreate),
+            ("myForums", LoopRoute.myForums),
+            ("likedPosts", LoopRoute.likedPosts),
+            ("notifications", LoopRoute.notifications),
+            ("placeRequests", LoopRoute.placeRequests),
+            ("myCourses", LoopRoute.myCourses),
+            ("coachPanel", LoopRoute.coachPanel),
+            ("myCoaching", LoopRoute.myCoaching),
+            ("paymentAccounts", LoopRoute.paymentAccounts),
+            ("paymentMethods", LoopRoute.paymentMethods),
+            ("mapSettings", LoopRoute.mapSettings),
+            ("mapStyle", LoopRoute.mapStyle),
+            ("locationMarker", LoopRoute.locationMarker),
+            ("locationPick", LoopRoute.locationPick),
+        ]
+        for (name, route) in routes {
+            try await capture(NavigationStack { route.page.loopRoutes() }.environment(session), name: "loop-page-\(name)")
+        }
+    }
+
     /** 资料页用的示例账号（不连网；背景图地址取不到时显示占位）。 */
     private func sampleAccount() throws -> FullAccountInformationWithCommunityProfile {
         let json = #"""

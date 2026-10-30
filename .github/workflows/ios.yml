@@ -80,7 +80,7 @@ jobs:
     name: Shell screenshots
     if: github.event_name == 'workflow_dispatch' && inputs.screenshots
     runs-on: macos-26
-    timeout-minutes: 40
+    timeout-minutes: 60
     # 手机和平板各截一套。
     strategy:
       fail-fast: false
@@ -112,12 +112,17 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "screenshots/${{ matrix.device }}"
-          TEST_RUNNER_SCREENSHOT_DIR="$PWD/screenshots/${{ matrix.device }}" xcodebuild test \
-            -project CityPulso.xcodeproj \
-            -scheme PulsoLoop \
-            -destination "id=$SIMULATOR_UDID" \
-            -derivedDataPath build \
-            CODE_SIGNING_ALLOWED=NO
+          # 两个 App 各跑一遍；一个崩了不影响另一个的截图。
+          status=0
+          for scheme in PulsoLoop PulsoNear; do
+            TEST_RUNNER_SCREENSHOT_DIR="$PWD/screenshots/${{ matrix.device }}" xcodebuild test \
+              -project CityPulso.xcodeproj \
+              -scheme "$scheme" \
+              -destination "id=$SIMULATOR_UDID" \
+              -derivedDataPath build \
+              CODE_SIGNING_ALLOWED=NO || status=1
+          done
+          exit $status
       - uses: actions/upload-artifact@v4
         if: always()
         with:

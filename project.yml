@@ -155,6 +155,8 @@ targets:
           - CFBundleURLSchemes: [youneary]
         # 聊天里跃圈的卡片先试着在跃圈里打开。
         LSApplicationQueriesSchemes: [youloopy]
+    scheme:
+      testTargets: [PulsoNearTests]
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.citypulso.pulsonear
@@ -181,3 +183,16 @@ targets:
       base:
         GENERATE_INFOPLIST_FILE: "YES"
         PRODUCT_BUNDLE_IDENTIFIER: com.citypulso.pulsoloop.tests
+
+  # 宿主在 PulsoNear 里跑的截图测试（同 PulsoLoopTests）。
+  PulsoNearTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: PulsoNear/Tests
+    dependencies:
+      - target: PulsoNear
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: "YES"
+        PRODUCT_BUNDLE_IDENTIFIER: com.citypulso.pulsonear.tests
