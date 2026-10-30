@@ -408,12 +408,6 @@ private struct ExitSheet: View {
 
 /* ------------------------------ 参与者 ------------------------------ */
 
-private enum ParticipantsTab: CaseIterable, Hashable {
-    case all
-    case joined
-    case waitlist
-}
-
 /** 参与者：全部 / 已报名 / 候补三个分段，每人一行带「查看主页」，滚到底加载更多。 */
 private struct ParticipantsSheet: View {
     let model: EventDetailModel

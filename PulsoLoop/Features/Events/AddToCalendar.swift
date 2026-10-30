@@ -51,7 +51,7 @@ struct CalendarEventEditor: UIViewControllerRepresentable {
     func updateUIViewController(_: EKEventEditViewController, context _: Context) {}
 
     @MainActor
-    final class Coordinator: NSObject, EKEventEditViewDelegate {
+    final class Coordinator: NSObject, @preconcurrency EKEventEditViewDelegate {
         let onDone: () -> Void
 
         init(onDone: @escaping () -> Void) {

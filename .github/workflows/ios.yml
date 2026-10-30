@@ -1,9 +1,9 @@
 name: iOS
 
-# macOS 分钟按 10 倍计费，所以：
-# - core 测试在 Linux 上跑（每次 push）；
-# - 三个 App 在一个 macOS 任务里依次编译、共用依赖，只在手动触发时跑；
-# - 截图也只在手动触发并勾选时跑。
+# 仓库公开，标准 runner 不计分钟：
+# - core 测试在 Linux 上跑；
+# - 三个 App 在一个 macOS 任务里依次编译、共用依赖，每次 push 都跑；
+# - 截图只在手动触发并勾选时跑。
 on:
   push:
     branches: [main]
@@ -35,7 +35,6 @@ jobs:
 
   build:
     name: Build apps
-    if: github.event_name == 'workflow_dispatch'
     runs-on: macos-26
     timeout-minutes: 60
     steps:

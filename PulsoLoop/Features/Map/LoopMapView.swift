@@ -120,7 +120,7 @@ struct LoopMapView: UIViewRepresentable {
     }
 
     @MainActor
-    final class Coordinator: NSObject, MLNMapViewDelegate {
+    final class Coordinator: NSObject, @preconcurrency MLNMapViewDelegate {
         var parent: LoopMapView?
         var styleURL: URL?
         var styleReady = false

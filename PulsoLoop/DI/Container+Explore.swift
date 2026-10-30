@@ -76,6 +76,7 @@ extension Container {
         self {
             let client = self.protectedClient()
             let store = VenueQueryStore(
+                repository: self.venueRepository(),
                 badminton: BadmintonEntryAPI(client: client),
                 tennis: TennisEntryAPI(client: client),
                 pickleball: PickleballEntryAPI(client: client),
@@ -84,6 +85,26 @@ extension Container {
             self.sessionTerminator().register(store)
             return store
         }.singleton
+    }
+
+    var venueRepository: Factory<VenueRepository> {
+        self { VenueRepository(publicAPI: VenuePublicAPI(client: self.publicClient()), api: VenueAPI(client: self.protectedClient())) }.singleton
+    }
+
+    var venueService: Factory<VenueService> {
+        self { VenueService(repository: self.venueRepository(), query: self.venueQueryStore(), eventBus: self.venueEventBus(), session: self.authSessionStore()) }.singleton
+    }
+
+    var tournamentService: Factory<TournamentService> {
+        self { TournamentService(repository: TournamentRepository(api: TournamentAPI(client: self.protectedClient())), eventBus: self.venueEventBus()) }.singleton
+    }
+
+    var venueNearbyFilterStore: Factory<VenueNearbyFilterStore> {
+        self { VenueNearbyFilterStore() }.singleton
+    }
+
+    var exploreLayerStore: Factory<ExploreLayerStore> {
+        self { ExploreLayerStore() }.singleton
     }
 
     var eventCreateDraftStore: Factory<EventCreateDraftStore> {
