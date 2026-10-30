@@ -98,8 +98,9 @@ struct ForumCreateView: View {
             .listRowBackground(Color.clear)
             Section {
                 HStack(spacing: 12) {
+                    let avatarURL = model.imageURL(model.pictures.avatar?.imageId)
                     PhotosPicker(selection: $avatarItem, matching: .images) {
-                        ForumAvatarThumb(pictures: model.pictures, imageURL: model.imageURL)
+                        ForumAvatarThumb(pictures: model.pictures, remoteURL: avatarURL)
                     }
                     .buttonStyle(.plain)
                     .disabled(model.submitting)
@@ -201,7 +202,8 @@ struct ForumCreateView: View {
 
     /** 封面（第一张背景）铺满顶部，右下角相机；还没有时请作者加一张。 */
     private var cover: some View {
-        PhotosPicker(selection: $coverItems, maxSelectionCount: max(1, forumBackgroundsMax - model.pictures.backgrounds.count), matching: .images) {
+        let coverURL = model.imageURL(model.pictures.backgrounds.first?.imageId)
+        return PhotosPicker(selection: $coverItems, maxSelectionCount: max(1, forumBackgroundsMax - model.pictures.backgrounds.count), matching: .images) {
             ZStack(alignment: .bottomTrailing) {
                 ZStack {
                     Rectangle().fill(.fill.tertiary)
@@ -209,7 +211,7 @@ struct ForumCreateView: View {
                         if let data = model.pictures.localData[first.localId], let image = UIImage(data: data) {
                             Image(uiImage: image).resizable().scaledToFill()
                         } else {
-                            PulsoRemoteImage(url: model.imageURL(first.imageId))
+                            PulsoRemoteImage(url: coverURL)
                         }
                         if first.status == .uploading { ProgressView() }
                     } else {

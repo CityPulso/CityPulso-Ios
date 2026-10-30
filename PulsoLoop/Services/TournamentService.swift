@@ -5,6 +5,8 @@ struct TournamentService: Sendable {
     let repository: TournamentRepository
     let eventBus: VenueEventBus
 
+    private static let myEntriesInTournament = 20
+
     func tournament(_ id: String) async throws -> TournamentDetail {
         try await repository.tournament(id)
     }
@@ -47,6 +49,11 @@ struct TournamentService: Sendable {
         return .offset(invalidates: { eventBus.signals { _ in true } }) { offset, limit in
             try await repository.myEntries(offset: offset, limit: limit)
         }
+    }
+
+    /** 我在这场赛事里的报名（任何组别）；赛事页底部栏和组别卡用。 */
+    func myEntriesIn(_ tournamentId: String) async throws -> [TournamentEntry] {
+        try await repository.myEntries(offset: 0, limit: Self.myEntriesInTournament, tournamentId: tournamentId).items
     }
 
     func answer(entryId: String, accept: Bool) async throws {

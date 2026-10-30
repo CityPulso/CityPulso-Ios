@@ -65468,7 +65468,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The bracket is not out yet"
+            "value": "The draw isn’t out yet"
           }
         },
         "fr": {
@@ -65480,13 +65480,42 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "对阵还没有排出"
+            "value": "对阵还没公布"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "對陣還沒有排出"
+            "value": "對陣還沒公佈"
+          }
+        }
+      }
+    },
+    "tournament_detail_no_bracket_body": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The host makes the draw after entries close. Matches and scores will show up here"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’organisateur fait le tirage après la clôture des inscriptions. Les matchs et les scores s’afficheront ici"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "报名截止后主办方会抽签，对阵和比分会显示在这里"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "報名截止後主辦方會抽籤，對陣和比分會顯示在這裏"
           }
         }
       }
@@ -67095,35 +67124,6 @@
         }
       }
     },
-    "tournament_list_subtitle": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Find a tournament near you, pick your division and sign up with your partners"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Trouvez un tournoi près de chez vous, choisissez votre catégorie et inscrivez-vous avec vos partenaires"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "找到身边的赛事，选择项目，和搭档一起报名"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "找到身邊的賽事，選擇項目，和搭檔一起報名"
-          }
-        }
-      }
-    },
     "tournament_match_canceled": {
       "extractionState": "manual",
       "localizations": {
@@ -67787,35 +67787,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "已接受 %1$lld/%2$lld：%3$@"
-          }
-        }
-      }
-    },
-    "tournament_mine_subtitle": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your entries, team invitations and the prizes you won"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vos inscriptions, invitations d’équipe et prix gagnés"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "你的报名、队伍邀请和获得的奖品"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "你的報名、隊伍邀請和獲得的獎品"
           }
         }
       }

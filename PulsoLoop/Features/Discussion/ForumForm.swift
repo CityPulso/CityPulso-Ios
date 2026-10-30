@@ -137,7 +137,7 @@ struct ForumPicturesEditor: View {
     var body: some View {
         Section {
             HStack(spacing: 12) {
-                ForumAvatarThumb(pictures: pictures, imageURL: imageURL, size: 72)
+                ForumAvatarThumb(pictures: pictures, remoteURL: imageURL(pictures.avatar?.imageId), size: 72)
                 VStack(alignment: .leading, spacing: 4) {
                     PhotosPicker(selection: $avatarItem, matching: .images) {
                         Text((pictures.avatar == nil ? "discussion_forum_avatar_pick" : "discussion_forum_avatar_change") as LocalizedStringKey)
@@ -174,7 +174,8 @@ struct ForumPicturesEditor: View {
 /** 论坛头像的缩略图：本地选中的先显示本地图，上传中盖一个转圈。 */
 struct ForumAvatarThumb: View {
     let pictures: ForumPictures
-    let imageURL: (String?) -> URL?
+    /** 已上传头像的地址（调用方算好；PhotosPicker 的 label 闭包里不能传 main actor 方法）。 */
+    let remoteURL: URL?
     var size: CGFloat = 64
 
     var body: some View {
@@ -184,7 +185,7 @@ struct ForumAvatarThumb: View {
                 if let data = pictures.localData[avatar.localId], let image = UIImage(data: data) {
                     Image(uiImage: image).resizable().scaledToFill()
                 } else {
-                    PulsoRemoteImage(url: imageURL(avatar.imageId))
+                    PulsoRemoteImage(url: remoteURL)
                 }
                 if avatar.status == .uploading { ProgressView() }
             } else {

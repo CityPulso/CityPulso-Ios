@@ -144,6 +144,8 @@ final class ChatFavoritePickerModel {
     var tab = ChatFavoriteTab.buildings
     let buildings: PagedList<BuildingFavoriteItem, Int>
     let venues: PagedList<VenueFavoriteItem, Int>
+    let posts: PagedList<PostCard, Int>
+    let forums: PagedList<ForumFavorite, Int>
 
     @ObservationIgnored @Injected(\.chatShareDraftStore) private var drafts
     @ObservationIgnored @Injected(\.pulsoCoreConfig) private var config
@@ -153,6 +155,14 @@ final class ChatFavoritePickerModel {
         let favorites = Container.shared.favoriteService()
         buildings = favorites.pageBuildings(BuildingFavoritesFilter(buildingTypes: BuildingType.loop.map(\.rawValue)))
         venues = favorites.pageVenues(VenueFavoritesFilter())
+        let discussion = Container.shared.discussionService()
+        posts = discussion.pageBookmarkedPosts()
+        forums = discussion.pageFavoriteForums(nil)
+    }
+
+    /** 帖子的标题；没有标题的取正文开头。 */
+    static func postTitle(_ post: PostCard) -> String {
+        post.title.isEmpty ? String(post.contentText.trimmingCharacters(in: .whitespacesAndNewlines).prefix(80)) : post.title
     }
 
     func imageURL(_ imageId: String?) -> URL? { ImageURLs.image(imageId, base: config.apiBaseURL) }
@@ -167,6 +177,21 @@ final class ChatFavoritePickerModel {
         drafts.emit(.card(conversationId: conversationId, type: .venueShare, card: ChatSharedCardContent(
             product: .loop, targetId: venue.venueId, subtype: venue.venueSports.first?.rawValue,
             title: venue.building.name, subtitle: venue.building.address.isEmpty ? nil : venue.building.address, imageKey: venue.coverImageId
+        )))
+    }
+
+    func pick(_ post: PostCard) {
+        let forum = post.forums.first?.forumName
+        drafts.emit(.card(conversationId: conversationId, type: .postShare, card: ChatSharedCardContent(
+            product: .loop, targetId: post.id, title: Self.postTitle(post),
+            subtitle: (forum?.isEmpty ?? true) ? nil : forum, imageKey: post.previewImageIds.first
+        )))
+    }
+
+    func pick(_ forum: ForumFavorite) {
+        drafts.emit(.card(conversationId: conversationId, type: .forumShare, card: ChatSharedCardContent(
+            product: .loop, targetId: forum.forumId, title: forum.name,
+            subtitle: forum.description.isEmpty ? nil : forum.description, imageKey: forum.coverImageId ?? forum.avatarImageId
         )))
     }
 }
@@ -201,8 +226,14 @@ struct ChatFavoritePickerView: View {
                 pickList(model.venues, empty: "shell_chat_favorite_picker_empty_venues") { item in
                     row("sportscourt", model.imageURL(item.coverImageId), item.building.name, item.building.address) { model.pick(item); dismiss() }
                 }
-            case .posts, .forums:
-                PulsoComingSoonView(title: model.tab == .posts ? "shell_chat_favorite_picker_posts" : "shell_chat_favorite_picker_forums", systemImage: "text.bubble")
+            case .posts:
+                pickList(model.posts, empty: "shell_chat_favorite_picker_empty_posts") { item in
+                    row("doc.text", model.imageURL(item.previewImageIds.first), ChatFavoritePickerModel.postTitle(item), item.forums.first?.forumName ?? "") { model.pick(item); dismiss() }
+                }
+            case .forums:
+                pickList(model.forums, empty: "shell_chat_favorite_picker_empty_forums") { item in
+                    row("bubble.left.and.bubble.right", model.imageURL(item.avatarImageId ?? item.coverImageId), item.name, item.description) { model.pick(item); dismiss() }
+                }
             }
         }
         .navigationTitle("shell_chat_favorite_picker_title")

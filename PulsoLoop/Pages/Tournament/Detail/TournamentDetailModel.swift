@@ -21,7 +21,10 @@ struct TournamentRegisterState: Identifiable {
     var ready: Bool { teammates.count >= minTeammates && !submitting }
 }
 
-/** 赛事详情（Android `TournamentDetailViewModel`）：赛事、对阵（有了才显示）、报名（平台付款走付款面板）。球馆有写操作就重拉。 */
+/**
+ * 赛事详情（Android `TournamentDetailViewModel`）：赛事、对阵、我在这场里的报名、报名（平台付款走付款面板）、
+ * 我的位置（场地离我多远）和地图样式。球馆有写操作就重拉。
+ */
 @MainActor
 @Observable
 final class TournamentDetailModel {
@@ -30,15 +33,25 @@ final class TournamentDetailModel {
     let tournamentId: String
     private(set) var tournament = Loadable<TournamentDetail>()
     private(set) var bracket: TournamentBracket?
+    /** 对阵请求回来了（有没有抽签都算）；之前赛程页显示加载。 */
+    private(set) var bracketLoaded = false
     var selectedDivisionId: String?
     var sheet: TournamentRegisterState?
     private(set) var outcome: TournamentEntryStatus?
+    var tab = TournamentDetailTab.about
+    /** 我在这场赛事里的报名（任何组别）。 */
+    private(set) var myEntries: [TournamentEntry] = []
+    private(set) var busy = false
+    private(set) var me: PickedLocation?
+    private(set) var map = ResolvedMapPreference()
 
     @ObservationIgnored @Injected(\.tournamentService) private var tournamentService
     @ObservationIgnored @Injected(\.socialService) private var socialService
     @ObservationIgnored @Injected(\.authSessionStore) private var sessionStore
     @ObservationIgnored @Injected(\.venueEventBus) private var eventBus
     @ObservationIgnored @Injected(\.pulsoCoreConfig) private var config
+    @ObservationIgnored @Injected(\.deviceLocationStore) private var deviceLocation
+    @ObservationIgnored @Injected(\.preferenceService) private var preferenceService
 
     init(tournamentId: String) {
         self.tournamentId = tournamentId
@@ -55,15 +68,45 @@ final class TournamentDetailModel {
 
     var division: TournamentDivision? { divisions.first { $0.id == selectedDivisionId } ?? divisions.first }
 
+    var myProfileId: String { sessionStore.state.value.currentProfileId }
+
+    func myStatus(_ entry: TournamentEntry) -> TournamentMemberStatus? {
+        entry.members.first { $0.profileId == myProfileId }?.status
+    }
+
+    /** 还算数的报名（没退出 / 取消 / 过期，我被邀请或已在队里）。 */
+    var myEntry: TournamentEntry? {
+        myEntries.first { entry in
+            !entry.status.isEnded && (myStatus(entry).map { [TournamentMemberStatus.invited, .accepted].contains($0) } ?? false)
+        }
+    }
+
+    /** 现在能报名的组别；底部「立即报名」至少要有一个。 */
+    var openDivisions: [TournamentDivision] { live ? divisions.filter { $0.registrationOpen() } : [] }
+
     func imageURL(_ imageId: String?) -> URL? {
         ImageURLs.image(imageId, base: config.apiBaseURL)
     }
 
     func observe() async {
-        await load()
-        for await _ in eventBus.signals(where: { _ in true }) {
-            await load()
-        }
+        await concurrently([
+            {
+                await self.load()
+                for await _ in self.eventBus.signals(where: { _ in true }) {
+                    await self.load()
+                }
+            },
+            {
+                for await device in self.deviceLocation.location.values() {
+                    self.me = device?.point
+                }
+            },
+            {
+                for await preference in self.preferenceService.preference.values() {
+                    self.map = preference.map
+                }
+            },
+        ])
     }
 
     func load() async {
@@ -73,8 +116,56 @@ final class TournamentDetailModel {
         } catch {
             tournament = Loadable(data: tournament.data, isLoading: false, error: UiError(error))
         }
-        // 抽签以后才有对阵；之前（或失败时）这一段留空。
-        if let value = try? await tournamentService.bracket(tournamentId) { bracket = value }
+        if let entries = try? await tournamentService.myEntriesIn(tournamentId) { myEntries = entries }
+        // 抽签以后才有对阵；之前（或失败时）赛程页说还没出。
+        bracket = try? await tournamentService.bracket(tournamentId)
+        bracketLoaded = true
+    }
+
+    /** 底部栏回复组队邀请。 */
+    func answer(accept: Bool) async {
+        guard let entry = myEntry else { return }
+        await act { try await self.tournamentService.answer(entryId: entry.id, accept: accept) }
+    }
+
+    /** 队长给待付款的报名付款：重新取付款意图，弹付款面板。 */
+    func payMine() async {
+        guard let entry = myEntry else { return }
+        await act {
+            let change = try await self.tournamentService.pay(entryId: entry.id)
+            guard let secret = change.clientSecret, let account = change.providerAccountId, let key = change.publishableKey else { return }
+            await self.present(ConnectedPaymentIntent(publishableKey: key, providerAccountId: account, clientSecret: secret))
+        }
+    }
+
+    /** 底部「立即报名」：只有一个组别开着就直接打开报名面板，否则切到组别页去选。 */
+    func registerNow() {
+        let open = openDivisions
+        if open.count == 1, let only = open.first {
+            openRegister(only)
+        } else {
+            tab = .divisions
+        }
+    }
+
+    private func act(_ block: () async throws -> Void) async {
+        busy = true
+        defer { busy = false }
+        do {
+            try await block()
+        } catch {
+            PulsoMessageCenter.shared.error(error, fallback: "tournament_action_failed")
+        }
+    }
+
+    private func present(_ intent: ConnectedPaymentIntent) async {
+        switch await ConnectedPaymentSheet.present(intent) {
+        case .completed:
+            outcome = .registered
+            tournamentService.invalidate()
+        case .canceled: break
+        case .failed: outcome = .awaitingPayment
+        }
     }
 
     func openRegister(_ division: TournamentDivision) {
@@ -115,13 +206,7 @@ final class TournamentDetailModel {
             )
             sheet = nil
             if let secret = change.clientSecret, let account = change.providerAccountId, let key = change.publishableKey {
-                switch await ConnectedPaymentSheet.present(ConnectedPaymentIntent(publishableKey: key, providerAccountId: account, clientSecret: secret)) {
-                case .completed:
-                    outcome = .registered
-                    tournamentService.invalidate()
-                case .canceled: break
-                case .failed: outcome = .awaitingPayment
-                }
+                await present(ConnectedPaymentIntent(publishableKey: key, providerAccountId: account, clientSecret: secret))
             } else {
                 outcome = change.status
             }

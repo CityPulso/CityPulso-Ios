@@ -28,8 +28,8 @@ struct TournamentRepository: Sendable {
         try await api.listPublic(PublicTournamentsRequest(limit: limit, offset: offset, search: search, sport: sport)).dataOrThrow("ListPublicTournaments")
     }
 
-    func myEntries(offset: Int, limit: Int) async throws -> ListWithTotal<TournamentEntry> {
-        try await api.listMyEntries(MyEntriesRequest(limit: limit, offset: offset)).dataOrThrow("ListMyTournamentEntries")
+    func myEntries(offset: Int, limit: Int, tournamentId: String? = nil) async throws -> ListWithTotal<TournamentEntry> {
+        try await api.listMyEntries(MyEntriesRequest(limit: limit, offset: offset, tournamentId: tournamentId)).dataOrThrow("ListMyTournamentEntries")
     }
 
     func answer(entryId: String, accept: Bool) async throws {

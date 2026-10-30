@@ -16,7 +16,7 @@ struct FavoritesControls<Filter: Hashable>: Hashable {
 
 /**
  * 收藏（Android `FavoritesViewModel`）：收藏的球馆和建筑，各自在服务端搜索、筛选、排序并分页；取消收藏后列表和数量都重拉。
- * 论坛 / 帖子 / 评论三个分段在第 11 组接上。
+ * 关注的论坛（按名字搜）、收藏的帖子和评论也在这里。
  */
 @MainActor
 @Observable
@@ -32,8 +32,13 @@ final class FavoritesModel {
     private(set) var buildingCounts: BuildingFavoriteCounts?
     /** 设备位置；有了才能按距离排。 */
     private(set) var origin: GeoPoint?
+    private(set) var forumQuery = ""
+    private(set) var forums: PagedList<ForumFavorite, Int>
+    let posts: PagedList<PostCard, Int>
+    let comments: PagedList<CommentBookmark, Int>
 
     @ObservationIgnored @Injected(\.favoriteService) private var favorites
+    @ObservationIgnored @Injected(\.discussionService) private var discussion
     @ObservationIgnored @Injected(\.deviceLocationStore) private var deviceLocation
     @ObservationIgnored @Injected(\.pulsoCoreConfig) private var config
     @ObservationIgnored private var debounceTask: Task<Void, Never>?
@@ -42,6 +47,54 @@ final class FavoritesModel {
         let service = Container.shared.favoriteService()
         venues = service.pageVenues(VenueFavoritesFilter())
         buildings = service.pageBuildings(BuildingFavoritesFilter(buildingTypes: BuildingType.loop.map(\.rawValue)))
+        let discussion = Container.shared.discussionService()
+        forums = discussion.pageFavoriteForums(nil)
+        posts = discussion.pageBookmarkedPosts()
+        comments = discussion.pageBookmarkedComments()
+    }
+
+    var query: String {
+        switch tab {
+        case .venues: venueControls.query
+        case .buildings: buildingControls.query
+        default: forumQuery
+        }
+    }
+
+    func setQuery(_ query: String) {
+        switch tab {
+        case .venues: setVenueQuery(query)
+        case .buildings: setBuildingQuery(query)
+        default:
+            forumQuery = query
+            debounce { self.forums = self.discussion.pageFavoriteForums(self.forumQuery) }
+        }
+    }
+
+    func unfollowForum(_ forumId: String) async {
+        await discussionAct { try await self.discussion.setForumFavorite(forumId, false) }
+    }
+
+    func unbookmarkPost(_ postId: String) async {
+        await discussionAct {
+            try await self.discussion.setPostBookmarked(postId, false)
+            self.discussion.invalidate()
+        }
+    }
+
+    func unbookmarkComment(_ commentId: String) async {
+        await discussionAct {
+            try await self.discussion.setCommentBookmarked(commentId, false)
+            self.discussion.invalidate()
+        }
+    }
+
+    private func discussionAct(_ block: () async throws -> Void) async {
+        do {
+            try await block()
+        } catch {
+            PulsoMessageCenter.shared.error(error, fallback: "discussion_action_failed")
+        }
     }
 
     var canSortByDistance: Bool { origin != nil }
@@ -109,7 +162,7 @@ final class FavoritesModel {
     /** 搜索词停下 0.3 秒再重拉；清空时马上。 */
     private func debounce(_ action: @escaping @MainActor () -> Void) {
         debounceTask?.cancel()
-        let empty = tab == .venues ? venueControls.query.isEmpty : buildingControls.query.isEmpty
+        let empty = query.isEmpty
         debounceTask = Task {
             if !empty { try? await Task.sleep(for: Self.searchDebounce) }
             guard !Task.isCancelled else { return }
@@ -140,6 +193,7 @@ final class FavoritesModel {
 struct FavoritesView: View {
     @State private var model = FavoritesModel()
     @State private var filtersOpen = false
+    @Environment(PulsoShellNavigator.self) private var shell: PulsoShellNavigator?
 
     var body: some View {
         List {
@@ -166,9 +220,9 @@ struct FavoritesView: View {
             switch model.tab {
             case .venues: venueRows
             case .buildings: buildingRows
-            case .forums, .posts, .comments:
-                PulsoComingSoonView(title: model.tab.labelKey, systemImage: "bubble.left.and.text.bubble.right")
-                    .listRowBackground(Color.clear)
+            case .forums: forumRows
+            case .posts: postRows
+            case .comments: commentRows
             }
         }
         .navigationTitle("favorites_title")
@@ -180,19 +234,105 @@ struct FavoritesView: View {
                 }
             }
         }
-        .searchable(text: Binding(
-            get: { model.tab == .venues ? model.venueControls.query : model.buildingControls.query },
-            set: { model.tab == .venues ? model.setVenueQuery($0) : model.setBuildingQuery($0) }
-        ), prompt: Text((model.tab == .venues ? "favorites_search_venues" : "favorites_search_buildings") as LocalizedStringKey))
+        .searchable(text: Binding(get: { model.query }, set: { model.setQuery($0) }), prompt: Text(searchPrompt))
         .sheet(isPresented: $filtersOpen) {
             FavoritesFilterSheet(model: model)
         }
         .refreshable {
-            if model.tab == .venues { await model.venues.refresh() } else { await model.buildings.refresh() }
+            switch model.tab {
+            case .venues: await model.venues.refresh()
+            case .buildings: await model.buildings.refresh()
+            case .forums: await model.forums.refresh()
+            case .posts: await model.posts.refresh()
+            case .comments: await model.comments.refresh()
+            }
         }
         .task { await model.observe() }
         .task(id: ObjectIdentifier(model.venues)) { await model.venues.observe() }
         .task(id: ObjectIdentifier(model.buildings)) { await model.buildings.observe() }
+        .task(id: ObjectIdentifier(model.forums)) { await model.forums.observe() }
+        .task { await model.posts.observe() }
+        .task { await model.comments.observe() }
+    }
+
+    private var searchPrompt: LocalizedStringKey {
+        switch model.tab {
+        case .venues: "favorites_search_venues"
+        case .buildings: "favorites_search_buildings"
+        default: "favorites_search_forums"
+        }
+    }
+
+    /* ------------------------------ 论坛 / 帖子 / 评论 ------------------------------ */
+
+    @ViewBuilder
+    private var forumRows: some View {
+        favoriteRows(model.forums, empty: model.forumQuery.isEmpty ? "favorites_empty_forums" : "favorites_no_results") { row in
+            Button { shell?.push(LoopRoute.forum(forumId: row.forumId)) } label: {
+                ForumRowView(
+                    name: row.name, ownerScope: row.owner.profileScope, sports: row.sports, description: row.description,
+                    favoriteCount: row.favoriteCount, postCount: row.postCount,
+                    avatarURL: model.imageURL(row.avatarImageId), coverURL: model.imageURL(row.coverImageId),
+                    favorited: true, onToggleFollow: { Task { await model.unfollowForum(row.forumId) } }
+                )
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    @ViewBuilder
+    private var postRows: some View {
+        favoriteRows(model.posts, empty: "favorites_empty_posts") { post in
+            PostCardView(
+                post: post,
+                imageURL: { model.imageURL($0) },
+                onOpen: { shell?.push(LoopRoute.post(postId: post.id)) },
+                onLike: {},
+                onBookmark: { Task { await model.unbookmarkPost(post.id) } },
+                onOpenForum: { shell?.push(LoopRoute.forum(forumId: $0)) }
+            )
+        }
+    }
+
+    @ViewBuilder
+    private var commentRows: some View {
+        favoriteRows(model.comments, empty: "favorites_empty_comments") { row in
+            VStack(alignment: .leading, spacing: 6) {
+                Button { shell?.push(LoopRoute.post(postId: row.postId)) } label: {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(verbatim: localizedFormat("favorites_comment_on", row.postTitle)).font(.caption2).foregroundStyle(.secondary).lineLimit(1)
+                        AuthorLine(author: row.author, at: row.createdAt, avatarURL: model.imageURL(row.author.avatarImageId))
+                        RichTextBody(html: row.contentHtml, lineLimit: 4)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .buttonStyle(.plain)
+                HStack {
+                    Spacer()
+                    Button("favorites_remove_saved") { Task { await model.unbookmarkComment(row.commentId) } }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                        .tint(.secondary)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func favoriteRows<Item: Sendable, Row: View>(
+        _ list: PagedList<Item, Int>, empty: LocalizedStringKey, @ViewBuilder row: @escaping (Item) -> Row
+    ) -> some View where Item: Identifiable {
+        if list.isLoading {
+            ProgressView().frame(maxWidth: .infinity).listRowBackground(Color.clear)
+        } else if let error = list.error {
+            PulsoLoadErrorView(error) { Task { await list.refresh() } }.listRowBackground(Color.clear)
+        } else if list.isEmpty {
+            Text(empty).font(.subheadline).foregroundStyle(.secondary).listRowBackground(Color.clear)
+        } else {
+            ForEach(list.items) { item in
+                row(item).onAppear { if item.id == list.items.last?.id { list.loadMore() } }
+            }
+        }
     }
 
     @ViewBuilder
@@ -364,3 +504,6 @@ extension PlaceSort {
         }
     }
 }
+
+extension ForumFavorite: Identifiable {}
+extension CommentBookmark: Identifiable {}
