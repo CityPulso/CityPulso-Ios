@@ -1,5 +1,6 @@
 import Factory
 import PulsoLinkCore
+import PulsoLinkUI
 
 /** 地图 / 附近搜索的依赖（Android Explore 与位置相关的单例）。 */
 extension Container {
@@ -160,6 +161,16 @@ extension Container {
 
     var exploreLayerStore: Factory<ExploreLayerStore> {
         self { ExploreLayerStore() }.singleton
+    }
+
+    /** 设置页「清除本地数据」：core 的本地库表和壁纸，加上 Loop 的图片缓存和发起草稿（Android `LoopLocalDataModule`）。 */
+    var localDataService: Factory<LocalDataService> {
+        self {
+            LocalDataService(sources: self.pulsoDatabase().localDataSources(wallpapers: self.chatWallpaperStore()) + [
+                ImageCacheDataSource(),
+                CreateDraftDataSource(store: self.eventCreateDraftStore()),
+            ])
+        }.singleton
     }
 
     var eventCreateDraftStore: Factory<EventCreateDraftStore> {

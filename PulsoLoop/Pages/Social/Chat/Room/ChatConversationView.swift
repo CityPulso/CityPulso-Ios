@@ -93,10 +93,19 @@ struct ChatConversationView: View {
             onImage: { viewingImage = $0 },
             onVideo: { playingVideo = $0 },
             onLocation: { shell?.push(LoopRoute.chatLocationView(latitude: $0.latitude, longitude: $0.longitude, label: $0.label, address: $0.address)) },
-            onCard: { type, card in if let route = cardRoute(type, card) { shell?.push(route) } },
+            onCard: { type, card in
+                // 娱邻的卡片交给娱邻（没装就开网站）。
+                if card.isPeer {
+                    if let path = chatCardPath(type, card) { Task { await peerApp.open(path) } }
+                } else if let route = cardRoute(type, card) {
+                    shell?.push(route)
+                }
+            },
             onBook: { card in
+                if card.isPeer {
+                    Task { await peerApp.open(chatVenueBookPath(card)) }
                 // 发的人选了运动就直接订那个运动，否则打开球馆页（那里列出每个能订的运动）。
-                if let sport = VenueSport.allCases.first(where: { $0.rawValue == card.subtype }) {
+                } else if let sport = VenueSport.allCases.first(where: { $0.rawValue == card.subtype }) {
                     shell?.push(LoopRoute.venueBook(venueId: card.targetId, sport: sport))
                 } else {
                     shell?.push(LoopRoute.venue(venueId: card.targetId, sheet: nil))

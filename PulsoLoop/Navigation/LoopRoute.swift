@@ -1,3 +1,4 @@
+import Factory
 import PulsoLinkCore
 import PulsoLinkUI
 import SwiftUI
@@ -11,6 +12,8 @@ enum LoopRoute: Hashable {
     case appIcon
     case navEdit
     case eventPreferences
+    /** 清除本地数据。 */
+    case storage
     case privacy
     case permissions
     case accountSecurity
@@ -120,6 +123,7 @@ enum LoopRoute: Hashable {
         case .appIcon: LauncherIconView()
         case .navEdit: NavEditView()
         case .eventPreferences: EventPreferencesView()
+        case .storage: StorageView(service: Container.shared.localDataService())
         case .privacy: PrivacySettingsView()
         case .permissions: PermissionsView()
         case .accountSecurity: AccountSecurityView()
@@ -166,7 +170,7 @@ enum LoopRoute: Hashable {
         case let .course(courseId): CourseDetailView(courseId: courseId)
         case .myCourses: MyCoursesView()
         case let .coach(profileId): CoachDetailView(profileId: profileId)
-        case .coachPanel: PulsoComingSoonView(title: "venue_programs_coach_panel", systemImage: "rectangle.stack")
+        case .coachPanel: CoachPanelView()
         case let .myMembership(membershipId): MyMembershipView(membershipId: membershipId)
         case let .wallet(tab): WalletView(tab: tab)
         case let .myMembershipPurchase(purchaseId): MyMembershipPurchaseView(purchaseId: purchaseId)

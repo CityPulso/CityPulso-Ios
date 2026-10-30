@@ -32,3 +32,17 @@ final class EventCreateDraftStore: LogoutClearable {
         clear()
     }
 }
+
+/** 没发出去的发起表单，设置页「清除本地数据」的草稿一行。 */
+struct CreateDraftDataSource: LocalDataSource {
+    let kind = LocalDataKind.drafts
+    let store: EventCreateDraftStore
+
+    func usage() async throws -> LocalDataUsage {
+        LocalDataUsage(count: store.draft == nil ? 0 : 1, bytes: nil)
+    }
+
+    func clear() async throws {
+        store.clear()
+    }
+}

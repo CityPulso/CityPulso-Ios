@@ -72,6 +72,9 @@ struct SettingsView: View {
                 NavigationLink(value: LoopRoute.eventPreferences) {
                     Label("settings_event_preferences", systemImage: "calendar")
                 }
+                NavigationLink(value: LoopRoute.storage) {
+                    Label("settings_storage", systemImage: "internaldrive")
+                }
             }
 
             if session.session.currentProfileKind == .community {

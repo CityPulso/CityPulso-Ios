@@ -115,6 +115,10 @@ targets:
         GIDClientID: 129233998164-i2itt0ptv399f48rrm9lf25lvb4dkrml.apps.googleusercontent.com
         CFBundleURLTypes:
           - CFBundleURLSchemes: [com.googleusercontent.apps.129233998164-i2itt0ptv399f48rrm9lf25lvb4dkrml]
+          # 娱邻打开跃圈的卡片：youloopy://open/panel/...（路径和 pulsoloop.com 一样）。
+          - CFBundleURLSchemes: [youloopy]
+        # 聊天里娱邻的卡片先试着在娱邻里打开。
+        LSApplicationQueriesSchemes: [youneary]
     scheme:
       testTargets: [PulsoLoopTests]
     settings:
@@ -147,6 +151,10 @@ targets:
         GIDClientID: 129233998164-2dv2ameks492jges1pob54ka39bt86m0.apps.googleusercontent.com
         CFBundleURLTypes:
           - CFBundleURLSchemes: [com.googleusercontent.apps.129233998164-2dv2ameks492jges1pob54ka39bt86m0]
+          # 跃圈打开娱邻的卡片：youneary://open/panel/...（路径和 pulsonear.com 一样）。
+          - CFBundleURLSchemes: [youneary]
+        # 聊天里跃圈的卡片先试着在跃圈里打开。
+        LSApplicationQueriesSchemes: [youloopy]
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.citypulso.pulsonear

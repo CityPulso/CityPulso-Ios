@@ -104,3 +104,41 @@ struct MediatedListTests {
     }
 }
 
+
+struct LocalDataTests {
+    @Test func tableSourceCountsAndClearsRows() async throws {
+        let database = try PulsoDatabase.inMemory()
+        let local = SocialLocalStore(database: database)
+        try await local.replaceConnections("me", .friends, ListWithTotal(items: [friend("a"), friend("b")], total: 2))
+        let source = DatabaseTableDataSource(database: database, kind: .socialConnections, table: SocialConnectionRecord.databaseTableName)
+        #expect(try await source.usage() == LocalDataUsage(count: 2, bytes: nil))
+        try await source.clear()
+        #expect(try await source.usage() == LocalDataUsage(count: 0, bytes: nil))
+    }
+
+    @Test func serviceListsKindsInPageOrder() throws {
+        let database = try PulsoDatabase.inMemory()
+        let defaults = UserDefaults(suiteName: "local-data-test")!
+        let service = LocalDataService(sources: database.localDataSources(wallpapers: ChatWallpaperStore(defaults: defaults)).reversed())
+        #expect(service.kinds == [.chatMessages, .conversations, .notifications, .socialConnections, .friendRequests, .profileCards, .chatWallpapers])
+    }
+}
+
+struct DeepLinkPathTests {
+    @Test func parsesSegmentsAndQueryOfOwnScheme() throws {
+        let link = try #require(DeepLinkPath(URL(string: "youloopy://open/panel/venue-book/v1?sport=tennis")!, scheme: "youloopy"))
+        #expect(link.segments == ["panel", "venue-book", "v1"])
+        #expect(link.query["sport"] == "tennis")
+    }
+
+    @Test func rejectsOtherSchemeOrHost() {
+        #expect(DeepLinkPath(URL(string: "youneary://open/panel/x")!, scheme: "youloopy") == nil)
+        #expect(DeepLinkPath(URL(string: "youloopy://share/panel/x")!, scheme: "youloopy") == nil)
+    }
+
+    @Test func siblingBuildsDeepLinkAndWebURL() {
+        let app = SiblingApp(scheme: "youneary", webOrigin: "https://pulsonear.com")
+        #expect(app.deepLink("/panel/venue-detail/v1")?.absoluteString == "youneary://open/panel/venue-detail/v1")
+        #expect(app.webURL("/panel/venue-detail/v1")?.absoluteString == "https://pulsonear.com/panel/venue-detail/v1")
+    }
+}

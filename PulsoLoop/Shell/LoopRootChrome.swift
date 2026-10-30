@@ -7,6 +7,7 @@ import SwiftUI
 struct LoopRootChrome: View {
     @State private var shell = PulsoShellModel()
     @State private var agendaOpen = false
+    @State private var deepLinks = LoopDeepLinkInbox.shared
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -46,6 +47,10 @@ struct LoopRootChrome: View {
                 applied = icon
                 await LauncherIconSync.apply(icon)
             }
+        }
+        // 深链打开的页面：主界面起来后推进当前栈（Android 主 nav host 取 inbox）。
+        .onChange(of: deepLinks.pending, initial: true) { _, pending in
+            if pending != nil, let route = deepLinks.take() { shell.navigator.push(route) }
         }
         .onChange(of: scenePhase, initial: true) { _, phase in
             // 用户可能刚在系统设置里改了本 App 的语言。

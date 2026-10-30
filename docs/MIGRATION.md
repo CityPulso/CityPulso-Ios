@@ -10,7 +10,7 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
     资料页头部改成 关注 / 粉丝 / 活动（未回来显示 `-`，关注 / 粉丝进社交对应标签）、去掉角色胶囊、创作者徽标、
     喜欢的运动 / 活动一行横滑 + 点开选择面板保存；编辑资料页喜欢的运动 / 活动改成一行 + 选择面板，不限个数，身份入口移到编辑页。
   - 等第 10 组：消息页（铃铛 → 通知、+ → 社交）、社交页（顶栏聊天图标，`social(tab:)` 路由现在是占位页）、不再有「新聊天」页。
-  - 等 Android 做完：设置 → 清除本地数据（iOS 对应 GRDB 表、Nuke 缓存、聊天壁纸、草稿、筛选、内存查询缓存）。
+  - 设置 → 清除本地数据（Android 已做）：GRDB 六张表、聊天壁纸、Nuke 图片缓存、发起草稿，每种显示占用，按住确认清除，可全部清除。
   - Near 资料页的「活动」数要等 Near 活动移植后才有，现在一直是 `-`。
 - 第 9 组写完：钱包、我的会员 / 会员购买记录 / 时长包详情、收款账户（Stripe Connect 开通）、付款方式、账单（我主持的 / 我的付款）。
 - 第 10 组进行中：
@@ -20,13 +20,12 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
     在 Loop / Near 启动时连）。Linux 测试 77 个全过。
   - Loop 页面：社交（好友 / 关注 / 粉丝、搜索、排序、心形、菜单、按住确认）、好友请求、黑名单、添加好友、公开主页、
     消息（私聊 / 群聊列表，铃铛红点 → 通知，+ → 社交）、通知收件箱（全部 / 未读、全部已读、点开对应页面）。
-  - 还差：聊天室（消息、发送、图片 / 视频 / 语音 / 文件 / 位置 / 卡片、撤回、转发）、会话设置、群成员、聊天壁纸、
-    分享卡片选择器；Near 的社交 / 消息页（随 Near 分叉）。
+  - 聊天室、会话设置、群成员、聊天壁纸、分享卡片选择器都已写完；Near 的社交 / 消息页随 Near 分叉。
 - 地图设置（样式、定位标记）写完。
 - **iPad（用户要求，2026-10-30）**：三个 App 改成通用（`TARGETED_DEVICE_FAMILY = 1,2`，iPad 四个方向、分屏 / 台前调度）。
   页面用系统 List / Form / sheet，宽屏下自动加阅读边距、sheet 变表单弹窗；还要逐页看 iPad 截图，修固定宽度的地方，
   CI 截图加一台 iPad。苹果没有折叠屏 iPhone，不需要「折叠屏」适配；iPad 的窗口任意缩放就覆盖了大小屏切换。
-- 第 12 组：课程详情、教练主页、我的课程、我的私教、赛事详情 / 报名（好友里选队友）/ 我的赛事都写完并接上路由；教练面板没写。
+- 第 12 组：课程详情、教练主页、我的课程、我的私教、赛事详情 / 报名（好友里选队友）/ 我的赛事、教练面板（课次 / 合作球馆 / 授课报酬 / 教练资料和服务、新建私教课）都写完并接上路由。
 - **赛事页（用户要求，2026-10-30，跟 Android 同步）**：底栏「赛事」改成公开赛事列表（`Pages/Tournament/List/TournamentsView`）：
   搜索（停 300ms）、运动标签带图标、海报卡（封面 + 状态、日期、球馆、组别 · 报名 · 最低报名费）；右上角「我的赛事」。
   「我的赛事」改成三个标签：我的报名（进行中 / 已结束）、组队邀请（红色数字，卡片下两个等宽按钮）、获得的奖品。
@@ -37,8 +36,9 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
   上下移动、按住确认删除；链接选择器四个标签 + 粘贴链接；论坛最多 10 个、每个最多 3 个话题；城市按位置预填；照片最多 9 张）。
   发现论坛（搜索 / 类型 / 运动 / 排序、行内关注）、我的论坛（待处理数、管理入口）、我赞过的帖子也写完。
   建论坛（封面 / 头像 / 运动 / 简介 / 发帖方式 / 规则 / 组织身份选管理员）、论坛管理（设置、管理人员、待审、举报、公告、话题）也写完。
-  还差：
-- 还差：深链 inbox；第 11 组剩下的页面；教练面板；Near 全部分叉；最后 `screenshots/` 截图（iPhone + iPad）。
+- 深链：`youloopy://open/panel/...`（活动 / 球馆 / 订场 / 场馆建筑 / 帖子 / 论坛）先进 inbox，登录后的主界面推进当前栈；
+  聊天里娱邻的卡片交给娱邻（`youneary://`，没装就开 pulsonear.com）。Info.plist 加了 URL Types 和 LSApplicationQueriesSchemes。
+- 还差：Near 全部分叉；最后 `screenshots/` 截图（iPhone + iPad）。
 
 ## 状态
 
@@ -185,7 +185,7 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 | OpenMyForums | `pages/discussion/mine` | `Pages/Discussion/Lists/ForumListViews` | 11 | 🟨 |
 | OpenCourse | `pages/program/course` | | 12 | ⬜ |
 | OpenCoach | `pages/program/coach` | | 12 | ⬜ |
-| OpenCoachPanel | `pages/coach/panel` | | 12 | ⬜ |
+| OpenCoachPanel | `pages/coach/panel` | `Pages/Coach/Panel` | 12 | 🟨 |
 | OpenTournament | `pages/tournament/detail` | | 12 | ⬜ |
 | （日程，左边缘右滑） | `pages/agenda` | `Pages/Agenda`（系统 sheet） | 4 | 🟦 |
 | OpenComingSoon | `navigation/ComingSoonRoute.kt` | `PulsoComingSoonView` | — | 🟩 |
