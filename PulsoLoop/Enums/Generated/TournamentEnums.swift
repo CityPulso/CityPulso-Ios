@@ -81,11 +81,12 @@ enum TournamentMemberRole: String, WireEnum {
     static let fallback: TournamentMemberRole = .member
 }
 
-/** 队友答复。 */
+/** 队友答复；CANCELED 是主办方取消赛事时撤回的、还没回复的邀请。 */
 enum TournamentMemberStatus: String, WireEnum {
     case invited
     case accepted
     case declined
+    case canceled
 
     static let fallback: TournamentMemberStatus = .invited
 }
@@ -145,4 +146,25 @@ enum TournamentGrantStatus: String, WireEnum {
     case failed
 
     static let fallback: TournamentGrantStatus = .pending
+}
+
+/** Tournament page sections (tabs under the head). */
+enum TournamentDetailTab: CaseIterable, Codable, Sendable, Hashable {
+    case about
+    case divisions
+    case schedule
+    case venue
+}
+
+/** My tournaments tabs: my entries, team invitations to answer, prizes won. */
+enum MyTournamentsTab: CaseIterable, Codable, Sendable, Hashable {
+    case entries
+    case invitations
+    case prizes
+}
+
+/** Second level under My entries: places still held, or entries that ended (withdrawn / canceled / expired). */
+enum MyEntriesFilter: CaseIterable, Codable, Sendable, Hashable {
+    case active
+    case ended
 }

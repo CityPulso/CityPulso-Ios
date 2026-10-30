@@ -35,7 +35,7 @@ struct TournamentAPI: Sendable {
         try await client.request(.post, "loop-tournament/divisions/\(divisionId)/entries", body: body)
     }
 
-    func listMyEntries(_ body: TournamentPageRequest) async throws -> DataResponse<ListWithTotal<TournamentEntry>> {
+    func listMyEntries(_ body: MyEntriesRequest) async throws -> DataResponse<ListWithTotal<TournamentEntry>> {
         try await client.request(.post, "loop-tournament/entries/mine", body: body)
     }
 

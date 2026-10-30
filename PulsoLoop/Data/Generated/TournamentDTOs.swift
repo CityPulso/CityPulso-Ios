@@ -371,6 +371,7 @@ struct TournamentDetail: Codable, Sendable, Hashable {
     var status: TournamentStatus
     var startsAt: String
     var endsAt: String
+    var timezone: String
     var currency: String
     var acceptsPhone: Bool
     var acceptsOffline: Bool
@@ -384,7 +385,7 @@ struct TournamentDetail: Codable, Sendable, Hashable {
     var allocations: [TournamentSlot]
     var hostProfiles: [TournamentProfileCard]
 
-    init(id: String, title: String = "", description: String? = nil, rules: String? = nil, status: TournamentStatus = .fallback, startsAt: String = "", endsAt: String = "", currency: String = "", acceptsPhone: Bool = false, acceptsOffline: Bool = false, acceptsPlatform: Bool = false, cancelReason: String? = nil, sports: [TournamentSport] = [], images: [TournamentImage] = [], venues: [TournamentVenue] = [], divisions: [TournamentDivision] = [], allocations: [TournamentSlot] = [], hostProfiles: [TournamentProfileCard] = []) {
+    init(id: String, title: String = "", description: String? = nil, rules: String? = nil, status: TournamentStatus = .fallback, startsAt: String = "", endsAt: String = "", timezone: String = "", currency: String = "", acceptsPhone: Bool = false, acceptsOffline: Bool = false, acceptsPlatform: Bool = false, cancelReason: String? = nil, sports: [TournamentSport] = [], images: [TournamentImage] = [], venues: [TournamentVenue] = [], divisions: [TournamentDivision] = [], allocations: [TournamentSlot] = [], hostProfiles: [TournamentProfileCard] = []) {
         self.id = id
         self.title = title
         self.description = description
@@ -392,6 +393,7 @@ struct TournamentDetail: Codable, Sendable, Hashable {
         self.status = status
         self.startsAt = startsAt
         self.endsAt = endsAt
+        self.timezone = timezone
         self.currency = currency
         self.acceptsPhone = acceptsPhone
         self.acceptsOffline = acceptsOffline
@@ -414,6 +416,7 @@ struct TournamentDetail: Codable, Sendable, Hashable {
         status = try container.wire(TournamentStatus.self, "status") ?? .fallback
         startsAt = try container.wire(String.self, "startsAt") ?? ""
         endsAt = try container.wire(String.self, "endsAt") ?? ""
+        timezone = try container.wire(String.self, "timezone") ?? ""
         currency = try container.wire(String.self, "currency") ?? ""
         acceptsPhone = try container.wire(Bool.self, "acceptsPhone") ?? false
         acceptsOffline = try container.wire(Bool.self, "acceptsOffline") ?? false
@@ -436,6 +439,7 @@ struct TournamentDetail: Codable, Sendable, Hashable {
         try container.wire(status, "status", default: .fallback)
         try container.wire(startsAt, "startsAt", default: "")
         try container.wire(endsAt, "endsAt", default: "")
+        try container.wire(timezone, "timezone", default: "")
         try container.wire(currency, "currency", default: "")
         try container.wire(acceptsPhone, "acceptsPhone", default: false)
         try container.wire(acceptsOffline, "acceptsOffline", default: false)
@@ -744,6 +748,7 @@ struct TournamentMember: Codable, Sendable, Hashable {
 struct TournamentEntry: Codable, Sendable, Hashable {
     var id: String
     var tournamentId: String
+    var divisionId: String
     var tournamentTitle: String
     var tournamentStartsAt: String
     var divisionName: String
@@ -759,9 +764,10 @@ struct TournamentEntry: Codable, Sendable, Hashable {
     var cancelReason: String?
     var members: [TournamentMember]
 
-    init(id: String, tournamentId: String, tournamentTitle: String = "", tournamentStartsAt: String = "", divisionName: String = "", minMembers: Int = 1, maxMembers: Int = 1, name: String? = nil, captainProfileId: String = "", status: TournamentEntryStatus = .fallback, paymentMethod: TournamentPaymentMethod = .fallback, amount: Double = 0.0, currency: String = "", expiresAt: String? = nil, cancelReason: String? = nil, members: [TournamentMember] = []) {
+    init(id: String, tournamentId: String, divisionId: String = "", tournamentTitle: String = "", tournamentStartsAt: String = "", divisionName: String = "", minMembers: Int = 1, maxMembers: Int = 1, name: String? = nil, captainProfileId: String = "", status: TournamentEntryStatus = .fallback, paymentMethod: TournamentPaymentMethod = .fallback, amount: Double = 0.0, currency: String = "", expiresAt: String? = nil, cancelReason: String? = nil, members: [TournamentMember] = []) {
         self.id = id
         self.tournamentId = tournamentId
+        self.divisionId = divisionId
         self.tournamentTitle = tournamentTitle
         self.tournamentStartsAt = tournamentStartsAt
         self.divisionName = divisionName
@@ -782,6 +788,7 @@ struct TournamentEntry: Codable, Sendable, Hashable {
         let container = try decoder.container(keyedBy: WireKey.self)
         id = try container.wireRequired(String.self, "id")
         tournamentId = try container.wireRequired(String.self, "tournamentId")
+        divisionId = try container.wire(String.self, "divisionId") ?? ""
         tournamentTitle = try container.wire(String.self, "tournamentTitle") ?? ""
         tournamentStartsAt = try container.wire(String.self, "tournamentStartsAt") ?? ""
         divisionName = try container.wire(String.self, "divisionName") ?? ""
@@ -802,6 +809,7 @@ struct TournamentEntry: Codable, Sendable, Hashable {
         var container = encoder.container(keyedBy: WireKey.self)
         try container.wire(id, "id")
         try container.wire(tournamentId, "tournamentId")
+        try container.wire(divisionId, "divisionId", default: "")
         try container.wire(tournamentTitle, "tournamentTitle", default: "")
         try container.wire(tournamentStartsAt, "tournamentStartsAt", default: "")
         try container.wire(divisionName, "divisionName", default: "")
@@ -816,6 +824,33 @@ struct TournamentEntry: Codable, Sendable, Hashable {
         try container.wireOptional(expiresAt, "expiresAt")
         try container.wireOptional(cancelReason, "cancelReason")
         try container.wire(members, "members", default: [])
+    }
+}
+
+/** My entries, paged; [tournamentId] keeps one tournament's (the tournament page's own registration). */
+struct MyEntriesRequest: Codable, Sendable, Hashable {
+    var limit: Int
+    var offset: Int
+    var tournamentId: String?
+
+    init(limit: Int, offset: Int = 0, tournamentId: String? = nil) {
+        self.limit = limit
+        self.offset = offset
+        self.tournamentId = tournamentId
+    }
+
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: WireKey.self)
+        limit = try container.wireRequired(Int.self, "limit")
+        offset = try container.wire(Int.self, "offset") ?? 0
+        tournamentId = try container.wire(String.self, "tournamentId")
+    }
+
+    func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: WireKey.self)
+        try container.wire(limit, "limit")
+        try container.wire(offset, "offset", default: 0)
+        try container.wireOptional(tournamentId, "tournamentId")
     }
 }
 

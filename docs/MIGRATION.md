@@ -33,7 +33,8 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 - 第 11 组进行中：论坛信息流、论坛详情、帖子详情（评论、点赞、收藏、举报）、发帖 / 编辑（段落编辑器：文字 / 照片 / 链接，
   上下移动、按住确认删除；链接选择器四个标签 + 粘贴链接；论坛最多 10 个、每个最多 3 个话题；城市按位置预填；照片最多 9 张）。
   发现论坛（搜索 / 类型 / 运动 / 排序、行内关注）、我的论坛（待处理数、管理入口）、我赞过的帖子也写完。
-  还差：建论坛、论坛管理；收藏页的论坛 / 帖子 / 评论标签；聊天收藏选择器的帖子 / 论坛标签。
+  建论坛（封面 / 头像 / 运动 / 简介 / 发帖方式 / 规则 / 组织身份选管理员）、论坛管理（设置、管理人员、待审、举报、公告、话题）也写完。
+  还差：收藏页的论坛 / 帖子 / 评论标签；聊天收藏选择器的帖子 / 论坛标签。
 - 还差：深链 inbox；第 11 组剩下的页面；教练面板；Near 全部分叉；最后 `screenshots/` 截图（iPhone + iPad）。
 
 ## 状态
@@ -172,9 +173,9 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 | OpenChatLocationPick / OpenChatLocationView | `pages/social/chat/picker` | | 10 | ⬜ |
 | OpenChatEventPicker / OpenChatFavoritePicker | `pages/social/chat/picker` | | 10 | ⬜ |
 | OpenForum | `pages/discussion/detail` | `Pages/Discussion/Detail` | 11 | 🟨 |
-| OpenForumManage | `pages/discussion/manage` | | 11 | ⬜ |
+| OpenForumManage | `pages/discussion/manage` | `Pages/Discussion/Manage` | 11 | 🟨 |
 | OpenForumSearch | `pages/discussion/search` | `Pages/Discussion/Lists/ForumListViews` | 11 | 🟨 |
-| OpenForumCreate | `pages/discussion/create` | | 11 | ⬜ |
+| OpenForumCreate | `pages/discussion/create` | `Pages/Discussion/Create` | 11 | 🟨 |
 | OpenPost | `pages/discussion/post/detail` | `Pages/Discussion/Post/PostDetailView` | 11 | 🟨 |
 | OpenPostCreate / OpenPostEdit | `pages/discussion/post/create`、`edit` | `Pages/Discussion/Post/PostCreateView`、`PostEditView` | 11 | 🟨 |
 | OpenLikedPosts | `pages/discussion/liked` | `Pages/Discussion/Lists/ForumListViews` | 11 | 🟨 |

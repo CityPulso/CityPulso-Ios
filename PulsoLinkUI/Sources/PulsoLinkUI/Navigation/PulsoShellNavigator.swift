@@ -34,6 +34,13 @@ public final class PulsoShellNavigator {
         paths[selection, default: NavigationPath()].append(route)
     }
 
+    /** 当前栈退回 [count] 页（比如删了论坛，管理页和论坛页一起退出）。 */
+    public func pop(_ count: Int = 1) {
+        var path = paths[selection, default: NavigationPath()]
+        path.removeLast(min(count, path.count))
+        paths[selection] = path
+    }
+
     /** 把当前栈最上面的页面换成 [route]（比如发完帖进帖子详情，返回时不再回到表单）。 */
     public func replaceTop(with route: some Hashable) {
         var path = paths[selection, default: NavigationPath()]

@@ -29,7 +29,7 @@ struct TournamentRepository: Sendable {
     }
 
     func myEntries(offset: Int, limit: Int) async throws -> ListWithTotal<TournamentEntry> {
-        try await api.listMyEntries(TournamentPageRequest(limit: limit, offset: offset)).dataOrThrow("ListMyTournamentEntries")
+        try await api.listMyEntries(MyEntriesRequest(limit: limit, offset: offset)).dataOrThrow("ListMyTournamentEntries")
     }
 
     func answer(entryId: String, accept: Bool) async throws {

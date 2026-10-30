@@ -149,8 +149,8 @@ enum LoopRoute: Hashable {
         case .forumSearch: ForumSearchView()
         case .myForums: MyForumsView()
         case .likedPosts: LikedPostsView()
-        case .forumManage, .forumCreate:
-            PulsoComingSoonView(title: "shell_dest_forum", systemImage: "text.bubble")
+        case let .forumManage(forumId): ForumManageView(forumId: forumId)
+        case .forumCreate: ForumCreateView()
         case let .conversation(conversationId, isGroup): ChatConversationView(conversationId: conversationId, isGroup: isGroup)
         case let .chatSettings(conversationId, isGroup): ChatSettingsView(conversationId: conversationId, isGroup: isGroup)
         case let .groupMembers(conversationId): GroupMembersView(conversationId: conversationId)

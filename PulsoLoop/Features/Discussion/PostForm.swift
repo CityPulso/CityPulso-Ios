@@ -183,9 +183,7 @@ struct PostBodyFields: View {
             Task {
                 var picked: [(data: Data, mimeType: String)] = []
                 for item in items {
-                    if let data = try? await item.loadTransferable(type: Data.self) {
-                        picked.append((data, item.supportedContentTypes.first?.preferredMIMEType ?? "image/jpeg"))
-                    }
+                    if let photo = await item.loadPhoto() { picked.append(photo) }
                 }
                 draft.addPhotos(picked)
             }
