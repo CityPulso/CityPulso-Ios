@@ -34,6 +34,14 @@ public final class PulsoShellNavigator {
         paths[selection, default: NavigationPath()].append(route)
     }
 
+    /** 把当前栈最上面的页面换成 [route]（比如发完帖进帖子详情，返回时不再回到表单）。 */
+    public func replaceTop(with route: some Hashable) {
+        var path = paths[selection, default: NavigationPath()]
+        if !path.isEmpty { path.removeLast() }
+        path.append(route)
+        paths[selection] = path
+    }
+
     public func path(for destination: ShellDestination) -> Binding<NavigationPath> {
         Binding(
             get: { self.paths[destination] ?? NavigationPath() },

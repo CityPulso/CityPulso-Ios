@@ -118,6 +118,15 @@ public final class PagedList<Item: Sendable, Cursor: Sendable> {
         items.removeAll(where: matches)
     }
 
+    /** 同一个分页源，每行换成另一种（Android `PagingData.map`）；[transform] 返回 nil 的行丢掉。 */
+    public func mapped<Mapped: Sendable>(_ transform: @escaping @Sendable (Item) -> Mapped?) -> PagedList<Mapped, Cursor> {
+        let fetch = fetch
+        return PagedList<Mapped, Cursor>(first: first, pageSize: pageSize, invalidates: invalidates) { cursor, limit in
+            let page = try await fetch(cursor, limit)
+            return Page(items: page.items.compactMap(transform), next: page.next)
+        }
+    }
+
     private func accept(_ page: Page<Item, Cursor>) {
         next = page.next
         endReached = page.next == nil

@@ -119,8 +119,8 @@ private struct ChatPlusPanel: View {
 
     var body: some View {
         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 16), count: 4), spacing: 18) {
-            PhotosPicker(selection: $photoItem, matching: .images) { tile("photo", "shell_chat_plus_image") }
-            PhotosPicker(selection: $videoItem, matching: .videos) { tile("video", "shell_chat_plus_video") }
+            PhotosPicker(selection: $photoItem, matching: .images) { PlusTile(symbol: "photo", label: "shell_chat_plus_image") }
+            PhotosPicker(selection: $videoItem, matching: .videos) { PlusTile(symbol: "video", label: "shell_chat_plus_video") }
             Button { importingFile = true } label: { tile("doc", "shell_chat_plus_file") }
             Button { shell?.push(LoopRoute.chatLocationPick(conversationId: model.conversationId)) } label: { tile("mappin.and.ellipse", "shell_chat_plus_location") }
             Button { shell?.push(LoopRoute.chatEventPicker(conversationId: model.conversationId, hosted: true)) } label: { tile("calendar.badge.plus", "shell_chat_plus_hosted_events") }
@@ -165,7 +165,15 @@ private struct ChatPlusPanel: View {
         await model.sendAttachment(data, fileName: "chat-\(Int(Date().timeIntervalSince1970)).\(ext)", mimeType: contentType?.preferredMIMEType ?? fallbackMime, type: type)
     }
 
-    private func tile(_ symbol: String, _ label: LocalizedStringKey) -> some View {
+    private func tile(_ symbol: String, _ label: LocalizedStringKey) -> PlusTile { PlusTile(symbol: symbol, label: label) }
+}
+
+/** 「+」面板的一格；单独的 View，PhotosPicker 的（非隔离）label 闭包也能建。 */
+private struct PlusTile: View {
+    let symbol: String
+    let label: LocalizedStringKey
+
+    var body: some View {
         VStack(spacing: 6) {
             Image(systemName: symbol)
                 .font(.title2)

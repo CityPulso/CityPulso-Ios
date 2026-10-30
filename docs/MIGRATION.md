@@ -27,7 +27,13 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
   页面用系统 List / Form / sheet，宽屏下自动加阅读边距、sheet 变表单弹窗；还要逐页看 iPad 截图，修固定宽度的地方，
   CI 截图加一台 iPad。苹果没有折叠屏 iPhone，不需要「折叠屏」适配；iPad 的窗口任意缩放就覆盖了大小屏切换。
 - 第 12 组：课程详情、教练主页、我的课程、我的私教、赛事详情 / 报名（好友里选队友）/ 我的赛事都写完并接上路由；教练面板没写。
-- 还差：深链 inbox；第 10 组页面；第 11 组论坛；教练面板；Near 全部分叉；最后 `screenshots/` 截图（iPhone + iPad）。
+- **赛事页（用户要求，2026-10-30，跟 Android 同步）**：底栏「赛事」改成公开赛事列表（`Pages/Tournament/List/TournamentsView`）：
+  搜索（停 300ms）、运动标签带图标、海报卡（封面 + 状态、日期、球馆、组别 · 报名 · 最低报名费）；右上角「我的赛事」。
+  Android 同一批还把「课程」和「私教」合成一页（去掉 COACHING），等 Android 提交后 iOS 跟着改。
+- 第 11 组进行中：论坛信息流、论坛详情、帖子详情（评论、点赞、收藏、举报）、发帖 / 编辑（段落编辑器：文字 / 照片 / 链接，
+  上下移动、按住确认删除；链接选择器四个标签 + 粘贴链接；论坛最多 10 个、每个最多 3 个话题；城市按位置预填；照片最多 9 张）。
+  还差：论坛搜索、我的论坛、赞过的帖子、建论坛、论坛管理；收藏页的论坛 / 帖子 / 评论标签；聊天收藏选择器的帖子 / 论坛标签。
+- 还差：深链 inbox；第 11 组剩下的页面；教练面板；Near 全部分叉；最后 `screenshots/` 截图（iPhone + iPad）。
 
 ## 状态
 
@@ -164,12 +170,12 @@ Android（`CityPulso-Android`）是唯一来源。本文件是功能对齐清单
 | OpenGroupMembers / OpenGroupAddMembers | `pages/social/chat/settings` | | 10 | ⬜ |
 | OpenChatLocationPick / OpenChatLocationView | `pages/social/chat/picker` | | 10 | ⬜ |
 | OpenChatEventPicker / OpenChatFavoritePicker | `pages/social/chat/picker` | | 10 | ⬜ |
-| OpenForum | `pages/discussion/detail` | | 11 | ⬜ |
+| OpenForum | `pages/discussion/detail` | `Pages/Discussion/Detail` | 11 | 🟨 |
 | OpenForumManage | `pages/discussion/manage` | | 11 | ⬜ |
 | OpenForumSearch | `pages/discussion/search` | | 11 | ⬜ |
 | OpenForumCreate | `pages/discussion/create` | | 11 | ⬜ |
-| OpenPost | `pages/discussion/post/detail` | | 11 | ⬜ |
-| OpenPostCreate / OpenPostEdit | `pages/discussion/post/create`、`edit` | | 11 | ⬜ |
+| OpenPost | `pages/discussion/post/detail` | `Pages/Discussion/Post/PostDetailView` | 11 | 🟨 |
+| OpenPostCreate / OpenPostEdit | `pages/discussion/post/create`、`edit` | `Pages/Discussion/Post/PostCreateView`、`PostEditView` | 11 | 🟨 |
 | OpenLikedPosts | `pages/discussion/liked` | | 11 | ⬜ |
 | OpenMyForums | `pages/discussion/mine` | | 11 | ⬜ |
 | OpenCourse | `pages/program/course` | | 12 | ⬜ |

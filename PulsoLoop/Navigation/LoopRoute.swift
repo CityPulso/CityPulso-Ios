@@ -33,7 +33,9 @@ enum LoopRoute: Hashable {
     case building(buildingId: String)
     /** 赛事详情（第 12 组）。 */
     case tournament(tournamentId: String)
-    /** 我的赛事（报名成功后的「看我的赛事」）。 */
+    /** 赛事页：公开赛事列表，右上角进我的赛事。 */
+    case tournaments
+    /** 我的赛事（赛事页右上角、报名成功后的「看我的赛事」）。 */
     case myTournaments
     /** 别人的主页（第 10 组）。 */
     /** 社交：好友 / 关注 / 粉丝，停在 [tab]。 */
@@ -133,13 +135,18 @@ enum LoopRoute: Hashable {
         case let .venueConfirm(venueId, sport, date, ranges): VenueConfirmView(venueId: venueId, sport: sport, dateKey: date, ranges: ranges)
         case let .building(buildingId): BuildingDetailView(buildingId: buildingId)
         case let .tournament(tournamentId): TournamentDetailView(tournamentId: tournamentId)
+        case .tournaments: TournamentsView()
         case .myTournaments: MyTournamentsView()
         case let .social(tab): SocialOverviewView(initialTab: tab)
         case .friendRequests: FriendRequestsView()
         case .addFriend: AddFriendView()
         case .blocked: BlockedListView()
         case .notifications: NotificationsView()
-        case .forum, .forumManage, .forumSearch, .forumCreate, .myForums, .likedPosts, .post, .postCreate, .postEdit:
+        case let .post(postId): PostDetailView(postId: postId)
+        case let .forum(forumId): ForumDetailView(forumId: forumId)
+        case let .postCreate(prefill): PostCreateView(prefill: prefill)
+        case let .postEdit(postId): PostEditView(postId: postId)
+        case .forumManage, .forumSearch, .forumCreate, .myForums, .likedPosts:
             PulsoComingSoonView(title: "shell_dest_forum", systemImage: "text.bubble")
         case let .conversation(conversationId, isGroup): ChatConversationView(conversationId: conversationId, isGroup: isGroup)
         case let .chatSettings(conversationId, isGroup): ChatSettingsView(conversationId: conversationId, isGroup: isGroup)

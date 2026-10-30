@@ -569,6 +569,7 @@ struct TournamentItem: Codable, Sendable, Hashable {
     var status: TournamentStatus
     var startsAt: String
     var endsAt: String
+    var timezone: String
     var currency: String
     var coverImageId: String?
     var divisionCount: Int
@@ -577,12 +578,13 @@ struct TournamentItem: Codable, Sendable, Hashable {
     var venues: [TournamentVenueRef]
     var sports: [TournamentSport]
 
-    init(id: String, title: String = "", status: TournamentStatus = .fallback, startsAt: String = "", endsAt: String = "", currency: String = "", coverImageId: String? = nil, divisionCount: Int = 0, entryCount: Int = 0, minFeeAmount: Double? = nil, venues: [TournamentVenueRef] = [], sports: [TournamentSport] = []) {
+    init(id: String, title: String = "", status: TournamentStatus = .fallback, startsAt: String = "", endsAt: String = "", timezone: String = "", currency: String = "", coverImageId: String? = nil, divisionCount: Int = 0, entryCount: Int = 0, minFeeAmount: Double? = nil, venues: [TournamentVenueRef] = [], sports: [TournamentSport] = []) {
         self.id = id
         self.title = title
         self.status = status
         self.startsAt = startsAt
         self.endsAt = endsAt
+        self.timezone = timezone
         self.currency = currency
         self.coverImageId = coverImageId
         self.divisionCount = divisionCount
@@ -599,6 +601,7 @@ struct TournamentItem: Codable, Sendable, Hashable {
         status = try container.wire(TournamentStatus.self, "status") ?? .fallback
         startsAt = try container.wire(String.self, "startsAt") ?? ""
         endsAt = try container.wire(String.self, "endsAt") ?? ""
+        timezone = try container.wire(String.self, "timezone") ?? ""
         currency = try container.wire(String.self, "currency") ?? ""
         coverImageId = try container.wire(String.self, "coverImageId")
         divisionCount = try container.wire(Int.self, "divisionCount") ?? 0
@@ -615,6 +618,7 @@ struct TournamentItem: Codable, Sendable, Hashable {
         try container.wire(status, "status", default: .fallback)
         try container.wire(startsAt, "startsAt", default: "")
         try container.wire(endsAt, "endsAt", default: "")
+        try container.wire(timezone, "timezone", default: "")
         try container.wire(currency, "currency", default: "")
         try container.wireOptional(coverImageId, "coverImageId")
         try container.wire(divisionCount, "divisionCount", default: 0)

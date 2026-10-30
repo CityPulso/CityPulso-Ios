@@ -17,6 +17,15 @@ struct TournamentService: Sendable {
         try await repository.nearby(latitude: latitude, longitude: longitude, radiusM: radiusM)
     }
 
+    /** 赛事页：公开赛事，可以搜索、只看一个运动。 */
+    @MainActor
+    func pagePublic(search: String?, sport: TournamentSport?) -> PagedList<TournamentItem, Int> {
+        let repository = repository
+        return .offset(invalidates: { eventBus.signals { _ in true } }) { offset, limit in
+            try await repository.publicList(offset: offset, limit: limit, search: search, sport: sport)
+        }
+    }
+
     /** 球馆页上已发布或进行中的赛事（其余服务端不返回）。 */
     @MainActor
     func pageAtVenue(_ venueId: String) -> PagedList<VenueTournament, Int> {

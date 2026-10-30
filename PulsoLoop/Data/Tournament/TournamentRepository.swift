@@ -24,6 +24,10 @@ struct TournamentRepository: Sendable {
         try await api.register(divisionId: divisionId, body).dataOrThrow("RegisterTournamentEntry")
     }
 
+    func publicList(offset: Int, limit: Int, search: String?, sport: TournamentSport?) async throws -> ListWithTotal<TournamentItem> {
+        try await api.listPublic(PublicTournamentsRequest(limit: limit, offset: offset, search: search, sport: sport)).dataOrThrow("ListPublicTournaments")
+    }
+
     func myEntries(offset: Int, limit: Int) async throws -> ListWithTotal<TournamentEntry> {
         try await api.listMyEntries(TournamentPageRequest(limit: limit, offset: offset)).dataOrThrow("ListMyTournamentEntries")
     }

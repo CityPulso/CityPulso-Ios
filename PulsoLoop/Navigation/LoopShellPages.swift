@@ -37,7 +37,7 @@ enum LoopShellPages {
         case .coaching:
             MyCoachingView()
         case .tournaments:
-            MyTournamentsView()
+            TournamentsView()
         case .chatHub:
             ChatHubView()
         case .forum:

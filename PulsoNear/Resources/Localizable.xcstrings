@@ -1834,7 +1834,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "End activity"
+            "value": "End"
           }
         },
         "fr": {
@@ -3052,7 +3052,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Payment checklist"
+            "value": "Checklist"
           }
         },
         "fr": {
@@ -8784,6 +8784,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "標記未付"
+          }
+        }
+      }
+    },
+    "checklist_more": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "More actions"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plus d’actions"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更多操作"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更多操作"
           }
         }
       }

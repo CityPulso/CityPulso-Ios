@@ -44,25 +44,23 @@ final class ChatEventPickerModel {
         let hosted = hosted
         let limit = Self.limit
         do {
-            let rows = try await withThrowingTaskGroup(of: [ChatEventPickRow].self) { group in
-                for service in services.values {
-                    group.addTask { @MainActor in
-                        if hosted {
-                            try await service.freshHostedEvents(accountId: session.currentAccountId, profileId: session.currentProfileId, hostedProfileId: session.currentProfileId, limit: limit)
-                            let items = await Self.first(service.hostedEvents(accountId: session.currentAccountId, profileId: session.currentProfileId, hostedProfileId: session.currentProfileId, limit: limit))
-                            return items.map { ChatEventPickRow(eventId: $0.id, sport: $0.sport, startsAt: $0.startsAt, title: $0.title ?? "", imageKey: $0.coverImageId, hostProfileId: session.currentProfileId) }
-                        } else {
-                            let query = SportRegistrationsQuery(accountId: session.currentAccountId, profileId: session.currentProfileId, limit: limit, excludeHosted: true)
-                            try await service.freshMyRegistrations(query)
-                            let items = await Self.first(service.myRegistrations(query))
-                            return items.map { ChatEventPickRow(eventId: $0.id, sport: $0.sport, startsAt: $0.startsAt, title: $0.title ?? "", imageKey: $0.coverImageId, hostProfileId: $0.profileId ?? "") }
-                        }
+            // 每个运动一个 main actor 任务（TaskGroup + @MainActor 子任务会让隔离检查器内部报错，同 `concurrently`）。
+            let tasks = services.values.map { service in
+                Task { @MainActor () throws -> [ChatEventPickRow] in
+                    if hosted {
+                        try await service.freshHostedEvents(accountId: session.currentAccountId, profileId: session.currentProfileId, hostedProfileId: session.currentProfileId, limit: limit)
+                        let items = await Self.first(service.hostedEvents(accountId: session.currentAccountId, profileId: session.currentProfileId, hostedProfileId: session.currentProfileId, limit: limit))
+                        return items.map { ChatEventPickRow(eventId: $0.id, sport: $0.sport, startsAt: $0.startsAt, title: $0.title ?? "", imageKey: $0.coverImageId, hostProfileId: session.currentProfileId) }
+                    } else {
+                        let query = SportRegistrationsQuery(accountId: session.currentAccountId, profileId: session.currentProfileId, limit: limit, excludeHosted: true)
+                        try await service.freshMyRegistrations(query)
+                        let items = await Self.first(service.myRegistrations(query))
+                        return items.map { ChatEventPickRow(eventId: $0.id, sport: $0.sport, startsAt: $0.startsAt, title: $0.title ?? "", imageKey: $0.coverImageId, hostProfileId: $0.profileId ?? "") }
                     }
                 }
-                var all: [ChatEventPickRow] = []
-                for try await part in group { all += part }
-                return all
             }
+            var rows: [ChatEventPickRow] = []
+            for task in tasks { rows += try await task.value }
             events = Loadable(data: sortedByStartsAt(rows, startsAt: \.startsAt, id: \.eventId, descending: true), isLoading: false)
         } catch {
             events = Loadable(data: events.data, isLoading: false, error: UiError(error))
