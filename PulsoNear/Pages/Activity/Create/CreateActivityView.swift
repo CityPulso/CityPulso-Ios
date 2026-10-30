@@ -92,9 +92,9 @@ struct CreateActivityView: View {
         shell?.push(NearRoute.activity(activityType: created.activityType, activityId: created.activityId))
     }
 
-    /** 「发个帖子」：论坛那组移植前先进占位页（Android `openPostCreate`）。 */
+    /** 「发个帖子」：带上这场活动去发找球友帖（Android `openPostCreateForActivity`）。 */
     private func postAbout(_ created: CreatedActivityPrompt) {
         model.createdActivity = nil
-        shell?.push(NearRoute.comingSoon(title: "shell_dest_forum", systemImage: "text.bubble"))
+        shell?.push(NearRoute.postCreate(prefill: PostCreatePrefill(activityType: created.activityType, activityId: created.activityId, kind: .playersWanted)))
     }
 }

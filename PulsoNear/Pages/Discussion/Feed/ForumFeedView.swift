@@ -5,7 +5,7 @@ import SwiftUI
 
 /** 发帖页的起点：要写的活动、要转发的帖子，或已经选好的论坛（Android `PostCreatePrefill`）。 */
 struct PostCreatePrefill: Hashable, Sendable {
-    var activityActivityType: NearActivityKind?
+    var activityType: NearActivityKind?
     var activityId: String?
     var repostOfPostId: String?
     var forumId: String?

@@ -115,8 +115,6 @@ enum LoopRoute: Hashable {
     case locationMarker
     /** 选附近搜索的中心点。 */
     case locationPick
-    /** 还没移植的页面：[title] 是文案 key。 */
-    case comingSoon(title: String, systemImage: String)
 
     @MainActor @ViewBuilder
     var page: some View {
@@ -187,8 +185,6 @@ enum LoopRoute: Hashable {
         case .mapSettings: MapSettingsView()
         case .mapStyle: MapStyleView()
         case .locationMarker: LocationMarkerView()
-        case let .comingSoon(title, systemImage):
-            PulsoComingSoonView(title: LocalizedStringKey(title), systemImage: systemImage)
         }
     }
 }

@@ -97,8 +97,6 @@ enum NearRoute: Hashable {
     case chatActivityPicker(conversationId: String, hosted: Bool)
     /** 分享收藏（建筑 / 门店 / 帖子 / 论坛）。 */
     case chatFavoritePicker(conversationId: String)
-    /** 还没移植的页面：[title] 是文案 key。 */
-    case comingSoon(title: String, systemImage: String)
 
     @MainActor @ViewBuilder
     var page: some View {
@@ -160,8 +158,6 @@ enum NearRoute: Hashable {
         case let .chatLocationView(latitude, longitude, label, address): ChatLocationView(latitude: latitude, longitude: longitude, label: label, address: address)
         case let .chatActivityPicker(conversationId, hosted): ChatActivityPickerView(conversationId: conversationId, hosted: hosted)
         case let .chatFavoritePicker(conversationId): ChatFavoritePickerView(conversationId: conversationId)
-        case let .comingSoon(title, systemImage):
-            PulsoComingSoonView(title: LocalizedStringKey(title), systemImage: systemImage)
         }
     }
 }

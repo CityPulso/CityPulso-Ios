@@ -60,7 +60,7 @@ final class PostCreateModel {
         if let id = prefill.repostOfPostId, let post = try? await discussion.post(id) {
             repostOf = RepostOf(postId: post.id, title: post.title, contentText: post.contentText, author: post.author, available: true)
         }
-        if let activityType = prefill.activityActivityType, let activityId = prefill.activityId, let service = activityTypeServices[activityType] {
+        if let activityType = prefill.activityType, let activityId = prefill.activityId, let service = activityTypeServices[activityType] {
             await prefillActivity(service, activityType: activityType, activityId: activityId)
         }
     }
