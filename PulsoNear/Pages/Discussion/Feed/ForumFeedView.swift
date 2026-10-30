@@ -139,6 +139,7 @@ struct ForumFeedView: View {
                     EmptyView()
                 }
                 .pickerStyle(.segmented)
+                .padding(.horizontal)
                 if model.tab != .mine { filters }
             }
             .listRowBackground(Color.clear)

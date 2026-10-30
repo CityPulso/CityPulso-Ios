@@ -84,8 +84,9 @@ struct WalletView: View {
         .task(id: model.bundlesTab) { await model.bundles.observe() }
     }
 
+    /** 卡片本身就是入口，用按钮推页面，列表不会再在外面加一个箭头。 */
     private func entry(_ systemImage: String, _ title: LocalizedStringKey, _ hint: LocalizedStringKey, _ route: LoopRoute) -> some View {
-        NavigationLink(value: route) {
+        Button { shell?.push(route) } label: {
             VStack(alignment: .leading, spacing: 4) {
                 Image(systemName: systemImage).font(.title3).foregroundStyle(Color.accentColor)
                 Text(title).font(.subheadline.weight(.semibold)).foregroundStyle(Color.primary).lineLimit(1)
