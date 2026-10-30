@@ -17,9 +17,7 @@ final class ActivityCenterModel {
 
     var activityType: NearActivityKind = .boardGame { didSet { if activityType != oldValue { reloadActivities(); reloadBookings() } } }
     var tab: ActivityCenterTab
-    var filter = ActivityFilter()
-    /** 「我的订场」下面：即将开始 / 已结束。 */
-    var bookingTab = SpaceBookingListTab.upcoming { didSet { if bookingTab != oldValue { reloadBookings() } } }
+    var filter = ActivityFilter() { didSet { if filter.bookings != oldValue.bookings { reloadBookings() } } }
     private(set) var isPulser = false
     private(set) var loading = false
     private(set) var error: UiError?
@@ -44,6 +42,29 @@ final class ActivityCenterModel {
     }
 
     /** 要发起活动得有 pulser 角色；所有人都能看自己参加的和订场。 */
+    /**
+     * 在第二层标签之间滑动；滑过最后（第一）个就到下一个（上一个）活动类型的第一个（最后一个）标签。
+     * 还没开放的活动类型只算一页。
+     */
+    func swipe(forward: Bool) {
+        let index = tabs.firstIndex(of: tab) ?? 0
+        let all = NearActivityKind.allCases
+        let current = all.firstIndex(of: activityType) ?? 0
+        let atStart = !activityType.available || index <= 0
+        let atEnd = !activityType.available || index >= tabs.count - 1
+        if forward, !atEnd {
+            tab = tabs[index + 1]
+        } else if !forward, !atStart {
+            tab = tabs[index - 1]
+        } else if forward, current < all.count - 1 {
+            activityType = all[current + 1]
+            tab = tabs.first ?? tab
+        } else if !forward, current > 0 {
+            activityType = all[current - 1]
+            tab = tabs.last ?? tab
+        }
+    }
+
     var tabs: [ActivityCenterTab] {
         isPulser ? ActivityCenterTab.allCases : [.joined, .spaceBookings]
     }
@@ -184,7 +205,7 @@ final class ActivityCenterModel {
         bookings = Loadable()
         guard let scope = scope(), let venueActivityType else { return }
         let stream = venueServices[venueActivityType]!.myBookings(
-            MySpaceBookingsKey(accountId: scope.accountId, profileId: scope.profileId, upcoming: bookingTab == .upcoming, limit: Self.pageSize)
+            MySpaceBookingsKey(accountId: scope.accountId, profileId: scope.profileId, upcoming: filter.bookings == .upcoming, limit: Self.pageSize)
         )
         bookingsTask = Task {
             for await response in stream {

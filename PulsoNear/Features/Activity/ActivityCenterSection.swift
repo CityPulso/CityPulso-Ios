@@ -61,15 +61,6 @@ struct ActivityCenterSection: View {
                     .accessibilityLabel(Text("activity_filter_title"))
                 }
                 .padding(.horizontal)
-                // 我的订场在这里（不再有单独的订场页）：即将开始或已结束。
-                if model.tab == .spaceBookings {
-                    Picker("activity_tab_bookings", selection: $model.bookingTab) {
-                        Text("space_bookings_tabs_upcoming").tag(SpaceBookingListTab.upcoming)
-                        Text("space_bookings_tabs_past").tag(SpaceBookingListTab.past)
-                    }
-                    .pickerStyle(.segmented)
-                    .padding(.horizontal)
-                }
             }
         }
         .padding(.vertical, 8)
@@ -78,6 +69,19 @@ struct ActivityCenterSection: View {
 
     @ViewBuilder
     private var content: some View {
+        contentBody
+            // 左右滑动换标签（横向为主才算，不挡上下滚动）。
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 30).onEnded { value in
+                    let dx = value.translation.width
+                    guard abs(dx) > 60, abs(dx) > abs(value.translation.height) * 1.5 else { return }
+                    withAnimation { model.swipe(forward: dx < 0) }
+                }
+            )
+    }
+
+    @ViewBuilder
+    private var contentBody: some View {
         if !model.activityType.available {
             PulsoComingSoonView(title: model.activityType.labelKey, systemImage: "hourglass")
                 .frame(minHeight: 320)
@@ -145,7 +149,7 @@ struct ActivityCenterSection: View {
             }
         case .spaceBookings:
             ContentUnavailableView {
-                Label(model.bookingTab == .past ? "space_bookings_empty_past" : "space_bookings_empty_upcoming", systemImage: "sportscourt")
+                Label(model.filter.bookings == .past ? "space_bookings_empty_past" : "space_bookings_empty_upcoming", systemImage: "sportscourt")
             } description: {
                 Text("space_bookings_empty_body")
             } actions: {

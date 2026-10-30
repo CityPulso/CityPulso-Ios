@@ -21,7 +21,12 @@ struct ActivityFilterSheet: View {
                     Text("shell_home_sort_earliest").tag(true)
                     Text("shell_home_sort_latest").tag(false)
                 }
-                if tab != .courtBookings {
+                if tab == .courtBookings {
+                    Picker("activity_tab_bookings", selection: $draft.bookings) {
+                        Text("court_bookings_tabs_upcoming").tag(CourtBookingListTab.upcoming)
+                        Text("court_bookings_tabs_past").tag(CourtBookingListTab.past)
+                    }
+                } else {
                     Toggle("activity_filter_show_ended", isOn: $draft.showEnded)
                 }
             }

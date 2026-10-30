@@ -21,7 +21,12 @@ struct CalendarActivityFilterSheet: View {
                     Text("shell_home_sort_earliest").tag(true)
                     Text("shell_home_sort_latest").tag(false)
                 }
-                if tab != .spaceBookings {
+                if tab == .spaceBookings {
+                    Picker("activity_tab_bookings", selection: $draft.bookings) {
+                        Text("space_bookings_tabs_upcoming").tag(SpaceBookingListTab.upcoming)
+                        Text("space_bookings_tabs_past").tag(SpaceBookingListTab.past)
+                    }
+                } else {
                     Toggle("activity_filter_show_ended", isOn: $draft.showEnded)
                 }
             }
