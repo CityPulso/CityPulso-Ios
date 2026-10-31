@@ -44,6 +44,7 @@ public struct PulsoFloatingShellNavigation: View {
                 if appsExpanded {
                     HStack(spacing: Self.gap) {
                         tray
+                            .frame(maxWidth: .infinity)
                             .glassEffect(.regular, in: .rect(cornerRadius: 28))
                             .glassEffectID("tray", in: glass)
                         Color.clear.frame(width: Self.barHeight, height: 1)

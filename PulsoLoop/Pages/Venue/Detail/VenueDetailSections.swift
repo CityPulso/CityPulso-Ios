@@ -61,7 +61,7 @@ struct VenueOverviewSections: View {
                 }
             }
             .listRowBackground(Color.clear)
-            .listRowInsets(EdgeInsets(top: PulsoSpace.s2, leading: 0, bottom: PulsoSpace.s2, trailing: 0))
+            .listRowInsets(EdgeInsets(top: PulsoSpace.s2, leading: PulsoSpace.s4, bottom: PulsoSpace.s2, trailing: PulsoSpace.s4))
         }
         hours
         location
