@@ -15,6 +15,7 @@ struct VenueDetailView: View {
     @State private var photoPage = 0
     @Environment(\.locale) private var locale
     @Environment(\.openURL) private var openURL
+    @Environment(\.dismiss) private var dismiss
     @Environment(\.pulsoPalette) private var palette
     @Environment(PulsoShellNavigator.self) private var shell: PulsoShellNavigator?
 
@@ -75,6 +76,8 @@ struct VenueDetailView: View {
                 tabContent(venue)
             }
             .listSectionSpacing(.compact)
+            .ignoresSafeArea(edges: .top)
+            .toolbarVisibility(.hidden, for: .navigationBar)
             .refreshable { model.refresh() }
         } else if let error = model.venue.error {
             if error.kind == .notFound {
@@ -113,9 +116,17 @@ struct VenueDetailView: View {
                     }
                 }
             }
-            .frame(height: 240)
+            .frame(height: 300)
+            .containerRelativeFrame(.horizontal)
             .clipped()
+            .overlay(alignment: .top) { heroButtons(venue) }
             .listRowInsets(EdgeInsets())
+            .listRowBackground(Color.clear)
+            if urls.count > 1 {
+                thumbnails(urls)
+                    .listRowInsets(EdgeInsets(top: PulsoSpace.s3, leading: 0, bottom: 0, trailing: 0))
+                    .listRowBackground(Color.clear)
+            }
             VStack(alignment: .leading, spacing: 6) {
                 HStack(alignment: .firstTextBaseline) {
                     Text(verbatim: venue.displayName).font(.title2.bold()).foregroundStyle(palette.text)
@@ -124,9 +135,7 @@ struct VenueDetailView: View {
                     }
                 }
                 if !venue.building.address.isEmpty {
-                    Label { Text(verbatim: venue.building.address) } icon: { Image(systemName: "mappin.and.ellipse") }
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                    Text(verbatim: venue.building.address).font(.subheadline).foregroundStyle(palette.secondaryText)
                 }
                 HStack(spacing: 12) {
                     if let price = venue.sportEntries.filter({ $0.status == .published }).lowestHourlyPrice {
@@ -135,8 +144,51 @@ struct VenueDetailView: View {
                     Label { Text(verbatim: localizedFormat("shell_views_count", venue.view)) } icon: { Image(systemName: "eye") }
                 }
                 .font(.subheadline.monospacedDigit())
-                .foregroundStyle(.secondary)
+                .foregroundStyle(palette.secondaryText)
+                if let status = venueOpenStatus(venueWeek(venue.hours), timezone: venue.timezone) {
+                    VenueOpenChip(status: status)
+                }
                 quickActions(venue)
+            }
+            .listRowInsets(EdgeInsets(top: PulsoSpace.s3, leading: 0, bottom: PulsoSpace.s3, trailing: 0))
+            .listRowBackground(Color.clear)
+        }
+        .listRowSeparator(.hidden)
+    }
+
+    /** 封面上的返回、分享、收藏（Android 详情页顶栏叠在照片上）。 */
+    private func heroButtons(_ venue: VenueDetail) -> some View {
+        HStack(spacing: PulsoSpace.s2) {
+            PulsoIconButton("arrow.left", label: Text("profile_back")) { dismiss() }
+            Spacer()
+            ShareLink(item: shareText(venue)) {
+                Image(systemName: "square.and.arrow.up")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .frame(width: PulsoControlSize.small.height, height: PulsoControlSize.small.height)
+                    .background(.black.opacity(0.36), in: palette.controlShape)
+            }
+            FavoriteHeart(target: .venue, id: venue.id, name: venue.displayName, style: .overlay)
+        }
+        .padding(.horizontal, PulsoSpace.s4)
+        .safeAreaPadding(.top)
+    }
+
+    /** 照片缩略图一排，当前那张描强调色边。 */
+    private func thumbnails(_ urls: [URL]) -> some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: PulsoSpace.s2) {
+                ForEach(urls.indices, id: \.self) { index in
+                    Button { withAnimation { photoPage = index } } label: {
+                        PulsoRemoteImage(url: urls[index])
+                            .frame(width: 80, height: 56)
+                            .clipShape(palette.innerShape)
+                            .overlay {
+                                if index == photoPage { palette.innerShape.strokeBorder(palette.accent.step(9), lineWidth: 2) }
+                            }
+                    }
+                    .buttonStyle(.plain)
+                }
             }
         }
     }
@@ -164,13 +216,8 @@ struct VenueDetailView: View {
             if let site = venue.website, !site.isEmpty, let url = URL(string: site.hasPrefix("http") ? site : "https://\(site)") {
                 Button { openURL(url) } label: { quickAction("globe", "venue_detail_website") }
             }
-            VStack(spacing: PulsoSpace.s1) {
-                FavoriteHeart(target: .venue, id: venue.id, name: venue.displayName)
-                    .frame(width: 48, height: 48)
-                    .background(palette.accent.step(3), in: palette.innerShape)
-                Text("venue_detail_action_favorite").font(.caption2).foregroundStyle(palette.secondaryText)
-            }
-            .frame(maxWidth: .infinity)
+            FavoriteHeart(target: .venue, id: venue.id, name: venue.displayName, style: .tile)
+                .frame(maxWidth: .infinity)
         }
         .buttonStyle(.plain)
         .padding(.top, PulsoSpace.s2)

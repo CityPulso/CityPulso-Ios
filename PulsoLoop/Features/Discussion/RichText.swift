@@ -157,7 +157,8 @@ struct RichTextBody: View {
 
 /**
  * 正文编辑器（Android `RichTextField`）：加粗、斜体、下划线、颜色、无序 / 有序列表，下面是「已用 / 上限」。
- * 调用方拿着 [text]，提交时用 [RichTextHTML.html] 导出。
+ * 调用方拿着 [text]，提交时用 [RichTextHTML.html] 导出。[compact] 是评论栏：只有加粗 / 斜体 / 下划线 / 颜色，
+ * 输入框是一行描边框，随内容长高到几行。
  */
 struct RichTextEditor: View {
     @Binding var text: AttributedString
@@ -165,14 +166,16 @@ struct RichTextEditor: View {
     let maxChars: Int
     var minHeight: CGFloat = 140
     var showCounter = true
+    var compact = false
     @State private var selection = AttributedTextSelection()
     @State private var paletteOpen = false
     @Environment(\.fontResolutionContext) private var fontContext
+    @Environment(\.pulsoPalette) private var palette
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: compact ? PulsoSpace.s1 : 6) {
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 4) {
+                HStack(spacing: compact ? PulsoSpace.s2 : 4) {
                     tool("bold", "discussion_editor_bold") { toggleTrait(bold: true) }
                     tool("italic", "discussion_editor_italic") { toggleTrait(bold: false) }
                     tool("underline", "discussion_editor_underline") {
@@ -181,8 +184,10 @@ struct RichTextEditor: View {
                         }
                     }
                     tool("paintpalette", "discussion_editor_color") { paletteOpen.toggle() }
-                    tool("list.bullet", "discussion_editor_bullets") { toggleLinePrefix(numbered: false) }
-                    tool("list.number", "discussion_editor_numbers") { toggleLinePrefix(numbered: true) }
+                    if !compact {
+                        tool("list.bullet", "discussion_editor_bullets") { toggleLinePrefix(numbered: false) }
+                        tool("list.number", "discussion_editor_numbers") { toggleLinePrefix(numbered: true) }
+                    }
                 }
             }
             if paletteOpen {
@@ -205,11 +210,16 @@ struct RichTextEditor: View {
             }
             ZStack(alignment: .topLeading) {
                 if text.characters.isEmpty {
-                    Text(placeholder).foregroundStyle(.tertiary).padding(.top, 8).padding(.leading, 5)
+                    Text(placeholder).foregroundStyle(palette.secondaryText).padding(.top, 8).padding(.leading, 5)
                 }
                 TextEditor(text: $text, selection: $selection)
-                    .frame(minHeight: minHeight)
+                    .frame(minHeight: compact ? 40 : minHeight, maxHeight: compact ? 120 : nil)
+                    .fixedSize(horizontal: false, vertical: compact)
                     .scrollContentBackground(.hidden)
+            }
+            .padding(.horizontal, compact ? PulsoSpace.s2 : 0)
+            .overlay {
+                if compact { palette.controlShape.stroke(palette.outline, lineWidth: pulsoHairline) }
             }
             if showCounter {
                 let length = RichTextHTML.length(text)
@@ -222,10 +232,12 @@ struct RichTextEditor: View {
     }
 
     private func tool(_ symbol: String, _ label: LocalizedStringKey, action: @escaping () -> Void) -> some View {
-        Button(action: action) { Image(systemName: symbol).frame(width: 32, height: 28) }
-            .buttonStyle(.pulso(.soft))
-            .controlSize(.small)
-            .accessibilityLabel(Text(label))
+        // 工具是不带底色的图标（Android 编辑器上方一排）。
+        Button(action: action) {
+            Image(systemName: symbol).font(.body.weight(.medium)).foregroundStyle(palette.text).frame(width: 36, height: 32)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text(label))
     }
 
     private func toggleTrait(bold: Bool) {

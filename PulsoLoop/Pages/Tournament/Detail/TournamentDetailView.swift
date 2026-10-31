@@ -11,6 +11,7 @@ struct TournamentDetailView: View {
     @State private var model: TournamentDetailModel
     @Environment(\.locale) private var locale
     @Environment(\.openURL) private var openURL
+    @Environment(\.dismiss) private var dismiss
     @Environment(PulsoShellNavigator.self) private var shell: PulsoShellNavigator?
 
     init(tournamentId: String) {
@@ -21,7 +22,6 @@ struct TournamentDetailView: View {
         content
             .navigationTitle(Text(verbatim: model.tournament.data?.title ?? ""))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { toolbar }
             .safeAreaInset(edge: .bottom) { bottomBar }
             .task { await model.observe() }
             .sheet(item: $model.sheet) { _ in
@@ -31,22 +31,30 @@ struct TournamentDetailView: View {
             }
     }
 
-    @ToolbarContentBuilder
-    private var toolbar: some ToolbarContent {
-        if let tournament = model.tournament.data {
-            ToolbarItem(placement: .topBarTrailing) {
-                ShareLink(item: shareText(tournament)) { Image(systemName: "square.and.arrow.up") }
-                    .accessibilityLabel(Text("tournament_detail_share"))
+    /** 封面上的返回、分享、更多（Android 赛事页顶栏叠在照片上）。 */
+    private func heroButtons(_ tournament: TournamentDetail) -> some View {
+        HStack(spacing: PulsoSpace.s2) {
+            PulsoIconButton("arrow.left", label: Text("profile_back")) { dismiss() }
+            Spacer()
+            ShareLink(item: shareText(tournament)) { overlayIcon("square.and.arrow.up") }
+                .accessibilityLabel(Text("tournament_detail_share"))
+            Menu {
+                Button { shell?.push(LoopRoute.myTournaments) } label: { Label("tournament_detail_open_mine", systemImage: "trophy") }
+            } label: {
+                overlayIcon("ellipsis")
             }
-            ToolbarItem(placement: .topBarTrailing) {
-                Menu {
-                    NavigationLink(value: LoopRoute.myTournaments) { Label("tournament_detail_open_mine", systemImage: "trophy") }
-                } label: {
-                    Image(systemName: "ellipsis")
-                }
-                .accessibilityLabel(Text("tournament_detail_more"))
-            }
+            .accessibilityLabel(Text("tournament_detail_more"))
         }
+        .padding(.horizontal, PulsoSpace.s4)
+        .safeAreaPadding(.top)
+    }
+
+    private func overlayIcon(_ systemImage: String) -> some View {
+        Image(systemName: systemImage)
+            .font(.system(size: 16, weight: .semibold))
+            .foregroundStyle(.white)
+            .frame(width: PulsoControlSize.small.height, height: PulsoControlSize.small.height)
+            .background(.black.opacity(0.36), in: palette.controlShape)
     }
 
     @ViewBuilder
@@ -55,6 +63,7 @@ struct TournamentDetailView: View {
             List {
                 Section {
                     TournamentHero(urls: tournament.images.sorted { $0.sortOrder < $1.sortOrder }.compactMap { model.imageURL($0.imageId) })
+                        .overlay(alignment: .top) { heroButtons(tournament) }
                         .listRowInsets(EdgeInsets())
                     head(tournament)
                 }
@@ -67,6 +76,8 @@ struct TournamentDetailView: View {
             }
             .listStyle(.plain)
             .listSectionSeparator(.hidden)
+            .ignoresSafeArea(edges: .top)
+            .toolbarVisibility(.hidden, for: .navigationBar)
             .refreshable { await model.load() }
         } else if let error = model.tournament.error {
             if error.kind == .notFound {
@@ -340,7 +351,7 @@ struct TournamentDetailView: View {
                             if mine.captainProfileId == model.myProfileId, mine.status == .awaitingPayment {
                                 Button("tournament_mine_pay") { Task { await model.payMine() } }.buttonStyle(.pulso())
                             } else {
-                                NavigationLink("tournament_detail_view_entry", value: LoopRoute.myTournaments).buttonStyle(.pulso())
+                                NavigationLink("tournament_detail_view_entry", value: LoopRoute.myTournaments).buttonStyle(.pulso(.soft))
                             }
                         }
                     }

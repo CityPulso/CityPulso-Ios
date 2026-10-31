@@ -331,6 +331,9 @@ struct PostDetailView: View {
                     onBookmark: { Task { await model.toggleBookmark() } }
                 )
             }
+            // 正文直接铺在页面上，不套卡片（Android 帖子页）。
+            .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
             if !data.publications.isEmpty {
                 Section("discussion_published_in") {
                     ForEach(data.publications, id: \.forumId) { publication in
@@ -363,7 +366,7 @@ struct PostDetailView: View {
                         Button { model.reporting = ReportTarget() } label: { Label("discussion_action_report", systemImage: "flag") }
                     }
                 } label: {
-                    Image(systemName: "ellipsis.circle")
+                    Image(systemName: "ellipsis")
                 }
                 .accessibilityLabel(Text("discussion_more"))
             }
@@ -504,8 +507,7 @@ struct PostDetailView: View {
                 }
             }
             HStack(alignment: .bottom) {
-                RichTextEditor(text: $draft, placeholder: "discussion_comment_placeholder", maxChars: commentMax, minHeight: 44, showCounter: false)
-                    .frame(maxHeight: 160)
+                RichTextEditor(text: $draft, placeholder: "discussion_comment_placeholder", maxChars: commentMax, showCounter: false, compact: true)
                 Button("discussion_comment_send") {
                     let html = RichTextHTML.html(draft, context: fontContext)
                     let text = String(draft.characters)

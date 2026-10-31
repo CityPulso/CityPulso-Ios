@@ -198,29 +198,50 @@ struct ForumDetailView: View {
             }
         }
         .refreshable { await model.load() }
+        .overlay(alignment: .bottomTrailing) {
+            if forum.status == .active, model.tab == .posts {
+                // 发帖：浅强调色圆角方块 + 强调色铅笔（Android FAB）。
+                Button { shell?.push(LoopRoute.postCreate(prefill: PostCreatePrefill(forumId: forum.id))) } label: {
+                    Image(systemName: "pencil")
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(palette.accent.step(11))
+                        .frame(width: 56, height: 56)
+                        .background(palette.accent.step(3), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .shadow(color: .black.opacity(0.15), radius: 6, y: 3)
+                }
+                .buttonStyle(.plain)
+                .padding(PulsoSpace.s4)
+                .accessibilityLabel(Text("discussion_new_post"))
+            }
+        }
     }
 
     private func header(_ forum: ForumDetail) -> some View {
+        // 封面铺满宽度，头像压在封面左下角往下伸出一半；名字、数字、简介和按钮直接在页面上（Android 论坛头部）。
         Section {
             ZStack(alignment: .bottomLeading) {
                 Rectangle().fill(palette.accent.step(3))
-                if let cover = model.imageURL(forum.coverImageId) { PulsoRemoteImage(url: cover) }
+                    .frame(height: 170)
+                    .overlay { if let cover = model.imageURL(forum.coverImageId) { PulsoRemoteImage(url: cover) } }
+                    .clipped()
+                    .containerRelativeFrame(.horizontal)
+                    .padding(.bottom, 48)
                 PulsoRemoteImage(url: model.imageURL(forum.avatarImageId))
-                    .frame(width: 56, height: 56)
+                    .frame(width: 88, height: 88)
                     .background(palette.gray.step(3))
                     .clipShape(palette.innerShape)
-                    .overlay(palette.innerShape.stroke(palette.background, lineWidth: 2))
-                    .padding(12)
+                    .overlay(palette.innerShape.stroke(palette.background, lineWidth: 3))
             }
-            .frame(height: 180)
-            .clipped()
             .listRowInsets(EdgeInsets())
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: PulsoSpace.s2) {
                 HStack {
-                    Text(verbatim: forum.name).font(.title3.bold()).foregroundStyle(palette.text)
+                    Text(verbatim: forum.name).font(.title2.bold()).foregroundStyle(palette.text)
                     ForumBadge(scope: forum.owner.profileScope)
                 }
-                Text(verbatim: localizedFormat("discussion_forum_stats", forum.favoriteCount, forum.postCount, forum.staffCount)).font(.caption).foregroundStyle(.secondary)
+                Text(verbatim: localizedFormat("discussion_forum_stats", forum.favoriteCount, forum.postCount, forum.staffCount)).font(.subheadline).foregroundStyle(palette.secondaryText)
+                if !forum.description.isEmpty {
+                    Text(verbatim: forum.description).font(.body).foregroundStyle(palette.text)
+                }
                 if forum.status == .archived {
                     Text("discussion_forum_archived").font(.caption).foregroundStyle(.orange)
                 }
@@ -235,7 +256,8 @@ struct ForumDetailView: View {
                     .buttonStyle(.pulso(forum.favoritedByMe ? .soft : .solid, tone: forum.favoritedByMe ? .gray : .accent))
                     .disabled(model.busy)
                     if forum.status == .active {
-                        NavigationLink(value: LoopRoute.postCreate(prefill: PostCreatePrefill(forumId: forum.id))) {
+                        // List 会把 NavigationLink 画成带箭头的一行，这里用按钮推页面。
+                        Button { shell?.push(LoopRoute.postCreate(prefill: PostCreatePrefill(forumId: forum.id))) } label: {
                             Text("discussion_post_here").frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.pulso(.soft))
@@ -259,8 +281,12 @@ struct ForumDetailView: View {
                     .buttonStyle(.plain)
                     .accessibilityLabel(Text("discussion_more_actions"))
                 }
+                .padding(.top, PulsoSpace.s2)
             }
+            .listRowInsets(EdgeInsets(top: PulsoSpace.s3, leading: 0, bottom: 0, trailing: 0))
         }
+        .listRowBackground(Color.clear)
+        .listRowSeparator(.hidden)
     }
 
     @ViewBuilder
@@ -341,12 +367,14 @@ struct ForumDetailView: View {
     }
 
     private func topicChip(_ label: Text, selected: Bool, action: @escaping () -> Void) -> some View {
+        // 选中是浅强调色底，没选中是描边（Android 话题筛选）。
         Button(action: action) {
             label.font(.subheadline.weight(selected ? .semibold : .regular))
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .foregroundStyle(selected ? AnyShapeStyle(.tint) : AnyShapeStyle(.secondary))
-                .background(selected ? AnyShapeStyle(.tint.opacity(0.15)) : AnyShapeStyle(.fill.tertiary), in: .capsule)
+                .padding(.horizontal, PulsoSpace.s4)
+                .frame(height: PulsoControlSize.small.height)
+                .foregroundStyle(selected ? palette.accent.step(11) : palette.text)
+                .background(selected ? palette.accent.step(3) : Color.clear, in: palette.chipShape)
+                .overlay { if !selected { palette.chipShape.stroke(palette.outlineVariant, lineWidth: pulsoHairline) } }
         }
         .buttonStyle(.plain)
     }

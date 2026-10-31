@@ -55,15 +55,23 @@ final class FavoriteHeartModel {
     }
 }
 
-/** 门店 / 建筑上的收藏心形（Android `FavoriteHeartAction`）；没登录时不显示。[overlay] 画在封面照片上。 */
+/** 心形画在哪儿：普通图标、封面照片上的玻璃圆钮、详情页快捷操作那一排的方块加小字。 */
+enum FavoriteHeartStyle {
+    case plain
+    case overlay
+    case tile
+}
+
+/** 门店 / 建筑上的收藏心形（Android `FavoriteHeartAction`）；没登录时不显示。 */
 struct FavoriteHeart: View {
     let name: String
-    var overlay = false
+    var style = FavoriteHeartStyle.plain
     @State private var model: FavoriteHeartModel
+    @Environment(\.pulsoPalette) private var palette
 
-    init(target: FavoriteTarget, id: String, name: String, overlay: Bool = false) {
+    init(target: FavoriteTarget, id: String, name: String, style: FavoriteHeartStyle = .plain) {
         self.name = name
-        self.overlay = overlay
+        self.style = style
         _model = State(initialValue: FavoriteHeartModel(target: target, id: id))
     }
 
@@ -73,29 +81,40 @@ struct FavoriteHeart: View {
                 Button {
                     Task { await model.toggle() }
                 } label: {
-                    Image(systemName: model.favorited ? "heart.fill" : "heart")
-                        .pulsoToggleBurst(active: model.favorited, color: .accentColor)
-                        .foregroundStyle(model.favorited ? Color.accentColor : (overlay ? Color.white : Color.primary))
-                        .frame(width: 36, height: 36)
+                    label
                 }
                 .buttonStyle(.plain)
-                .modifier(OverlayGlass(enabled: overlay))
                 .disabled(model.pending)
                 .accessibilityLabel(Text(verbatim: localizedFormat(model.favorited ? "favorites_remove_named" : "favorites_add_named", name)))
             }
         }
         .task { await model.observe() }
     }
-}
 
-private struct OverlayGlass: ViewModifier {
-    let enabled: Bool
-
-    func body(content: Content) -> some View {
-        if enabled {
-            content.glassEffect(.regular.interactive(), in: .circle)
-        } else {
-            content
+    @ViewBuilder
+    private var label: some View {
+        let heart = Image(systemName: model.favorited ? "heart.fill" : "heart")
+            .pulsoToggleBurst(active: model.favorited, color: palette.accent.step(9))
+        switch style {
+        case .plain:
+            heart
+                .foregroundStyle(model.favorited ? palette.accent.step(9) : palette.text)
+                .frame(width: 36, height: 36)
+        case .overlay:
+            heart
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(model.favorited ? palette.accent.step(9) : Color.white)
+                .frame(width: PulsoControlSize.small.height, height: PulsoControlSize.small.height)
+                .background(.black.opacity(0.36), in: palette.controlShape)
+        case .tile:
+            VStack(spacing: PulsoSpace.s1) {
+                heart
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(palette.accent.step(9))
+                    .frame(width: 48, height: 48)
+                    .background(palette.accent.step(3), in: palette.innerShape)
+                Text("venue_detail_action_favorite").font(.caption2).foregroundStyle(palette.secondaryText)
+            }
         }
     }
 }
