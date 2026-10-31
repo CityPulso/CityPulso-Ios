@@ -54,7 +54,7 @@ struct ChatConversationView: View {
         if let path = model.wallpaperPath, let image = UIImage(contentsOfFile: path) {
             Image(uiImage: image).resizable().scaledToFill().ignoresSafeArea()
         } else {
-            Color(.systemGroupedBackground).ignoresSafeArea()
+            PulsoPageBackground().ignoresSafeArea()
         }
     }
 

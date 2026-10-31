@@ -44,17 +44,9 @@ struct VenueBookActivityTypeBar: View {
                 HStack(spacing: 8) {
                     ForEach(activityTypes, id: \.self) { activityType in
                         let isOn = activityType == selected
-                        Button { onSelect(activityType) } label: {
-                            HStack(spacing: 6) {
-                                Image(activityType.kind.iconAsset).resizable().scaledToFit().frame(width: 18, height: 18)
-                                Text(activityType.kind.labelKey).font(.subheadline.weight(isOn ? .semibold : .regular))
-                            }
-                            .padding(.horizontal, 12)
-                            .frame(height: 34)
-                            .foregroundStyle(isOn ? Color.white : Color.primary)
-                            .background(isOn ? Color.accentColor : Color(.tertiarySystemFill), in: .capsule)
+                        PulsoChoiceChip(Text(activityType.kind.labelKey), image: Image(activityType.kind.iconAsset), selected: isOn) {
+                            onSelect(activityType)
                         }
-                        .buttonStyle(.plain)
                     }
                 }
                 .padding(.horizontal)
@@ -71,6 +63,7 @@ struct VenueBookView: View {
     let onSelectActivityType: (VenueActivityType) -> Void
     @State private var model: VenueBookModel
     @Environment(\.locale) private var locale
+    @Environment(\.pulsoPalette) private var palette
     @Environment(PulsoShellNavigator.self) private var shell: PulsoShellNavigator?
 
     init(venueId: String, activityType: VenueActivityType, onSelectActivityType: @escaping (VenueActivityType) -> Void) {
@@ -136,8 +129,8 @@ struct VenueBookView: View {
             VenueBookActivityTypeBar(activityTypes: model.activityTypes, selected: model.activityType, onSelect: onSelectActivityType)
             SpaceDateStrip(dateKeys: model.dateKeys, selected: model.dateKey) { model.selectDate($0) }
         }
-        .padding(.vertical, 8)
-        .background(.bar)
+        .padding(.vertical, PulsoSpace.s2)
+        .background(palette.gray.step(2))
     }
 
     @ViewBuilder
@@ -190,30 +183,32 @@ struct SpaceDateStrip: View {
     let onSelect: (String) -> Void
 
     @Environment(\.locale) private var locale
+    @Environment(\.pulsoPalette) private var palette
 
     var body: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "calendar").foregroundStyle(.secondary).accessibilityLabel(Text("venue_book_pick_date"))
+        HStack(spacing: PulsoSpace.s2) {
+            Image(systemName: "calendar").font(.title3).foregroundStyle(palette.secondaryText).accessibilityLabel(Text("venue_book_pick_date"))
             ScrollViewReader { proxy in
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 4) {
                         if dateKeys.isEmpty {
                             ForEach(0 ..< 5, id: \.self) { _ in
-                                RoundedRectangle(cornerRadius: 10).fill(Color(.tertiarySystemFill)).frame(width: 56, height: 44)
+                                palette.innerShape.fill(palette.gray.step(3)).frame(width: 56, height: 52)
                             }
                         }
                         ForEach(dateKeys, id: \.self) { key in
                             let parts = VenueTime.dateKeyParts(key, locale: locale)
                             let isOn = key == selected
                             Button { onSelect(key) } label: {
-                                VStack(spacing: 0) {
-                                    Text(verbatim: parts.weekday).font(.caption.weight(.medium))
-                                    Text(verbatim: parts.day).font(.caption2.monospacedDigit()).lineLimit(1)
+                                // 选中的日期是实心强调色块（Android 日期条）。
+                                VStack(spacing: PulsoSpace.half) {
+                                    Text(verbatim: parts.weekday).font(.subheadline.weight(isOn ? .bold : .medium))
+                                    Text(verbatim: parts.day).font(.caption.monospacedDigit()).lineLimit(1)
                                 }
-                                .foregroundStyle(isOn ? Color.white : Color.secondary)
-                                .frame(width: 56)
-                                .padding(.vertical, 8)
-                                .background(isOn ? Color.accentColor : Color.clear, in: .rect(cornerRadius: 10))
+                                .foregroundStyle(isOn ? palette.onAccent : palette.secondaryText)
+                                .frame(width: 60)
+                                .padding(.vertical, PulsoSpace.s2)
+                                .background(isOn ? palette.accent.step(9) : Color.clear, in: palette.innerShape)
                             }
                             .buttonStyle(.plain)
                             .id(key)
@@ -249,11 +244,12 @@ struct SpaceSelectedBar: View {
     let onOpenMembership: () -> Void
 
     @Environment(\.locale) private var locale
+    @Environment(\.pulsoPalette) private var palette
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             if lines.isEmpty {
-                Text("venue_book_pick_first").font(.subheadline).foregroundStyle(.secondary)
+                Text("venue_book_pick_first").font(.subheadline).foregroundStyle(palette.secondaryText)
             } else {
                 HStack {
                     Text(verbatim: localizedFormat("venue_book_selected_title", lines.count)).font(.subheadline.weight(.semibold))
@@ -278,7 +274,7 @@ struct SpaceSelectedBar: View {
                             .padding(.horizontal, 10)
                             .padding(.vertical, 6)
                             .frame(maxWidth: 200)
-                            .background(Color(.tertiarySystemFill), in: .rect(cornerRadius: 10))
+                            .background(palette.gray.step(3), in: palette.innerShape)
                         }
                     }
                 }
@@ -291,13 +287,13 @@ struct SpaceSelectedBar: View {
                     MemberSaveHint(level: upsellLevel, amount: formatMoney(Double(upsellSaveCents) / 100, currency: currency, locale: locale), onTap: onOpenMembership)
                 }
             }
-            Button(action: onContinue) { Text("venue_book_goto_confirm").frame(maxWidth: .infinity) }
-                .buttonStyle(.pulso())
-                .controlSize(.large)
+            Button(action: onContinue) { Text("venue_book_goto_confirm") }
+                .buttonStyle(.pulso(fullWidth: true))
+                .environment(\.pulsoControlSize, .comfortable)
                 .disabled(!canContinue)
         }
-        .padding(16)
-        .background(.bar)
+        .padding(PulsoSpace.s4)
+        .background(palette.accent.step(2).shadow(.drop(color: .black.opacity(0.08), radius: 4, y: -1)))
     }
 }
 
@@ -310,6 +306,7 @@ struct PriceStack: View {
     var emphasized = false
 
     @Environment(\.locale) private var locale
+    @Environment(\.pulsoPalette) private var palette
 
     var body: some View {
         VStack(alignment: .trailing, spacing: 0) {
@@ -321,7 +318,7 @@ struct PriceStack: View {
             }
             Text(verbatim: formatMoney(Double(payCents) / 100, currency: currency, locale: locale))
                 .font((emphasized ? Font.headline : Font.subheadline).monospacedDigit().weight(emphasized ? .bold : .medium))
-                .foregroundStyle(struck ? Color.accentColor : Color.primary)
+                .foregroundStyle(struck ? palette.accent.step(11) : palette.text)
         }
     }
 }
@@ -331,6 +328,8 @@ struct MemberSaveHint: View {
     let level: MembershipLevel
     let amount: String
     let onTap: () -> Void
+
+    @Environment(\.pulsoPalette) private var palette
 
     var body: some View {
         Button(action: onTap) {
@@ -346,7 +345,7 @@ struct MemberSaveHint: View {
                 Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)
             }
             .padding(10)
-            .background(Color.accentColor.opacity(0.08), in: .rect(cornerRadius: 12))
+            .background(palette.accent.step(3), in: palette.innerShape)
         }
         .buttonStyle(.plain)
     }

@@ -396,20 +396,22 @@ struct ForumRowView: View {
     var busy = false
     var onToggleFollow: (() -> Void)?
 
+    @Environment(\.pulsoPalette) private var rowPalette
+
     var body: some View {
         HStack(spacing: 12) {
             ZStack(alignment: .bottomLeading) {
-                Rectangle().fill(.fill.tertiary)
+                Rectangle().fill(rowPalette.gray.step(3))
                 if let coverURL { PulsoRemoteImage(url: coverURL) }
                 PulsoRemoteImage(url: avatarURL)
                     .frame(width: 32, height: 32)
-                    .background(Color.accentColor.opacity(0.4))
-                    .clipShape(.rect(cornerRadius: 6))
-                    .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color(.systemBackground), lineWidth: 2))
-                    .padding(4)
+                    .background(rowPalette.accent.step(3))
+                    .clipShape(rowPalette.innerShape)
+                    .overlay(rowPalette.innerShape.stroke(rowPalette.background, lineWidth: 2))
+                    .padding(PulsoSpace.s1)
             }
             .frame(width: 96, height: 64)
-            .clipShape(.rect(cornerRadius: 8))
+            .clipShape(rowPalette.innerShape)
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 4) {
                     Text(verbatim: name).font(.subheadline.weight(.semibold)).lineLimit(1)
@@ -424,10 +426,12 @@ struct ForumRowView: View {
             Spacer(minLength: 0)
             if let favorited, let onToggleFollow {
                 Button(action: onToggleFollow) {
-                    Image(systemName: favorited ? "star.fill" : "star").foregroundStyle(favorited ? AnyShapeStyle(.tint) : AnyShapeStyle(.secondary))
-                        .pulsoToggleBurst(active: favorited, color: .accentColor)
+                    Image(systemName: favorited ? "star.fill" : "star")
+                        .foregroundStyle(favorited ? rowPalette.accent.step(9) : rowPalette.secondaryText)
+                        .pulsoToggleBurst(active: favorited, color: rowPalette.accent.step(9))
+                        .frame(width: 32, height: 32)
                 }
-                .buttonStyle(.borderless)
+                .buttonStyle(.plain)
                 .disabled(busy)
                 .accessibilityLabel(Text((favorited ? "discussion_unfollow" : "discussion_follow") as LocalizedStringKey))
             }

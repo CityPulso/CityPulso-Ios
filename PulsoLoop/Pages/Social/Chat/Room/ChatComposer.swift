@@ -5,65 +5,85 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 /**
- * 输入栏（Android `ChatComposer`，参照 `.pictures/messages`）：左边语音 / 键盘切换，中间输入框或「按住 说话」，右边「+」；
- * 有字时「+」换成发送。上面是正在引用的消息。表情用系统键盘的表情（iOS 没有独立的表情面板）。
+ * 输入栏（Android `ChatComposer`，参照 `.pictures/messages`）：左边语音 / 键盘切换，中间输入框或「按住 说话」，再是表情和「+」；
+ * 有字时「+」换成发送。下面是正在引用的消息。表情按钮切到系统表情键盘。
  */
 struct ChatComposer: View {
     @Bindable var model: ChatConversationModel
     let recorder: ChatVoiceRecorder
-    @FocusState private var focused: Bool
+    @Environment(\.pulsoPalette) private var palette
+    @State private var focused = false
+    @State private var emoji = false
     @State private var cancelling = false
 
     var body: some View {
-        VStack(spacing: 6) {
-            if let quoting = model.quoting {
-                HStack {
-                    ChatQuoteLine(quote: quoting.quote)
-                    Spacer()
-                    Button { model.clearQuote() } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary) }
-                        .accessibilityLabel(Text("shell_chat_quote_remove"))
-                }
-                .padding(.horizontal, 12)
-            }
-            HStack(alignment: .bottom, spacing: 8) {
+        VStack(spacing: 0) {
+            HStack(alignment: .bottom, spacing: PulsoSpace.s1) {
                 Button {
+                    emoji = false
                     model.setComposerMode(model.composerMode == .voice ? .text : .voice)
                     focused = model.composerMode == .text
                 } label: {
-                    Image(systemName: model.composerMode == .voice ? "keyboard" : "waveform.circle").font(.title2)
+                    Image(systemName: model.composerMode == .voice ? "keyboard" : "mic").font(.title2).frame(width: 40, height: 40)
                 }
                 .accessibilityLabel(Text((model.composerMode == .voice ? "shell_chat_keyboard_mode" : "shell_chat_voice_mode") as LocalizedStringKey))
                 if model.composerMode == .voice {
-                    holdToTalk
+                    holdToTalk.padding(.vertical, 2)
                 } else {
-                    TextField("shell_chat_send", text: $model.draft, prompt: Text(verbatim: ""), axis: .vertical)
-                        .lineLimit(1...5)
-                        .focused($focused)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 8)
-                        .background(Color(.systemBackground), in: .rect(cornerRadius: 6))
+                    PulsoEmojiTextView(text: $model.draft, focused: $focused, emoji: emoji)
+                        .padding(.horizontal, PulsoSpace.s3)
+                        .padding(.vertical, 10)
+                        .background(palette.background, in: palette.controlShape)
+                        .padding(.vertical, 2)
                         .onChange(of: focused) { _, isFocused in if isFocused { model.panelOpen = false } }
                 }
+                // 表情：换成系统表情键盘；再点回到普通键盘（Android 表情面板）。
+                Button {
+                    if emoji {
+                        emoji = false
+                    } else {
+                        if model.composerMode == .voice { model.setComposerMode(.text) }
+                        model.panelOpen = false
+                        emoji = true
+                    }
+                    focused = true
+                } label: {
+                    Image(systemName: emoji ? "keyboard" : "face.smiling").font(.title2).frame(width: 40, height: 40)
+                }
+                .accessibilityLabel(Text((emoji ? "shell_chat_keyboard_mode" : "shell_chat_emoji") as LocalizedStringKey))
                 if model.draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || model.composerMode == .voice {
                     Button {
                         focused = false
+                        emoji = false
                         model.togglePanel()
                     } label: {
-                        Image(systemName: "plus.circle").font(.title2)
+                        Image(systemName: "plus.circle").font(.title2).frame(width: 40, height: 40)
                     }
                     .accessibilityLabel(Text("shell_chat_plus"))
                 } else {
                     Button("shell_chat_send") { Task { await model.sendText() } }
                         .buttonStyle(.pulso())
-                        .controlSize(.small)
+                        .environment(\.pulsoControlSize, .compact)
+                        .padding(.horizontal, PulsoSpace.s1)
+                        .padding(.bottom, PulsoSpace.s1)
                 }
             }
-            .tint(.primary)
-            .padding(.horizontal, 12)
+            .tint(palette.text)
+            .padding(.horizontal, PulsoSpace.s1)
+            .padding(.vertical, PulsoSpace.s2)
+            if let quoting = model.quoting {
+                HStack {
+                    ChatQuoteLine(quote: quoting.quote)
+                    Spacer()
+                    Button { model.clearQuote() } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(palette.secondaryText) }
+                        .accessibilityLabel(Text("shell_chat_quote_remove"))
+                }
+                .padding(.horizontal, PulsoSpace.s3)
+                .padding(.bottom, PulsoSpace.s2)
+            }
             if model.panelOpen { ChatPlusPanel(model: model) }
         }
-        .padding(.vertical, 8)
-        .background(.bar)
+        .background(palette.gray.step(2))
         .overlay(alignment: .top) {
             if recorder.isRecording { recordingOverlay.offset(y: -150) }
         }
@@ -74,7 +94,7 @@ struct ChatComposer: View {
         Text((recorder.isRecording ? (cancelling ? "shell_chat_release_to_cancel" : "shell_chat_release_to_send") : "shell_chat_hold_to_talk") as LocalizedStringKey)
             .font(.subheadline.weight(.semibold))
             .frame(maxWidth: .infinity, minHeight: 36)
-            .background(recorder.isRecording ? Color(.systemGray4) : Color(.systemBackground), in: .rect(cornerRadius: 6))
+            .background(recorder.isRecording ? palette.gray.step(5) : palette.background, in: palette.controlShape)
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in
@@ -173,12 +193,14 @@ private struct PlusTile: View {
     let symbol: String
     let label: LocalizedStringKey
 
+    @Environment(\.pulsoPalette) private var palette
+
     var body: some View {
         VStack(spacing: 6) {
             Image(systemName: symbol)
                 .font(.title2)
                 .frame(width: 60, height: 60)
-                .background(Color(.systemBackground), in: .rect(cornerRadius: 14))
+                .background(palette.background, in: palette.cardShape)
             Text(label).font(.caption).foregroundStyle(.secondary).lineLimit(1).minimumScaleFactor(0.8)
         }
     }

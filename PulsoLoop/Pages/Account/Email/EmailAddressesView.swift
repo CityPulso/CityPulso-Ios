@@ -50,22 +50,26 @@ struct EmailAddressesView: View {
                     }
                 }
 
-                Section("account_security_add_email_address") {
-                    TextField("account_security_add_email", text: $model.newEmail, prompt: Text(verbatim: "you@example.com"))
-                        .textContentType(.emailAddress)
-                        .keyboardType(.emailAddress)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                    Button {
-                        Task { await model.addEmail() }
-                    } label: {
-                        if model.isAdding {
-                            ProgressView()
-                        } else {
-                            Label("account_security_add_email_action", systemImage: "plus")
+                // 添加邮箱：描边输入框 + 一整行实心按钮（Android 同样不套分组卡片）。
+                Section {
+                    VStack(spacing: PulsoSpace.s3) {
+                        PulsoTextField("account_security_add_email", text: $model.newEmail, prompt: "you@example.com")
+                            .textContentType(.emailAddress)
+                            .keyboardType(.emailAddress)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                        Button {
+                            Task { await model.addEmail() }
+                        } label: {
+                            PulsoButtonLabel("account_security_add_email_action", loading: model.isAdding)
                         }
+                        .buttonStyle(.pulso(fullWidth: true))
+                        .disabled(model.newEmail.trimmingCharacters(in: .whitespaces).isEmpty || model.isAdding)
                     }
-                    .disabled(model.newEmail.trimmingCharacters(in: .whitespaces).isEmpty || model.isAdding)
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets())
+                } header: {
+                    Text("account_security_add_email_address").font(.subheadline.weight(.semibold)).textCase(nil)
                 }
             }
         } else if let error = model.list.loadError {

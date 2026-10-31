@@ -68,18 +68,22 @@ final class ForumSearchModel {
 /** 发现论坛（Android `ForumSearchScreen`）：搜索框随列表滚走，类型切换和活动类型 / 排序筛选固定在上面；右上角建论坛。 */
 struct ForumSearchView: View {
     @State private var model = ForumSearchModel()
+    @Environment(\.pulsoPalette) private var palette
     @Environment(PulsoShellNavigator.self) private var shell: PulsoShellNavigator?
 
     var body: some View {
-        List {
-            Section {
-                rows
-            } header: {
-                filters
+        ScrollView {
+            LazyVStack(spacing: PulsoSpace.s3, pinnedViews: .sectionHeaders) {
+                PulsoSearchField(text: $model.query, prompt: Text("discussion_search_forums_placeholder"))
+                    .padding(.horizontal, PulsoSpace.s4)
+                Section {
+                    rows.padding(.horizontal, PulsoSpace.s4)
+                } header: {
+                    filters
+                }
             }
+            .padding(.vertical, PulsoSpace.s3)
         }
-        .listStyle(.plain)
-        .searchable(text: $model.query, placement: .navigationBarDrawer(displayMode: .always), prompt: Text("discussion_search_forums_placeholder"))
         .navigationTitle("discussion_search_title")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -93,50 +97,33 @@ struct ForumSearchView: View {
         .task(id: model.query) { await model.queryChanged() }
     }
 
+    /** 类型切换和运动 / 排序筛选吸顶（Android 发现论坛）。 */
     private var filters: some View {
-        VStack(spacing: 8) {
-            Picker("discussion_search_title", selection: $model.owner) {
-                ForEach(ForumOwnerFilter.allCases, id: \.self) { Text($0.labelKey).tag($0) }
-            }
-            .pickerStyle(.segmented)
+        VStack(spacing: PulsoSpace.s3) {
+            PulsoSegmentedControl(ForumOwnerFilter.allCases, selection: $model.owner) { Text($0.labelKey) }
+                .padding(.horizontal, PulsoSpace.s4)
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 6) {
-                    chip("discussion_all_activity_types", selected: model.activityType == nil) { model.activityType = nil }
-                    ForEach(ForumActivityType.allCases, id: \.self) { activityType in
-                        chip(activityType.labelKey, icon: activityType.activityType?.iconAsset, selected: model.activityType == activityType) { model.activityType = activityType }
+                HStack(spacing: PulsoSpace.s2) {
+                    PulsoChoiceChip(Text("discussion_all_sports"), selected: model.sport == nil) { model.sport = nil }
+                    ForEach(ForumSport.allCases, id: \.self) { sport in
+                        PulsoChoiceChip(Text(sport.labelKey), image: sport.sport.map { Image($0.iconAsset) }, selected: model.sport == sport) { model.sport = sport }
                     }
                     ForEach(ForumSort.allCases, id: \.self) { sort in
-                        chip(sort.labelKey, selected: model.sort == sort) { model.sort = sort }
+                        PulsoChoiceChip(Text(sort.labelKey), selected: model.sort == sort) { model.sort = sort }
                     }
                 }
+                .padding(.horizontal, PulsoSpace.s4)
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
-        .background(.bar)
-        .listRowInsets(EdgeInsets())
-        .textCase(nil)
-    }
-
-    private func chip(_ label: LocalizedStringKey, icon: String? = nil, selected: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 4) {
-                if let icon { Image(icon).resizable().scaledToFit().frame(width: 14, height: 14) }
-                Text(label).font(.subheadline)
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .background(selected ? AnyShapeStyle(Color.accentColor.opacity(0.18)) : AnyShapeStyle(.fill.tertiary), in: .capsule)
-            .foregroundStyle(selected ? Color.accentColor : .primary)
-        }
-        .buttonStyle(.plain)
+        .padding(.vertical, PulsoSpace.s2)
+        .background(palette.background)
     }
 
     @ViewBuilder
     private var rows: some View {
         let list = model.forums
         if list.isLoading {
-            ForEach(0 ..< 4, id: \.self) { _ in RoundedRectangle(cornerRadius: 12).fill(.fill.tertiary).frame(height: 80) }
+            ForEach(0 ..< 4, id: \.self) { _ in palette.cardShape.fill(palette.gray.step(3)).frame(height: 120) }
         } else if let error = list.error {
             PulsoLoadErrorView(error) { Task { await list.refresh() } }
         } else if list.isEmpty {
@@ -147,12 +134,14 @@ struct ForumSearchView: View {
             } actions: {
                 NavigationLink("discussion_create_forum", value: NearRoute.forumCreate).buttonStyle(.pulso())
             }
-            .listRowSeparator(.hidden)
         } else {
             ForEach(list.items, id: \.id) { forum in
                 Button { shell?.push(NearRoute.forum(forumId: forum.id)) } label: {
-                    ForumRowView(forum: forum, imageURL: model.imageURL, busy: model.busyId == forum.id) {
-                        Task { await model.toggleFollow(forum) }
+                    PulsoCard {
+                        ForumRowView(forum: forum, imageURL: model.imageURL, busy: model.busyId == forum.id) {
+                            Task { await model.toggleFollow(forum) }
+                        }
+                        .padding(PulsoSpace.s4)
                     }
                 }
                 .buttonStyle(.plain)
@@ -176,9 +165,11 @@ struct MyForumsView: View {
         PulsoPagedList(list: forums, emptyTitle: "discussion_my_forums_empty", emptyBody: "discussion_my_forums_empty_body") {
             NavigationLink("discussion_create_forum", value: NearRoute.forumCreate).buttonStyle(.pulso())
         } header: {
+            // 「创建论坛」是一整行柔和按钮（Android 我的论坛顶部）。
             NavigationLink(value: NearRoute.forumCreate) {
                 Label("discussion_create_forum", systemImage: "plus")
             }
+            .buttonStyle(.pulso(.soft, fullWidth: true))
         } row: { forum in
             row(forum)
         }

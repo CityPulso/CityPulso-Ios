@@ -10,6 +10,7 @@ struct SessionBookView: View {
     let onSelectActivityType: (VenueActivityType) -> Void
     @State private var model: SessionBookModel
     @Environment(\.locale) private var locale
+    @Environment(\.pulsoPalette) private var palette
     @Environment(\.dismiss) private var dismiss
     @Environment(PulsoShellNavigator.self) private var shell: PulsoShellNavigator?
 
@@ -58,8 +59,8 @@ struct SessionBookView: View {
                         SpaceDateStrip(dateKeys: model.dateKeys, selected: model.dateKey) { model.selectDate($0) }
                     }
                 }
-                .padding(.vertical, 8)
-                .background(.bar)
+                .padding(.vertical, PulsoSpace.s2)
+                .background(palette.gray.step(2))
             }
         }
     }
@@ -138,14 +139,14 @@ struct SessionBookView: View {
             Button {
                 if let route = model.confirmRoute { shell?.push(route) }
             } label: {
-                Text("venue_book_goto_confirm").frame(maxWidth: .infinity)
+                Text("venue_book_goto_confirm")
             }
-            .buttonStyle(.pulso())
-            .controlSize(.large)
+            .buttonStyle(.pulso(fullWidth: true))
+            .environment(\.pulsoControlSize, .comfortable)
             .disabled(!model.canGoToConfirm)
         }
-        .padding(16)
-        .background(.bar)
+        .padding(PulsoSpace.s4)
+        .background(palette.accent.step(2).shadow(.drop(color: .black.opacity(0.08), radius: 4, y: -1)))
     }
 }
 
@@ -158,6 +159,8 @@ private struct SessionRowCard: View {
     let bookable: Bool
     let picked: String?
     let onPick: (String) -> Void
+
+    @Environment(\.pulsoPalette) private var palette
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -185,8 +188,8 @@ private struct SessionRowCard: View {
                             .font(.subheadline.monospacedDigit().weight(isOn ? .semibold : .regular))
                             .padding(.horizontal, 12)
                             .frame(height: 32)
-                            .foregroundStyle(isOn ? Color.white : Color.primary)
-                            .background(isOn ? Color.accentColor : Color(.tertiarySystemFill), in: .capsule)
+                            .foregroundStyle(isOn ? palette.onAccent : palette.text)
+                            .background(isOn ? palette.accent.step(9) : palette.accent.step(3), in: palette.chipShape)
                     }
                     .buttonStyle(.plain)
                     .disabled(!slot.available || !bookable)
@@ -196,7 +199,7 @@ private struct SessionRowCard: View {
         }
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.secondarySystemGroupedBackground), in: .rect(cornerRadius: 16))
+        .background(palette.panel, in: palette.cardShape)
     }
 
     /** 密室是难度，剧本杀是题材（没有题材时也用难度）。 */

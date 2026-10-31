@@ -5,18 +5,24 @@ import SwiftUI
 
 /** 地图设置（Android `MapSettingsScreen`）：地图样式、定位标记两个入口。 */
 struct MapSettingsView: View {
+    @Environment(\.pulsoPalette) private var palette
+
     var body: some View {
-        List {
-            Section {
-                NavigationLink(value: LoopRoute.mapStyle) {
-                    Label { VStack(alignment: .leading) { Text("map_style_title"); Text("map_style_desc").font(.caption).foregroundStyle(.secondary) } } icon: { Image(systemName: "square.3.layers.3d") }
+        ScrollView {
+            VStack(alignment: .leading, spacing: PulsoSpace.s4) {
+                Text("map_settings_subtitle").font(.subheadline).foregroundStyle(palette.secondaryText)
+                PulsoSection {
+                    NavigationLink(value: LoopRoute.mapStyle) {
+                        PulsoSectionRow("map_style_title", systemImage: "square.3.layers.3d", supporting: String(localized: "map_style_desc"))
+                    }
+                    .buttonStyle(.pulsoRow)
+                    NavigationLink(value: LoopRoute.locationMarker) {
+                        PulsoSectionRow("location_marker_title", systemImage: "location.circle", supporting: String(localized: "location_marker_desc"))
+                    }
+                    .buttonStyle(.pulsoRow)
                 }
-                NavigationLink(value: LoopRoute.locationMarker) {
-                    Label { VStack(alignment: .leading) { Text("location_marker_title"); Text("location_marker_desc").font(.caption).foregroundStyle(.secondary) } } icon: { Image(systemName: "location.circle") }
-                }
-            } footer: {
-                Text("map_settings_subtitle")
             }
+            .padding(PulsoSpace.s4)
         }
         .navigationTitle("map_settings_title")
     }
@@ -25,74 +31,61 @@ struct MapSettingsView: View {
 /** 地图样式（Android `MapStyleViewModel` / `MapStyleScreen`）：浅色 / 深色样式、3D 建筑、平面、范围圈、活动 / 球馆卡片；改了马上同步到账号。 */
 struct MapStyleView: View {
     @State private var map = ResolvedMapPreference()
+    @Environment(\.pulsoPalette) private var palette
     @Injected(\.preferenceService) private var preferenceService
     @Injected(\.deviceLocationStore) private var deviceLocation
 
     var body: some View {
         let center = deviceLocation.location.value?.point
-        List {
-            Section {
+        ScrollView {
+            VStack(alignment: .leading, spacing: PulsoSpace.s4) {
+                Text("map_style_desc").font(.subheadline).foregroundStyle(palette.secondaryText)
                 LoopMapView(
                     map: map,
                     initialCenter: (center?.latitude ?? MapConstants.fallbackCenter.latitude, center?.longitude ?? MapConstants.fallbackCenter.longitude),
                     initialZoom: 15
                 )
                 .allowsHitTesting(false)
-                .frame(height: 200)
-                .clipShape(.rect(cornerRadius: 12))
-                .overlay(alignment: .topLeading) {
-                    Text((map.mapflat ? "map_style_preview_top" : "map_style_preview_3d") as LocalizedStringKey)
-                        .font(.caption.weight(.semibold))
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(.regularMaterial, in: .capsule)
-                        .padding(8)
+                .frame(height: 220)
+                .clipShape(palette.cardShape)
+                PulsoCard {
+                    VStack(alignment: .leading, spacing: PulsoSpace.s4) {
+                        PulsoSectionTitle("map_style_light_section")
+                        PulsoSegmentedControl([MapLightColor.positron, .bright, .liberty], selection: binding(\.mapLightStyle)) { style in
+                            switch style {
+                            case .positron: Text("map_style_positron")
+                            case .bright: Text("map_style_bright")
+                            default: Text("map_style_liberty")
+                            }
+                        }
+                        PulsoSectionTitle("map_style_dark_section")
+                        PulsoSegmentedControl([MapDarkColor.dark, .fiord], selection: binding(\.mapDarkStyle)) { style in
+                            style == .dark ? Text("map_style_dark") : Text("map_style_fiord")
+                        }
+                    }
+                    .padding(PulsoSpace.s5)
                 }
-                .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
-            }
-            Section("map_style_light_section") {
-                Picker(selection: binding(\.mapLightStyle)) {
-                    Text("map_style_positron").tag(MapLightColor.positron)
-                    Text("map_style_bright").tag(MapLightColor.bright)
-                    Text("map_style_liberty").tag(MapLightColor.liberty)
-                } label: {
-                    EmptyView()
-                }
-                .pickerStyle(.inline)
-                .labelsHidden()
-            }
-            Section("map_style_dark_section") {
-                Picker(selection: binding(\.mapDarkStyle)) {
-                    Text("map_style_dark").tag(MapDarkColor.dark)
-                    Text("map_style_fiord").tag(MapDarkColor.fiord)
-                } label: {
-                    EmptyView()
-                }
-                .pickerStyle(.inline)
-                .labelsHidden()
-            }
-            Section {
-                Toggle("map_style_enable_3d", isOn: binding(\.map3d))
-                Toggle("map_style_enable_flat", isOn: binding(\.mapflat))
-                Toggle(isOn: binding(\.mapNearbyRange)) {
-                    Text("map_style_enable_nearby")
-                    Text("map_style_enable_nearby_hint")
-                }
-                Toggle(isOn: Binding(get: { map.showEventCards == true }, set: { value in save { $0.map.showEventCards = value } })) {
-                    Text("map_style_event_cards")
-                    Text("map_style_event_cards_hint")
-                }
-                Toggle(isOn: Binding(get: { map.showVenueCards == true }, set: { value in save { $0.map.showVenueCards = value } })) {
-                    Text("map_style_venue_cards")
-                    Text("map_style_venue_cards_hint")
+                PulsoSection {
+                    toggleRow("map_style_enable_3d", supporting: "map_style_preview_3d", isOn: binding(\.map3d))
+                    toggleRow("map_style_enable_flat", supporting: "map_style_preview_top", isOn: binding(\.mapflat))
+                    toggleRow("map_style_enable_nearby", supporting: "map_style_enable_nearby_hint", isOn: binding(\.mapNearbyRange))
+                    toggleRow("map_style_event_cards", supporting: "map_style_event_cards_hint", isOn: Binding(get: { map.showEventCards == true }, set: { value in save { $0.map.showEventCards = value } }))
+                    toggleRow("map_style_venue_cards", supporting: "map_style_venue_cards_hint", isOn: Binding(get: { map.showVenueCards == true }, set: { value in save { $0.map.showVenueCards = value } }))
                 }
             }
+            .padding(PulsoSpace.s4)
         }
         .navigationTitle("map_style_title")
         .task {
             for await preference in preferenceService.preference.values() {
                 map = preference.map
             }
+        }
+    }
+
+    private func toggleRow(_ title: LocalizedStringKey, supporting: String.LocalizationValue, isOn: Binding<Bool>) -> some View {
+        PulsoSectionRow(title, supporting: String(localized: supporting), showChevron: false) {
+            Toggle(isOn: isOn) { EmptyView() }.labelsHidden()
         }
     }
 
@@ -133,6 +126,7 @@ struct LocationMarkerDraft: Equatable {
  * 清掉某项就跟随主题。改的是草稿，保存才写回偏好并同步。
  */
 struct LocationMarkerView: View {
+    @Environment(\.pulsoPalette) private var palette
     @State private var saved = LocationMarkerDraft()
     @State private var draft = LocationMarkerDraft()
     @State private var loaded = false
@@ -144,49 +138,51 @@ struct LocationMarkerView: View {
     @Injected(\.pulsoCoreConfig) private var config
 
     var body: some View {
-        List {
-            Section {
-                HStack {
-                    Spacer()
+        ScrollView {
+            VStack(alignment: .leading, spacing: PulsoSpace.s4) {
+                Text("location_marker_desc").font(.subheadline).foregroundStyle(palette.secondaryText)
+                PulsoCard {
                     ExploreMyLocationPin(map: previewMap, displayName: displayName, avatarURL: avatarURL) {}
                         .scaleEffect(1.6)
-                        .padding(24)
-                    Spacer()
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 200)
                 }
-            } footer: {
-                Text("location_marker_desc")
-            }
-            Section {
-                colorRow("location_marker_ring", \.ring)
-                colorRow("location_marker_dot", \.dot)
-                colorRow("location_marker_border", \.border)
-            }
-            Section("location_marker_badge_group") {
-                Toggle(isOn: $draft.useAvatarImage) {
-                    Text("location_marker_use_photo")
-                    Text("location_marker_use_photo_hint")
-                }
-                colorRow("location_marker_badge_bg", \.badgeBg)
-                colorRow("location_marker_badge_border", \.badgeBorder)
-                HStack {
-                    Text("location_marker_letter")
-                    Spacer()
-                    TextField("location_marker_letter_placeholder", text: Binding(get: { draft.letter }, set: { draft.letter = String($0.prefix(1)) }))
-                        .multilineTextAlignment(.trailing)
-                        .frame(width: 60)
-                    if !draft.letter.isEmpty {
-                        Button { draft.letter = "" } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(.tertiary) }
-                            .buttonStyle(.borderless)
-                            .accessibilityLabel(Text("location_marker_reset_letter"))
+                PulsoCard {
+                    VStack(spacing: PulsoSpace.s4) {
+                        colorRow("location_marker_ring", \.ring)
+                        colorRow("location_marker_dot", \.dot)
+                        colorRow("location_marker_border", \.border)
                     }
+                    .padding(PulsoSpace.s5)
                 }
-            }
-            Section {
+                PulsoCard {
+                    VStack(alignment: .leading, spacing: PulsoSpace.s4) {
+                        PulsoSectionTitle("location_marker_badge_group")
+                        Toggle(isOn: $draft.useAvatarImage) {
+                            Text("location_marker_use_photo")
+                            Text("location_marker_use_photo_hint")
+                        }
+                        colorRow("location_marker_badge_bg", \.badgeBg)
+                        colorRow("location_marker_badge_border", \.badgeBorder)
+                        HStack(spacing: PulsoSpace.s3) {
+                            PulsoTextField(
+                                "location_marker_letter",
+                                text: Binding(get: { draft.letter }, set: { draft.letter = String($0.prefix(1)) }),
+                                prompt: String(localized: "location_marker_letter_placeholder")
+                            )
+                            clearButton(visible: !draft.letter.isEmpty, label: "location_marker_reset_letter") { draft.letter = "" }
+                        }
+                    }
+                    .padding(PulsoSpace.s5)
+                }
                 Button("location_marker_reset_all") { draft = LocationMarkerDraft() }
+                    .buttonStyle(.pulso(.outline, tone: .gray, fullWidth: true))
                 if draft != saved {
-                    Button("location_marker_discard", role: .destructive) { draft = saved }
+                    Button("location_marker_discard") { draft = saved }
+                        .buttonStyle(.pulso(.soft, tone: .gray, fullWidth: true))
                 }
             }
+            .padding(PulsoSpace.s4)
         }
         .navigationTitle("location_marker_title")
         .toolbar {
@@ -232,28 +228,31 @@ struct LocationMarkerView: View {
         return map
     }
 
-    /** 一个颜色：系统取色器；有值时可以清掉（跟随主题）。 */
+    /** 一个颜色：左边色块点开系统取色器，中间可以直接填色值，右边清掉（跟随主题）。 */
     private func colorRow(_ label: LocalizedStringKey, _ path: WritableKeyPath<LocationMarkerDraft, String>) -> some View {
-        HStack {
+        HStack(spacing: PulsoSpace.s3) {
             ColorPicker(selection: Binding(
-                get: { preferenceColor(draft[keyPath: path]) ?? .accentColor },
+                get: { preferenceColor(draft[keyPath: path]) ?? palette.gray.step(5) },
                 set: { draft[keyPath: path] = $0.hexString }
-            ), supportsOpacity: false) {
-                VStack(alignment: .leading) {
-                    Text(label)
-                    if draft[keyPath: path].isEmpty {
-                        Text("location_marker_following_theme").font(.caption).foregroundStyle(.secondary)
-                    } else {
-                        Text(verbatim: draft[keyPath: path]).font(.caption.monospaced()).foregroundStyle(.secondary)
-                    }
-                }
-            }
-            if !draft[keyPath: path].isEmpty {
-                Button { draft[keyPath: path] = "" } label: { Image(systemName: "arrow.uturn.backward.circle").foregroundStyle(.secondary) }
-                    .buttonStyle(.borderless)
-                    .accessibilityLabel(Text("location_marker_reset_field"))
-            }
+            ), supportsOpacity: false) { Text(label) }
+                .labelsHidden()
+            PulsoTextField(
+                label, text: Binding(get: { draft[keyPath: path] }, set: { draft[keyPath: path] = $0 }),
+                prompt: "#e5484d",
+                hintText: draft[keyPath: path].isEmpty ? String(localized: "location_marker_following_theme") : nil
+            )
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled()
+            clearButton(visible: !draft[keyPath: path].isEmpty, label: "location_marker_reset_field") { draft[keyPath: path] = "" }
         }
+    }
+
+    private func clearButton(visible: Bool, label: LocalizedStringKey, action: @escaping () -> Void) -> some View {
+        Button(action: action) { Image(systemName: "xmark").font(.title3).foregroundStyle(palette.secondaryText).frame(width: 40, height: 40) }
+            .buttonStyle(.plain)
+            .opacity(visible ? 1 : 0.4)
+            .disabled(!visible)
+            .accessibilityLabel(Text(label))
     }
 
     private func save() async {

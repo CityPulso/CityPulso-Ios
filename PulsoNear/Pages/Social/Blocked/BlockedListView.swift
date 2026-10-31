@@ -46,7 +46,7 @@ struct BlockedListView: View {
             let rows = model.rows
             if !rows.items.isEmpty {
                 ForEach(rows.items, id: \.blockedProfileId) { item in
-                    HStack(spacing: 12) {
+                    HStack(spacing: PulsoSpace.s3) {
                         NavigationLink(value: NearRoute.socialProfile(profileId: item.blockedProfileId)) {
                             HStack(spacing: 12) {
                                 PulsoAvatar(url: model.avatarURL(item), size: 40, fallbackText: model.displayName(item))
@@ -58,10 +58,12 @@ struct BlockedListView: View {
                                 }
                             }
                         }
+                        // 解除拉黑：灰色柔和小按钮（Android 黑名单行）；不用按住确认（hold-confirm 规则里属于普通点击）。
                         Button("shell_social_unblock") { Task { await model.unblock(item) } }
-                            .buttonStyle(.pulso(.soft))
+                            .buttonStyle(.pulso(.soft, tone: .gray, size: .small))
                             .disabled(model.busyId == item.blockedProfileId)
                     }
+                    .navigationLinkIndicatorVisibility(.hidden)
                     .onAppear { if item.blockedProfileId == rows.items.last?.blockedProfileId { rows.loadMore() } }
                 }
             } else if rows.isLoading {
@@ -69,9 +71,10 @@ struct BlockedListView: View {
             } else if let error = rows.error {
                 PulsoLoadErrorView(error) { Task { await rows.refresh() } }.listRowBackground(Color.clear)
             } else {
-                ContentUnavailableView("shell_social_blocked_empty", systemImage: "nosign").listRowBackground(Color.clear)
+                PulsoEmptyState(Text("shell_social_blocked_empty")).frame(minHeight: 360).listRowBackground(Color.clear)
             }
         }
+        .listStyle(.plain)
         .navigationTitle("shell_social_blocked_title")
         .refreshable { await model.rows.refresh() }
         .task { await model.rows.observe() }

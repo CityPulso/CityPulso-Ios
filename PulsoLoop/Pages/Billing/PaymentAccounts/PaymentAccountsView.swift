@@ -9,6 +9,7 @@ import SwiftUI
 struct PaymentAccountsView: View {
     @State private var model = PaymentAccountsModel()
     @State private var creatingForm = false
+    @Environment(\.pulsoPalette) private var palette
 
     var body: some View {
         content
@@ -25,24 +26,28 @@ struct PaymentAccountsView: View {
         } else if model.accounts.data == nil, let error = model.accounts.error {
             PulsoLoadErrorView(error) { model.refresh() }
         } else {
-            List {
-                Section {
-                    Text("payment_accounts_intro").font(.subheadline).foregroundStyle(.secondary)
+            ScrollView {
+                VStack(alignment: .leading, spacing: PulsoSpace.s4) {
+                    Text("payment_accounts_intro").font(.subheadline).foregroundStyle(palette.secondaryText)
                     if creatingForm {
-                        CreatePaymentAccountForm(model: model, onCancel: { creatingForm = false }) { label, country, email in
-                            Task {
-                                await model.create(label: label, country: country, email: email)
-                                creatingForm = false
+                        PulsoCard {
+                            CreatePaymentAccountForm(model: model, onCancel: { creatingForm = false }) { label, country, email in
+                                Task {
+                                    await model.create(label: label, country: country, email: email)
+                                    creatingForm = false
+                                }
                             }
+                            .padding(PulsoSpace.s5)
                         }
                     }
+                    if model.items.isEmpty, !creatingForm {
+                        PulsoEmptyState(Text("payment_accounts_empty")).frame(maxWidth: .infinity)
+                    }
+                    ForEach(model.items, id: \.id) { account in
+                        PulsoCard { AccountCard(account: account, model: model).padding(PulsoSpace.s5) }
+                    }
                 }
-                if model.items.isEmpty, !creatingForm {
-                    Section { Text("payment_accounts_empty").font(.subheadline).foregroundStyle(.secondary) }
-                }
-                ForEach(model.items, id: \.id) { account in
-                    Section { AccountCard(account: account, model: model) }
-                }
+                .padding(PulsoSpace.s4)
             }
             // Adding an account sits at the bottom of the page; the form opens at the top of the list.
             .safeAreaInset(edge: .bottom) {
@@ -70,13 +75,16 @@ private struct CreatePaymentAccountForm: View {
     var body: some View {
         let labelError = touched && label.trimmingCharacters(in: .whitespaces).isEmpty
         let emailError = touched && !email.contains("@")
-        VStack(alignment: .leading, spacing: 10) {
-            TextField("payment_accounts_label_placeholder", text: $label)
-                .textFieldStyle(.roundedBorder)
-            if labelError { Text("payment_accounts_label_required").font(.caption).foregroundStyle(.red) }
-            HStack {
-                TextField("payment_accounts_email_placeholder", text: $email)
-                    .textFieldStyle(.roundedBorder)
+        VStack(alignment: .leading, spacing: PulsoSpace.s3) {
+            PulsoTextField(
+                "payment_accounts_label", text: $label, prompt: String(localized: "payment_accounts_label_placeholder"),
+                errorText: labelError ? String(localized: "payment_accounts_label_required") : nil
+            )
+            HStack(alignment: .top) {
+                PulsoTextField(
+                    "payment_accounts_email", text: $email, prompt: String(localized: "payment_accounts_email_placeholder"),
+                    errorText: emailError ? String(localized: "payment_accounts_email_required") : nil
+                )
                     .keyboardType(.emailAddress)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
@@ -90,14 +98,10 @@ private struct CreatePaymentAccountForm: View {
                     }
                 }
             }
-            if emailError { Text("payment_accounts_email_required").font(.caption).foregroundStyle(.red) }
-            Picker(selection: $country) {
-                Text("payment_accounts_country_ca").tag(PaymentAccountCountry.ca)
-                Text("payment_accounts_country_us").tag(PaymentAccountCountry.us)
-            } label: {
-                Text("payment_accounts_country")
+            PulsoSectionTitle("payment_accounts_country")
+            PulsoSegmentedControl([PaymentAccountCountry.ca, .us], selection: $country) {
+                Text($0 == .ca ? "payment_accounts_country_ca" : "payment_accounts_country_us")
             }
-            .pickerStyle(.segmented)
             HStack {
                 Button("event_detail_dialog_cancel", action: onCancel).buttonStyle(.pulso(.soft))
                 Spacer()
@@ -120,29 +124,32 @@ private struct AccountCard: View {
     let account: PaymentAccountItem
     let model: PaymentAccountsModel
 
+    @Environment(\.pulsoPalette) private var palette
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: PulsoSpace.s3) {
             HStack {
-                Text(verbatim: account.label).font(.headline)
+                Text(verbatim: account.label).font(.headline).foregroundStyle(palette.text)
                 Spacer()
                 VenueChip(text: String(localized: account.status.labelResource), tone: account.status.tone)
             }
-            Text(verbatim: "\(account.country) · \(account.defaultCurrency.uppercased())").font(.caption).foregroundStyle(.secondary)
+            Text(verbatim: "\(account.country) · \(account.defaultCurrency.uppercased()) · \(account.providerAccountId)").font(.subheadline).foregroundStyle(palette.secondaryText).lineLimit(1)
             HStack(spacing: 6) {
-                VenueChip(text: String(localized: account.chargesEnabled ? "payment_accounts_charges_on" : "payment_accounts_charges_off"), tone: account.chargesEnabled ? RadixScale.green.lightStep(9) : RadixScale.slate.lightStep(9))
-                VenueChip(text: String(localized: account.payoutsEnabled ? "payment_accounts_payouts_on" : "payment_accounts_payouts_off"), tone: account.payoutsEnabled ? RadixScale.green.lightStep(9) : RadixScale.slate.lightStep(9))
+                VenueChip(text: String(localized: account.chargesEnabled ? "payment_accounts_charges_on" : "payment_accounts_charges_off"), tone: account.chargesEnabled ? RadixScale.green.lightStep(9) : palette.secondaryText)
+                VenueChip(text: String(localized: account.payoutsEnabled ? "payment_accounts_payouts_on" : "payment_accounts_payouts_off"), tone: account.payoutsEnabled ? RadixScale.green.lightStep(9) : palette.secondaryText)
             }
             HStack {
                 Button((account.detailsSubmitted ? "payment_accounts_update" : "payment_accounts_onboard") as LocalizedStringKey) {
                     Task { await model.onboard(account.id) }
                 }
-                .buttonStyle(.pulso())
+                .buttonStyle(.pulso(fullWidth: true))
+                .layoutPriority(1)
                 Button {
                     Task { await model.sync(account.id) }
                 } label: {
-                    if model.syncingId == account.id { ProgressView() } else { Text("payment_accounts_sync") }
+                    if model.syncingId == account.id { ProgressView() } else { PulsoButtonLabel("payment_accounts_sync", systemImage: "arrow.clockwise") }
                 }
-                .buttonStyle(.pulso(.soft))
+                .buttonStyle(.pulso(.soft, tone: .gray, fullWidth: true))
                 .disabled(model.syncingId == account.id)
             }
             if !model.prefillVenues.isEmpty, !account.detailsSubmitted {
@@ -153,7 +160,7 @@ private struct AccountCard: View {
                 } label: {
                     if model.prefillingId == account.id { ProgressView() } else { Label("payment_accounts_prefill", systemImage: "storefront") }
                 }
-                Text("payment_accounts_prefill_hint").font(.caption).foregroundStyle(.secondary)
+                Text("payment_accounts_prefill_hint").font(.caption).foregroundStyle(palette.secondaryText)
             }
         }
         .buttonStyle(.borderless)
@@ -175,7 +182,7 @@ extension PaymentsPaymentAccountStatus {
         case .onboarding: RadixScale.amber.lightStep(9)
         case .active: RadixScale.green.lightStep(9)
         case .restricted: RadixScale.red.lightStep(9)
-        case .disabled: RadixScale.slate.lightStep(9)
+        case .disabled: palette.secondaryText
         }
     }
 }

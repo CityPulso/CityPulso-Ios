@@ -25,6 +25,7 @@ struct CourtAvailabilityBoard: View {
     private static let photoHeight: CGFloat = 44
 
     @Environment(\.locale) private var locale
+    @Environment(\.pulsoPalette) private var palette
     @State private var lastPainted: CellPosition?
 
     private struct CellPosition: Equatable {
@@ -102,7 +103,7 @@ struct CourtAvailabilityBoard: View {
             if let imageURL = court.imageURL {
                 PulsoRemoteImage(url: imageURL)
                     .frame(height: Self.photoHeight)
-                    .clipShape(.rect(cornerRadius: 8))
+                    .clipShape(palette.innerShape)
             }
         }
         .padding(.horizontal, 2)
@@ -117,11 +118,11 @@ struct CourtAvailabilityBoard: View {
         case .closed: "—"
         }
         return ZStack {
-            RoundedRectangle(cornerRadius: 6).fill(kind.fill)
+            palette.innerShape.fill(kind.fill(palette))
             if kind == .selected {
-                Image(systemName: "checkmark").font(.caption.bold()).foregroundStyle(.white)
+                Image(systemName: "checkmark").font(.caption.bold()).foregroundStyle(palette.onAccent)
             } else if let label {
-                Text(verbatim: label).font(.caption2.monospacedDigit()).foregroundStyle(kind.foreground).lineLimit(1).minimumScaleFactor(0.7)
+                Text(verbatim: label).font(.caption.weight(.semibold).monospacedDigit()).foregroundStyle(kind.foreground(palette)).lineLimit(1).minimumScaleFactor(0.7)
             }
         }
         .padding(2)
@@ -143,8 +144,8 @@ struct CourtAvailabilityBoard: View {
         HStack(spacing: 12) {
             ForEach([CellKind.available, .selected, .taken, .blocked], id: \.self) { kind in
                 HStack(spacing: 4) {
-                    RoundedRectangle(cornerRadius: 3).fill(kind.fill).frame(width: 12, height: 12)
-                    Text(kind.legendKey).font(.caption2).foregroundStyle(.secondary)
+                    RoundedRectangle(cornerRadius: 3).fill(kind.fill(palette)).frame(width: 12, height: 12)
+                    Text(kind.legendKey).font(.caption2).foregroundStyle(palette.secondaryText)
                 }
             }
         }
@@ -232,21 +233,22 @@ private enum CellKind: Hashable {
         }
     }
 
-    var fill: Color {
+    /** 可订是浅强调色底、强调色价格，已选是实心强调色（Android 选场表）。 */
+    func fill(_ palette: PulsoPalette) -> Color {
         switch self {
-        case .available: Color.accentColor.opacity(0.12)
-        case .selected: Color.accentColor
-        case .taken: Color(.tertiarySystemFill)
+        case .available: palette.accent.step(3)
+        case .selected: palette.accent.step(9)
+        case .taken: palette.gray.step(3)
         case .blocked: Color.orange.opacity(0.15)
         case .closed: Color.clear
         }
     }
 
-    var foreground: Color {
+    func foreground(_ palette: PulsoPalette) -> Color {
         switch self {
-        case .available: Color.accentColor
-        case .selected: Color.white
-        case .taken, .blocked, .closed: Color.secondary
+        case .available: palette.accent.step(11)
+        case .selected: palette.onAccent
+        case .taken, .blocked, .closed: palette.secondaryText
         }
     }
 

@@ -9,36 +9,50 @@ struct PaymentMethodsView: View {
     @State private var removing: PaymentMethodItem?
     @State private var nickname = ""
 
+    @State private var deckOpen = false
+    @Environment(\.pulsoPalette) private var palette
+
     var body: some View {
-        List {
-            Section {
+        ScrollView {
+            VStack(alignment: .leading, spacing: PulsoSpace.s4) {
+                Text("payment_methods_intro").font(.caption).foregroundStyle(palette.secondaryText)
                 if let error = model.methods.error, model.methods.data == nil {
                     PulsoLoadErrorView(error) { model.refresh() }
                 } else if model.methods.data == nil {
-                    ProgressView().frame(maxWidth: .infinity)
+                    ProgressView().frame(maxWidth: .infinity).padding(.top, PulsoSpace.s8)
                 } else if model.items.isEmpty {
-                    ContentUnavailableView("payment_methods_empty", systemImage: "creditcard")
-                }
-                ForEach(model.items, id: \.id) { method in
-                    PaymentMethodRow(method: method)
-                        .overlay(alignment: .trailing) { if model.busyId == method.id { ProgressView() } }
-                        .swipeActions {
-                            Button("payment_methods_remove", systemImage: "trash", role: .destructive) { removing = method }
-                        }
-                        .contextMenu {
-                            if !method.isDefault {
-                                Button("payment_methods_set_default", systemImage: "star") { Task { await model.setDefault(method.id) } }
+                    PulsoEmptyState(Text("payment_methods_empty")).frame(minHeight: 320)
+                } else {
+                    // 卡片堆：收起时叠着，点一下逐张弹开；打开后每张下面是设为默认 / 改名，长按删除（Android 左滑删除）。
+                    PulsoCardStack(items: model.items, id: \.id, expanded: deckOpen, onExpand: { deckOpen = true }) { method in
+                        VStack(spacing: PulsoSpace.s2) {
+                            PaymentMethodFaceCard(method: method)
+                                .contextMenu {
+                                    Button("payment_methods_remove", systemImage: "trash", role: .destructive) { removing = method }
+                                }
+                            if deckOpen {
+                                HStack(spacing: PulsoSpace.s2) {
+                                    if !method.isDefault {
+                                        Button { Task { await model.setDefault(method.id) } } label: {
+                                            PulsoButtonLabel("payment_methods_set_default", systemImage: "star", loading: model.busyId == method.id)
+                                        }
+                                        .buttonStyle(.pulso(.soft, size: .compact, fullWidth: true))
+                                    }
+                                    Button {
+                                        nickname = method.nickname ?? ""
+                                        renaming = method
+                                    } label: {
+                                        Label("payment_methods_rename", systemImage: "pencil")
+                                    }
+                                    .buttonStyle(.pulso(.soft, tone: .gray, size: .compact, fullWidth: true))
+                                    .disabled(model.busyId == method.id)
+                                }
                             }
-                            Button("payment_methods_rename", systemImage: "pencil") {
-                                nickname = method.nickname ?? ""
-                                renaming = method
-                            }
-                            Button("payment_methods_remove", systemImage: "trash", role: .destructive) { removing = method }
                         }
+                    }
                 }
-            } footer: {
-                Text("payment_methods_intro")
             }
+            .padding(PulsoSpace.s4)
         }
         .refreshable { model.refresh() }
         .navigationTitle("payment_methods_title")

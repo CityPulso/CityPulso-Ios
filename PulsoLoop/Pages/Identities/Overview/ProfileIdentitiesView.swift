@@ -8,53 +8,42 @@ import SwiftUI
  */
 struct ProfileIdentitiesView: View {
     @State private var model = ProfileIdentitiesModel()
+    @Environment(\.pulsoPalette) private var palette
 
     var body: some View {
-        Form {
-            Section {
-                NavigationLink(value: LoopRoute.accountSecurity) {
-                    Label {
-                        VStack(alignment: .leading) {
-                            Text("account_security_title")
-                            Text("account_security_entry_hint").font(.footnote).foregroundStyle(.secondary)
-                        }
-                    } icon: {
-                        Image(systemName: "lock.shield")
+        ScrollView {
+            VStack(alignment: .leading, spacing: PulsoSpace.s5) {
+                PulsoCard {
+                    NavigationLink(value: LoopRoute.accountSecurity) {
+                        PulsoSectionRow("account_security_title", systemImage: "lock.shield", supporting: String(localized: "account_security_entry_hint"))
                     }
+                    .buttonStyle(.pulsoRow)
                 }
-            }
-
-            Section {
+                communityHeader
                 if let profiles = model.profiles {
                     ForEach(profiles) { profile in
-                        identityCard(profile)
+                        PulsoCard { identityCard(profile).padding(PulsoSpace.s5) }
                     }
                     ForEach(0..<max(ProfileIdentitiesModel.maxCommunityProfiles - profiles.count, 0), id: \.self) { _ in
-                        Text("profile_identities_empty_slot").foregroundStyle(.secondary)
+                        PulsoCard {
+                            Text("profile_identities_empty_slot").foregroundStyle(palette.secondaryText).padding(PulsoSpace.s5)
+                        }
                     }
                 } else {
                     ProgressView().frame(maxWidth: .infinity)
                 }
-            } header: {
-                HStack {
-                    Label("profile_identities_region_community_title", systemImage: ProfileRoleVisuals.kindSymbol(.community))
-                    Spacer()
-                    if let profiles = model.profiles {
-                        Text(verbatim: localizedFormat("profile_identities_count", profiles.count, ProfileIdentitiesModel.maxCommunityProfiles))
-                    }
+                ForEach(AuthCommunityRole.applicable, id: \.self) { role in
+                    applyCard(role)
                 }
-            } footer: {
-                Text("profile_identities_region_community_hint")
+                PulsoCard {
+                    HStack(spacing: PulsoSpace.s3) {
+                        Image(systemName: "laptopcomputer").font(.title2).foregroundStyle(palette.text)
+                        Text("profile_identities_web_apply_note").font(.subheadline).foregroundStyle(palette.secondaryText)
+                    }
+                    .padding(PulsoSpace.s5)
+                }
             }
-
-            ForEach(AuthCommunityRole.applicable, id: \.self) { role in
-                applySection(role)
-            }
-
-            Section {
-                Label("profile_identities_web_apply_note", systemImage: "desktopcomputer")
-                    .foregroundStyle(.secondary)
-            }
+            .padding(PulsoSpace.s4)
         }
         .navigationTitle("profile_identities_title")
         .navigationBarTitleDisplayMode(.inline)
@@ -63,112 +52,156 @@ struct ProfileIdentitiesView: View {
         .task { await model.observeApplication(.coach) }
     }
 
-    @ViewBuilder
+    /** 区块头：图标、标题和说明、配额，下面一条强调色线（Android 身份页的分区头）。 */
+    private var communityHeader: some View {
+        VStack(spacing: PulsoSpace.s2) {
+            HStack(alignment: .bottom, spacing: PulsoSpace.s3) {
+                Image(systemName: ProfileRoleVisuals.kindSymbol(.community)).font(.title3).foregroundStyle(palette.secondaryText)
+                VStack(alignment: .leading, spacing: PulsoSpace.half) {
+                    Text("profile_identities_region_community_title").font(.headline).foregroundStyle(palette.text)
+                    Text("profile_identities_region_community_hint").font(.footnote).foregroundStyle(palette.secondaryText)
+                }
+                Spacer(minLength: 0)
+                if let profiles = model.profiles {
+                    Text(verbatim: localizedFormat("profile_identities_count", profiles.count, ProfileIdentitiesModel.maxCommunityProfiles))
+                        .font(.headline.monospacedDigit())
+                        .foregroundStyle(palette.secondaryText)
+                }
+            }
+            Capsule().fill(palette.accent.step(9)).frame(height: 3)
+        }
+    }
+
     private func identityCard(_ profile: CommunityProfileItem) -> some View {
         let isCurrent = profile.profileId == model.currentProfileId
-        HStack(spacing: 12) {
-            PulsoAvatar(url: model.avatarURL(profile), size: 48, systemImage: "person", fallbackText: profile.displayName)
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
+        return VStack(alignment: .leading, spacing: PulsoSpace.s4) {
+            HStack(spacing: PulsoSpace.s3) {
+                PulsoAvatar(url: model.avatarURL(profile), size: 56, systemImage: "person", fallbackText: profile.displayName)
+                VStack(alignment: .leading, spacing: PulsoSpace.half) {
                     Group {
                         if let name = profile.displayName, !name.isEmpty { Text(verbatim: name) } else { Text("select_profile_unnamed") }
                     }
                     .font(.headline)
-                    if isCurrent {
-                        Text("profile_identities_in_use")
-                            .font(.caption.weight(.semibold))
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 2)
-                            .background(.tint.opacity(0.15), in: .capsule)
-                            .foregroundStyle(.tint)
+                    .foregroundStyle(palette.text)
+                    Text(languageKey(profile.profileLanguage)).font(.subheadline).foregroundStyle(palette.secondaryText)
+                }
+                Spacer(minLength: 0)
+                if isCurrent {
+                    Label("profile_identities_in_use", systemImage: "checkmark")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(palette.onAccent)
+                        .padding(.horizontal, PulsoSpace.s3)
+                        .padding(.vertical, PulsoSpace.s2)
+                        .background(palette.accent.step(9), in: palette.chipShape)
+                }
+            }
+            citypulsoId(profile, isCurrent: isCurrent)
+            Label("select_profile_kind_community", systemImage: ProfileRoleVisuals.kindSymbol(.community))
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(palette.accent.step(11))
+                .padding(.horizontal, PulsoSpace.s3)
+                .padding(.vertical, PulsoSpace.s2)
+                .background(palette.accent.step(3), in: palette.chipShape)
+            let roles = ProfileRoleVisuals.sorted(profile.communityRoles.map(\.rawValue))
+            if !roles.isEmpty {
+                HStack(spacing: PulsoSpace.s2) {
+                    ForEach(roles, id: \.self) { role in
+                        ProfileRoleLabel(role: role)
+                            .labelStyle(.iconOnly)
+                            .foregroundStyle(palette.text)
+                            .frame(width: 40, height: 40)
+                            .overlay { palette.innerShape.strokeBorder(palette.outlineVariant, lineWidth: pulsoHairline) }
                     }
                 }
-                HStack(spacing: 6) {
-                    ForEach(ProfileRoleVisuals.sorted(profile.communityRoles.map(\.rawValue)), id: \.self) { role in
-                        ProfileRoleLabel(role: role).labelStyle(.iconOnly).foregroundStyle(.secondary)
-                    }
-                    Text(languageKey(profile.profileLanguage)).font(.caption).foregroundStyle(.secondary)
-                }
+            }
+            if isCurrent {
+                Text("profile_identities_currently_active").font(.subheadline.weight(.semibold)).foregroundStyle(palette.accent.step(11))
             }
         }
+    }
+
+    /** 「@ CityPulso ID」，当前身份可以点铅笔改。 */
+    @ViewBuilder
+    private func citypulsoId(_ profile: CommunityProfileItem, isCurrent: Bool) -> some View {
         if isCurrent, let draft = model.citypulsoIdDraft, draft.profileId == profile.profileId {
-            VStack(alignment: .leading, spacing: 6) {
-                TextField("profile_identities_citypulso_id_label", text: Binding(get: { draft.value }, set: { model.setCitypulsoIdDraft($0) }))
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                Text("profile_identities_citypulso_id_rule")
-                    .font(.footnote)
-                    .foregroundStyle(model.citypulsoIdDraftValid ? Color.secondary : Color.red)
-                HStack {
-                    Button("profile_identities_citypulso_id_cancel", role: .cancel) { model.citypulsoIdDraft = nil }
-                    Spacer()
+            VStack(alignment: .leading, spacing: PulsoSpace.s3) {
+                PulsoTextField(
+                    "profile_identities_citypulso_id_label",
+                    text: Binding(get: { draft.value }, set: { model.setCitypulsoIdDraft($0) }),
+                    hintText: model.citypulsoIdDraftValid ? String(localized: "profile_identities_citypulso_id_rule") : nil,
+                    errorText: model.citypulsoIdDraftValid ? nil : String(localized: "profile_identities_citypulso_id_rule")
+                )
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                HStack(spacing: PulsoSpace.s3) {
+                    Button("profile_identities_citypulso_id_cancel") { model.citypulsoIdDraft = nil }
+                        .buttonStyle(.pulso(.soft, tone: .gray, fullWidth: true))
                     Button("profile_identities_citypulso_id_save") { Task { await model.saveCitypulsoId() } }
-                        .buttonStyle(.pulso())
+                        .buttonStyle(.pulso(fullWidth: true))
                         .disabled(!model.citypulsoIdDraftValid || model.savingCitypulsoId)
                 }
-                .buttonStyle(.borderless)
             }
         } else {
-            LabeledContent("profile_identities_citypulso_id_label") {
-                HStack {
-                    Text(verbatim: profile.citypulsoId).textSelection(.enabled)
-                    if isCurrent {
-                        Button("profile_identities_citypulso_id_edit", systemImage: "pencil") { model.startCitypulsoIdEdit(profile) }
-                            .labelStyle(.iconOnly)
-                            .buttonStyle(.borderless)
+            HStack(spacing: PulsoSpace.s2) {
+                Image(systemName: "at").foregroundStyle(palette.secondaryText)
+                Text(verbatim: profile.citypulsoId).font(.body.weight(.medium)).foregroundStyle(palette.secondaryText).textSelection(.enabled)
+                if isCurrent {
+                    Button { model.startCitypulsoIdEdit(profile) } label: {
+                        Image(systemName: "pencil").foregroundStyle(palette.text).frame(width: 32, height: 32)
                     }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(Text("profile_identities_citypulso_id_edit"))
                 }
             }
         }
     }
 
-    @ViewBuilder
-    private func applySection(_ role: AuthCommunityRole) -> some View {
+    /** 申请成为创作者 / 教练：一张卡，标题、说明、多行输入框和提交按钮（Android 身份页）。 */
+    private func applyCard(_ role: AuthCommunityRole) -> some View {
         let copy = ApplyCopy(role)
         let form = model.form(role)
         let status = form.application?.status
-        Section {
-            if !form.loaded {
-                ProgressView().frame(maxWidth: .infinity)
-            } else {
-                switch status {
-                case .pending:
-                    statusRow("profile_identities_apply_status_pending", .orange, Text(copy.pending))
-                case .approved:
-                    statusRow("profile_identities_apply_status_approved", .green, Text(copy.approved))
-                case .rejected:
-                    let reason = form.application?.rejectionReason.flatMap { $0.trimmingCharacters(in: .whitespaces).isEmpty ? nil : $0 }
-                        ?? String(localized: "profile_identities_apply_rejected_no_reason")
-                    statusRow("profile_identities_apply_status_rejected", .red, Text(verbatim: localizedFormat("profile_identities_apply_rejected_message", reason)))
-                case nil:
-                    EmptyView()
-                }
-                if status != .pending, status != .approved, !model.holds(role) {
-                    Text(copy.intro).font(.subheadline).foregroundStyle(.secondary)
-                    TextField(
-                        status == .rejected ? "profile_identities_apply_reapply_title" : copy.title,
-                        text: Binding(get: { form.motivation }, set: { model.setMotivation(role, $0) }),
-                        prompt: Text(copy.placeholder),
-                        axis: .vertical
-                    )
-                    .lineLimit(4...10)
-                    Button {
-                        Task { await model.submit(role) }
-                    } label: {
-                        HStack {
-                            Text("profile_identities_apply_submit")
-                            if form.submitting { ProgressView() }
-                        }
+        let canApply = status != .pending && status != .approved && !model.holds(role)
+        return PulsoCard {
+            VStack(alignment: .leading, spacing: PulsoSpace.s4) {
+                Text(status == .rejected ? "profile_identities_apply_reapply_title" : copy.title).font(.headline).foregroundStyle(palette.text)
+                if !form.loaded {
+                    ProgressView().frame(maxWidth: .infinity)
+                } else {
+                    switch status {
+                    case .pending:
+                        statusRow("profile_identities_apply_status_pending", .orange, Text(copy.pending))
+                    case .approved:
+                        statusRow("profile_identities_apply_status_approved", .green, Text(copy.approved))
+                    case .rejected:
+                        let reason = form.application?.rejectionReason.flatMap { $0.trimmingCharacters(in: .whitespaces).isEmpty ? nil : $0 }
+                            ?? String(localized: "profile_identities_apply_rejected_no_reason")
+                        statusRow("profile_identities_apply_status_rejected", palette.error, Text(verbatim: localizedFormat("profile_identities_apply_rejected_message", reason)))
+                    case nil:
+                        EmptyView()
                     }
-                    .disabled(!form.motivationValid || form.submitting)
+                    if canApply {
+                        Text(copy.intro).font(.subheadline).foregroundStyle(palette.secondaryText)
+                        TextField("", text: Binding(get: { form.motivation }, set: { model.setMotivation(role, $0) }), prompt: Text(copy.placeholder), axis: .vertical)
+                            .lineLimit(5...10)
+                            .padding(PulsoSpace.s4)
+                            .frame(minHeight: 140, alignment: .topLeading)
+                            .overlay { palette.textAreaShape.strokeBorder(palette.outline, lineWidth: pulsoHairline) }
+                        if !form.motivation.isEmpty, !form.motivationValid {
+                            Text("profile_identities_apply_motivation_min").font(.footnote).foregroundStyle(palette.error)
+                        }
+                        Button {
+                            Task { await model.submit(role) }
+                        } label: {
+                            if form.submitting { ProgressView() } else { Text("profile_identities_apply_submit") }
+                        }
+                        .buttonStyle(.pulso(fullWidth: true))
+                        .environment(\.pulsoControlSize, .comfortable)
+                        .disabled(!form.motivationValid || form.submitting)
+                    }
                 }
             }
-        } header: {
-            Text(status == .rejected ? "profile_identities_apply_reapply_title" : copy.title)
-        } footer: {
-            if form.loaded, status != .pending, status != .approved, !model.holds(role), !form.motivation.isEmpty, !form.motivationValid {
-                Text("profile_identities_apply_motivation_min")
-            }
+            .padding(PulsoSpace.s5)
         }
     }
 

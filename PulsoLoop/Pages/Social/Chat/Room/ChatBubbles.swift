@@ -28,6 +28,8 @@ struct ChatMessageBubble: View {
     let map: ResolvedMapPreference
     let callbacks: ChatBubbleCallbacks
 
+    @Environment(\.pulsoPalette) private var palette
+
     var body: some View {
         if message.type == .system {
             ChatCenterNote(text: chatSystemNoticeText(message.content.system, mine: message.isMine))
@@ -40,7 +42,7 @@ struct ChatMessageBubble: View {
                 if message.isMine { Spacer(minLength: avatarSize + 8) } else { avatar }
                 VStack(alignment: message.isMine ? .trailing : .leading, spacing: 2) {
                     if isGroup, !message.isMine {
-                        Text(verbatim: message.sender?.displayName ?? "").font(.caption2).foregroundStyle(.secondary)
+                        Text(verbatim: message.sender?.displayName ?? "").font(.caption2).foregroundStyle(palette.secondaryText)
                     }
                     HStack(alignment: .center, spacing: 6) {
                         if message.isMine, message.status == .failed {
@@ -64,12 +66,12 @@ struct ChatMessageBubble: View {
             PulsoRemoteImage(url: message.sender?.avatarURL)
                 .overlay {
                     if message.sender?.avatarURL == nil {
-                        Text(verbatim: String((message.sender?.displayName ?? "?").prefix(1))).font(.headline).foregroundStyle(.white)
+                        Text(verbatim: String((message.sender?.displayName ?? "?").prefix(1)).uppercased()).font(.headline).foregroundStyle(palette.accent.step(11))
                     }
                 }
                 .frame(width: avatarSize, height: avatarSize)
-                .background(Color.accentColor.opacity(0.5))
-                .clipShape(.rect(cornerRadius: 6))
+                .background(palette.accent.step(3))
+                .clipShape(palette.innerShape)
         }
         .buttonStyle(.plain)
     }
@@ -119,8 +121,8 @@ struct ChatMessageBubble: View {
             .font(.body)
             .padding(.horizontal, 12)
             .padding(.vertical, 9)
-            .foregroundStyle(message.isMine ? Color.white : Color.primary)
-            .background(ChatBubbleShape(mine: message.isMine).fill(message.isMine ? Color.accentColor : Color(.secondarySystemGroupedBackground)))
+            .foregroundStyle(message.isMine ? palette.onAccent : palette.text)
+            .background(ChatBubbleShape(mine: message.isMine).fill(message.isMine ? palette.accent.step(9) : palette.gray.step(3)))
     }
 
     private func voice(_ url: URL) -> some View {
@@ -157,7 +159,7 @@ struct ChatMessageBubble: View {
         }
         .frame(width: 220, alignment: .leading)
         .padding(12)
-        .background(Color(.secondarySystemGroupedBackground), in: .rect(cornerRadius: 8))
+        .background(palette.gray.step(3), in: palette.innerShape)
         if let url = file.url { Link(destination: url) { row }.buttonStyle(.plain) } else { row }
     }
 
@@ -177,8 +179,8 @@ struct ChatMessageBubble: View {
                     .overlay { Image(systemName: "mappin.circle.fill").font(.title).foregroundStyle(.red) }
             }
             .frame(width: 240)
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(.rect(cornerRadius: 8))
+            .background(palette.gray.step(3))
+            .clipShape(palette.innerShape)
         }
         .buttonStyle(.plain)
     }
@@ -211,13 +213,15 @@ struct ChatBubbleShape: Shape {
 struct ChatCenterNote: View {
     let text: String
 
+    @Environment(\.pulsoPalette) private var palette
+
     var body: some View {
         Text(verbatim: text)
             .font(.caption)
-            .foregroundStyle(.secondary)
+            .foregroundStyle(palette.secondaryText)
             .padding(.horizontal, 8)
             .padding(.vertical, 3)
-            .background(.fill.tertiary, in: .rect(cornerRadius: 4))
+            .background(palette.gray.step(3), in: RoundedRectangle(cornerRadius: palette.radius(1)))
             .frame(maxWidth: .infinity)
     }
 }
@@ -226,6 +230,8 @@ struct ChatCenterNote: View {
 struct ChatQuoteLine: View {
     let quote: ChatQuoteUi
 
+    @Environment(\.pulsoPalette) private var palette
+
     var body: some View {
         Text(verbatim: localizedFormat("shell_chat_quote_line", quote.senderName ?? String(localized: "shell_chat_peer_fallback"), quotePreview(quote)))
             .font(.caption)
@@ -233,7 +239,7 @@ struct ChatQuoteLine: View {
             .lineLimit(2)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .background(.fill.tertiary, in: .rect(cornerRadius: 4))
+            .background(palette.gray.step(3), in: RoundedRectangle(cornerRadius: palette.radius(1)))
             .frame(maxWidth: bubbleMaxWidth, alignment: .leading)
     }
 }
@@ -251,6 +257,8 @@ struct ChatShareCard: View {
     let mine: Bool
     let hosted: Bool
     let callbacks: ChatBubbleCallbacks
+
+    @Environment(\.pulsoPalette) private var palette
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -275,11 +283,11 @@ struct ChatShareCard: View {
                 HStack {
                     Button(primaryLabel) { callbacks.onCard(type, card) }
                         .buttonStyle(.pulso(.soft))
-                        .tint(mine ? .white : .accentColor)
+                        .tint(mine ? palette.onAccent : palette.accent.step(9))
                     if type == .venueShare {
                         Button("shell_chat_card_book") { callbacks.onBook(card) }
                             .buttonStyle(.pulso())
-                            .tint(mine ? .white.opacity(0.3) : .accentColor)
+                            .tint(mine ? palette.onAccent.opacity(0.3) : palette.accent.step(9))
                     }
                 }
                 .controlSize(.small)
@@ -287,9 +295,9 @@ struct ChatShareCard: View {
             .padding(12)
         }
         .frame(width: 260, alignment: .leading)
-        .foregroundStyle(mine ? Color.white : Color.primary)
-        .background(mine ? Color.accentColor : Color(.secondarySystemGroupedBackground))
-        .clipShape(.rect(cornerRadius: 10))
+        .foregroundStyle(mine ? palette.onAccent : palette.text)
+        .background(mine ? palette.accent.step(9) : palette.gray.step(3))
+        .clipShape(palette.innerShape)
     }
 
     private var kindLabel: LocalizedStringKey {

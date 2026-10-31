@@ -58,44 +58,50 @@ final class StorageModel {
 public struct StorageView: View {
     @State private var model: StorageModel
     @State private var confirm: PulsoHoldConfirm?
+    @Environment(\.pulsoPalette) private var palette
 
     public init(service: LocalDataService) {
         _model = State(initialValue: StorageModel(service: service))
     }
 
     public var body: some View {
-        List {
-            Section {
-                ForEach(model.kinds, id: \.self) { kind in
+        ScrollView {
+            VStack(alignment: .leading, spacing: PulsoSpace.s4) {
+                Text("storage_intro").font(.subheadline).foregroundStyle(palette.secondaryText)
+                // 每一行是一类本地数据，第二行是占用（Android 清除本地数据）。
+                PulsoSection {
+                    ForEach(model.kinds, id: \.self) { kind in
+                        Button {
+                            guard model.clearing.isEmpty else { return }
+                            let label = String(localized: kind.labelResource)
+                            confirm = PulsoHoldConfirm(
+                                title: localizedFormat("storage_clear_title", label),
+                                message: String(localized: (kind.recoverable ? "storage_clear_refetch" : "storage_clear_permanent") as String.LocalizationValue),
+                                label: String(localized: "storage_clear_confirm")
+                            ) { Task { await model.clear(kind) } }
+                        } label: {
+                            PulsoSectionRow(
+                                LocalizedStringKey(kind.labelKeyName), systemImage: kind.symbol,
+                                supporting: usageText(model.usage[kind], clearing: model.clearing.contains(kind)), showChevron: false
+                            )
+                        }
+                        .buttonStyle(.pulsoRow)
+                    }
+                }
+                PulsoSection {
                     Button {
                         guard model.clearing.isEmpty else { return }
-                        let label = String(localized: kind.labelResource)
-                        confirm = PulsoHoldConfirm(
-                            title: localizedFormat("storage_clear_title", label),
-                            message: String(localized: (kind.recoverable ? "storage_clear_refetch" : "storage_clear_permanent") as String.LocalizationValue),
-                            label: String(localized: "storage_clear_confirm")
-                        ) { Task { await model.clear(kind) } }
-                    } label: {
-                        LabeledContent {
-                            Text(verbatim: usageText(model.usage[kind], clearing: model.clearing.contains(kind)))
-                        } label: {
-                            Label(LocalizedStringKey(kind.labelKeyName), systemImage: kind.symbol)
+                        let title = String(localized: "storage_clear_all")
+                        confirm = PulsoHoldConfirm(title: title, message: String(localized: "storage_clear_all_text"), label: title) {
+                            Task { await model.clearAll() }
                         }
+                    } label: {
+                        PulsoSectionRow("storage_clear_all", systemImage: "trash", tint: palette.error, showChevron: false)
                     }
-                    .tint(.primary)
-                }
-            } header: {
-                Text("storage_intro").textCase(nil)
-            }
-            Section {
-                Button("storage_clear_all", systemImage: "trash", role: .destructive) {
-                    guard model.clearing.isEmpty else { return }
-                    let title = String(localized: "storage_clear_all")
-                    confirm = PulsoHoldConfirm(title: title, message: String(localized: "storage_clear_all_text"), label: title) {
-                        Task { await model.clearAll() }
-                    }
+                    .buttonStyle(.pulsoRow)
                 }
             }
+            .padding(PulsoSpace.s4)
         }
         .navigationTitle("settings_storage")
         .task { await model.measureAll() }

@@ -187,7 +187,8 @@ final class ScreenshotTests: XCTestCase {
         for _ in 0..<27 where Self.isSpinning(window) {
             try await Task.sleep(for: .milliseconds(500))
         }
-        try await Task.sleep(for: .seconds(1.5))
+        // 列表数据回来后封面、头像还在下载。
+        try await Task.sleep(for: .seconds(3))
     }
 
     private static func isSpinning(_ view: UIView) -> Bool {
