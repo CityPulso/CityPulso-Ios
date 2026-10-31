@@ -91,7 +91,7 @@ struct CoachDetailView: View {
         } else if model.coach.isLoading {
             ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
-            ContentUnavailableView("coach_detail_not_found", systemImage: "person.crop.circle.badge.questionmark")
+            PulsoEmptyState(Text("coach_detail_not_found"))
         }
     }
 }

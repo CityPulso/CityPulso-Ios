@@ -348,11 +348,7 @@ struct ForumDetailView: View {
         } else if let error = posts.error {
             PulsoLoadErrorView(error) { Task { await posts.refresh() } }.listRowBackground(Color.clear)
         } else if posts.isEmpty {
-            ContentUnavailableView {
-                Text("discussion_forum_empty")
-            } description: {
-                Text("discussion_forum_empty_body")
-            } actions: {
+            PulsoEmptyState(Text("discussion_forum_empty"), description: Text("discussion_forum_empty_body")) {
                 if forum.status == .active {
                     NavigationLink("discussion_post_here", value: NearRoute.postCreate(prefill: PostCreatePrefill(forumId: forum.id))).buttonStyle(.pulso())
                 }

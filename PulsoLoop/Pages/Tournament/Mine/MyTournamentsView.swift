@@ -154,11 +154,7 @@ struct MyTournamentsView: View {
         } else if let error = list.error {
             PulsoLoadErrorView(error) { Task { await list.refresh() } }
         } else if rows.isEmpty, list.endReached {
-            ContentUnavailableView {
-                Text("tournament_mine_empty")
-            } description: {
-                Text("tournament_mine_empty_body")
-            } actions: {
+            PulsoEmptyState(Text("tournament_mine_empty"), description: Text("tournament_mine_empty_body")) {
                 Button("tournament_mine_browse") { shell?.open(.explore) }.buttonStyle(.pulso())
             }
         } else {
@@ -207,7 +203,7 @@ struct MyTournamentsView: View {
         } else if let error = list.error {
             PulsoLoadErrorView(error) { Task { await list.refresh() } }
         } else if rows.isEmpty, list.endReached {
-            ContentUnavailableView { Text("tournament_mine_invitations_empty") }
+            PulsoEmptyState(Text("tournament_mine_invitations_empty"))
         } else {
             ForEach(rows, id: \.id) { entry in
                 // 「加入 Ethan & Olivia · 公开双打」：队里其他人，再是组别。
@@ -239,7 +235,7 @@ struct MyTournamentsView: View {
         } else if let error = list.error {
             PulsoLoadErrorView(error) { Task { await list.refresh() } }
         } else if list.isEmpty {
-            ContentUnavailableView { Text("tournament_mine_prizes_empty") }
+            PulsoEmptyState(Text("tournament_mine_prizes_empty"))
         } else {
             ForEach(list.items, id: \.id) { grant in
                 prizeCard(grant)

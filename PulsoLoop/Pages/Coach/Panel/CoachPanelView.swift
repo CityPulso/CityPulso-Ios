@@ -201,11 +201,7 @@ struct CoachPanelView: View {
             .listRowBackground(Color.clear)
             let items = model.compensations.data ?? []
             if items.isEmpty, !model.compensations.isLoading {
-                ContentUnavailableView {
-                    Text("coach_panel_compensation_empty")
-                } description: {
-                    Text("coach_panel_compensation_empty_body")
-                }
+                PulsoEmptyState(Text("coach_panel_compensation_empty"), description: Text("coach_panel_compensation_empty_body"))
             }
             ForEach(items, id: \.id) { item in
                 HStack {
@@ -259,11 +255,7 @@ struct CoachPanelView: View {
         } else if let error = list.error {
             PulsoLoadErrorView(error) { Task { await list.refresh() } }
         } else if list.isEmpty {
-            ContentUnavailableView {
-                Text(emptyTitle)
-            } description: {
-                if let emptyBody { Text(emptyBody) }
-            } actions: {
+            PulsoEmptyState(Text(emptyTitle), description: if let emptyBody { Text(emptyBody) }) {
                 emptyAction()
             }
         } else {

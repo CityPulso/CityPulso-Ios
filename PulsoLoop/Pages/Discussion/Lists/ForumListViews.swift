@@ -127,11 +127,7 @@ struct ForumSearchView: View {
         } else if let error = list.error {
             PulsoLoadErrorView(error) { Task { await list.refresh() } }
         } else if list.isEmpty {
-            ContentUnavailableView {
-                Text("discussion_search_empty")
-            } description: {
-                Text("discussion_search_empty_body")
-            } actions: {
+            PulsoEmptyState(Text("discussion_search_empty"), description: Text("discussion_search_empty_body")) {
                 NavigationLink("discussion_create_forum", value: LoopRoute.forumCreate).buttonStyle(.pulso())
             }
         } else {

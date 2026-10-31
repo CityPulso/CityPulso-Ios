@@ -65,10 +65,8 @@ struct SpaceBookingView: View {
             .refreshable { model.refresh() }
         } else if let error = model.booking.error {
             if error.kind == .notFound {
-                ContentUnavailableView {
-                    Label("space_booking_not_found", systemImage: "calendar.badge.exclamationmark")
-                } actions: {
-                    Button("space_booking_back") { shell?.push(NearRoute.calendar(tab: .spaceBookings)) }
+                PulsoEmptyState(Text("space_booking_not_found"), style: .calendar) {
+                    Button("space_booking_back") { shell?.push(NearRoute.calendar(tab: .spaceBookings)) }.buttonStyle(.pulso())
                 }
             } else {
                 PulsoLoadErrorView(error) { model.refresh() }

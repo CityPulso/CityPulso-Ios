@@ -65,10 +65,8 @@ struct CourtBookingView: View {
             .refreshable { model.refresh() }
         } else if let error = model.booking.error {
             if error.kind == .notFound {
-                ContentUnavailableView {
-                    Label("court_booking_not_found", systemImage: "calendar.badge.exclamationmark")
-                } actions: {
-                    Button("court_booking_back") { shell?.push(LoopRoute.calendar(tab: .courtBookings)) }
+                PulsoEmptyState(Text("court_booking_not_found"), style: .calendar) {
+                    Button("court_booking_back") { shell?.push(LoopRoute.calendar(tab: .courtBookings)) }.buttonStyle(.pulso())
                 }
             } else {
                 PulsoLoadErrorView(error) { model.refresh() }

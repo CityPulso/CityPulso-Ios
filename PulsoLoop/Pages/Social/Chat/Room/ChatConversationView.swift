@@ -66,7 +66,7 @@ struct ChatConversationView: View {
         } else if ordered.isEmpty, model.isLoading {
             ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if ordered.isEmpty {
-            ContentUnavailableView("shell_chat_conversation_empty", systemImage: "bubble.left.and.bubble.right").frame(maxHeight: .infinity)
+            PulsoEmptyState(Text("shell_chat_conversation_empty"), style: .campfire).frame(maxHeight: .infinity)
         } else {
             ScrollView {
                 LazyVStack(spacing: 12) {
@@ -216,7 +216,7 @@ struct ChatConversationView: View {
             List {
                 let targets = model.allConversations
                 if targets.isEmpty {
-                    ContentUnavailableView("shell_chat_forward_empty", systemImage: "bubble.left.and.bubble.right")
+                    PulsoEmptyState(Text("shell_chat_forward_empty"), style: .campfire)
                 }
                 ForEach(targets) { target in
                     Button { Task { await model.forward(to: target) } } label: { ConversationRowView(row: target) }

@@ -150,12 +150,8 @@ struct BuildingDetailView: View {
         } else if let error = model.building.error, error.kind != .notFound {
             PulsoLoadErrorView(error) { Task { await model.refresh() } }
         } else {
-            ContentUnavailableView {
-                Label("building_detail_not_found", systemImage: "building")
-            } description: {
-                Text("building_detail_not_found_body")
-            } actions: {
-                Button("venue_detail_back_to_explore") { shell?.open(.explore) }
+            PulsoEmptyState(Text("building_detail_not_found"), description: Text("building_detail_not_found_body")) {
+                Button("venue_detail_back_to_explore") { shell?.open(.explore) }.buttonStyle(.pulso())
             }
         }
     }

@@ -109,11 +109,7 @@ struct AgendaView: View {
     @ViewBuilder
     private var empty: some View {
         let spaces = model.tab == .spaces
-        ContentUnavailableView {
-            Label(spaces ? "home_agenda_empty_spaces" : "home_agenda_empty", systemImage: spaces ? "sportscourt" : "calendar")
-        } description: {
-            Text(spaces ? "home_agenda_empty_spaces_hint" : "home_agenda_empty_hint")
-        } actions: {
+        PulsoEmptyState(Text(spaces ? "home_agenda_empty_spaces" : "home_agenda_empty"), description: Text(spaces ? "home_agenda_empty_spaces_hint" : "home_agenda_empty_hint"), style: .calendar) {
             if !spaces, model.isPulser {
                 Button("shell_empty_action_create") { open(root: .create) }.buttonStyle(.pulso())
             }

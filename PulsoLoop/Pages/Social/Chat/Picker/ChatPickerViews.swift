@@ -103,7 +103,7 @@ struct ChatEventPickerView: View {
         Group {
             if let rows = model.events.data {
                 if rows.isEmpty {
-                    ContentUnavailableView("shell_chat_event_picker_empty", systemImage: "calendar")
+                    PulsoEmptyState(Text("shell_chat_event_picker_empty"), style: .calendar)
                 } else {
                     List(rows) { row in
                         Button {
@@ -246,7 +246,7 @@ struct ChatFavoritePickerView: View {
             } else if let error = list.error {
                 PulsoLoadErrorView(error) { Task { await list.refresh() } }
             } else if list.isEmpty {
-                ContentUnavailableView(empty, systemImage: "heart")
+                PulsoEmptyState(Text(empty))
             } else {
                 List(list.items) { item in
                     row(item).onAppear { if item.id == list.items.last?.id { list.loadMore() } }

@@ -81,7 +81,7 @@ struct TournamentDetailView: View {
             .refreshable { await model.load() }
         } else if let error = model.tournament.error {
             if error.kind == .notFound {
-                ContentUnavailableView("tournament_detail_not_found", systemImage: "trophy", description: Text("tournament_detail_not_found_body"))
+                PulsoEmptyState(Text("tournament_detail_not_found"), description: Text("tournament_detail_not_found_body"))
             } else {
                 PulsoLoadErrorView(error) { Task { await model.load() } }
             }
@@ -386,7 +386,7 @@ struct TournamentDetailView: View {
     }
 
     private var bracketPending: some View {
-        ContentUnavailableView("tournament_detail_no_bracket", systemImage: "list.bullet.rectangle", description: Text("tournament_detail_no_bracket_body"))
+        PulsoEmptyState(Text("tournament_detail_no_bracket"), description: Text("tournament_detail_no_bracket_body"))
             .listRowSeparator(.hidden)
     }
 

@@ -172,7 +172,7 @@ struct CourseDetailView: View {
             .refreshable { await model.load() }
         } else if let error = model.course.error {
             if error.kind == .notFound {
-                ContentUnavailableView("course_detail_not_found", systemImage: "book.closed", description: Text("course_detail_not_found_body"))
+                PulsoEmptyState(Text("course_detail_not_found"), description: Text("course_detail_not_found_body"))
             } else {
                 PulsoLoadErrorView(error) { Task { await model.load() } }
             }

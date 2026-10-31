@@ -35,12 +35,8 @@ struct SessionBookView: View {
             ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if model.venue.data == nil, let error = model.venue.error {
             if error.kind == .notFound {
-                ContentUnavailableView {
-                    Label("venue_detail_not_found", systemImage: "building.2")
-                } description: {
-                    Text("venue_detail_not_found_body")
-                } actions: {
-                    Button("venue_book_back") { dismiss() }
+                PulsoEmptyState(Text("venue_detail_not_found"), description: Text("venue_detail_not_found_body")) {
+                    Button("venue_book_back") { dismiss() }.buttonStyle(.pulso())
                 }
             } else {
                 PulsoLoadErrorView(error) { model.refresh() }

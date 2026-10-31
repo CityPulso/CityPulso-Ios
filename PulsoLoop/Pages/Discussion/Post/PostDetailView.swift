@@ -326,29 +326,32 @@ struct PostDetailView: View {
                     shareURL: data.live.contains { $0.allowShares } ? postShareURL(data.id) : nil,
                     onBookmark: { Task { await model.toggleBookmark() } }
                 )
+                // 发布在哪些论坛：一行「发布在 论坛名 标签」，点名字进论坛；拒绝 / 下架的原因只给作者看（Android 帖子页）。
+                if !data.publications.isEmpty {
+                    PulsoFlowLayout(spacing: PulsoSpace.s2) {
+                        Text("discussion_published_in").font(.subheadline.weight(.medium)).foregroundStyle(.secondary)
+                        ForEach(data.publications, id: \.forumId) { publication in
+                            HStack(spacing: PulsoSpace.s1) {
+                                Button { shell?.push(LoopRoute.forum(forumId: publication.forumId)) } label: {
+                                    Text(verbatim: publication.forumName).font(.subheadline.weight(.semibold)).foregroundStyle(.tint).lineLimit(1)
+                                }
+                                .buttonStyle(.plain)
+                                ForumBadge(scope: publication.ownerProfileScope)
+                                if publication.status != .published || data.isAuthor { PostStatusChip(status: publication.status) }
+                            }
+                        }
+                    }
+                    ForEach(data.publications, id: \.forumId) { publication in
+                        if data.isAuthor, let reason = publication.rejectReason ?? publication.removedReason, !reason.isEmpty {
+                            Text(verbatim: localizedFormat("discussion_forum_reason", publication.forumName, reason)).font(.caption).foregroundStyle(.red)
+                        }
+                    }
+                }
             }
             // 正文直接铺在页面上，不套卡片，各块之间只留一点空（Android 帖子页）。
             .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)
             .listRowInsets(EdgeInsets(top: PulsoSpace.s1, leading: PulsoSpace.s4, bottom: PulsoSpace.s1, trailing: PulsoSpace.s4))
-            if !data.publications.isEmpty {
-                Section("discussion_published_in") {
-                    ForEach(data.publications, id: \.forumId) { publication in
-                        Button { shell?.push(LoopRoute.forum(forumId: publication.forumId)) } label: {
-                            VStack(alignment: .leading, spacing: 2) {
-                                HStack {
-                                    Text(verbatim: publication.forumName)
-                                    if publication.status != .published || data.isAuthor { PostStatusChip(status: publication.status) }
-                                }
-                                if data.isAuthor, let reason = publication.rejectReason ?? publication.removedReason, !reason.isEmpty {
-                                    Text(verbatim: reason).font(.caption).foregroundStyle(.red)
-                                }
-                            }
-                        }
-                        .foregroundStyle(.primary)
-                    }
-                }
-            }
             commentsSection(data)
         }
         .listSectionSpacing(PulsoSpace.s4)

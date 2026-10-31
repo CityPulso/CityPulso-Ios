@@ -113,12 +113,8 @@ struct MyMembershipView: View {
             } else if let error = model.value.error, error.kind != .notFound {
                 PulsoLoadErrorView(error) { Container.shared.membershipService().invalidate() }
             } else if model.value.error != nil {
-                ContentUnavailableView {
-                    Label("my_membership_not_found", systemImage: "person.text.rectangle")
-                } description: {
-                    Text("my_membership_not_found_body")
-                } actions: {
-                    Button("my_membership_back") { shell?.push(NearRoute.wallet) }
+                PulsoEmptyState(Text("my_membership_not_found"), description: Text("my_membership_not_found_body")) {
+                    Button("my_membership_back") { shell?.push(NearRoute.wallet) }.buttonStyle(.pulso())
                 }
             } else {
                 ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)

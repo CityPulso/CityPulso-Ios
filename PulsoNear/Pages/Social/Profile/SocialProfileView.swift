@@ -179,7 +179,7 @@ struct SocialProfileView: View {
         } else if let error = list.error {
             PulsoErrorBanner(error) { Task { await model.load() } }
         } else if list.items.isEmpty {
-            ContentUnavailableView(empty, systemImage: "calendar").listRowBackground(Color.clear)
+            PulsoEmptyState(Text(empty), style: .calendar).listRowBackground(Color.clear)
         } else {
             ForEach(list.items, id: \.id) { item in
                 NavigationLink(value: NearRoute.activity(activityType: item.activityType, activityId: item.id)) {

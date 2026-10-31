@@ -25,7 +25,7 @@ struct ResolvedNavPreferenceTests {
         wire.slot2 = AndroidNavSlot(destination: .courses)
         let near = Set(ShellDestination.allCases).subtracting([.courses, .tournaments])
 
-        #expect(ResolvedAndroidPreference.resolve(wire, kind: .community, supported: near).slot2 == ResolvedAndroidNavSlot(.venueSearch, iconPack: .place))
+        #expect(ResolvedAndroidPreference.resolve(wire, kind: .community, supported: near).slot2 == ResolvedAndroidNavSlot(.search, iconPack: .sports))
     }
 
     @Test func appsTrayListsEveryOtherAvailablePage() {

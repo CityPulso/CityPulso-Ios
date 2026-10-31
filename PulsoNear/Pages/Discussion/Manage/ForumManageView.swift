@@ -23,7 +23,7 @@ struct ForumManageView: View {
                 if forum.canManage {
                     content(forum)
                 } else {
-                    ContentUnavailableView { Text("discussion_manage_no_access") }
+                    PulsoEmptyState(Text("discussion_manage_no_access"))
                 }
             } else if let error = model.forum.error {
                 PulsoLoadErrorView(error) { Task { await model.load(resetForm: false) } }
@@ -228,11 +228,7 @@ struct ForumManageView: View {
     private var pendingTab: some View {
         let list = model.pending
         if list.isEmpty {
-            ContentUnavailableView {
-                Text("discussion_pending_empty")
-            } description: {
-                Text("discussion_pending_empty_body")
-            }
+            PulsoEmptyState(Text("discussion_pending_empty"), description: Text("discussion_pending_empty_body"))
             .listRowBackground(Color.clear)
         } else {
             pagedRows(list, empty: "discussion_pending_empty") { post in
@@ -409,11 +405,7 @@ struct ForumManageView: View {
         }
         Section {
             if model.topics.isEmpty {
-                ContentUnavailableView {
-                    Text("discussion_topics_empty")
-                } description: {
-                    Text("discussion_topics_empty_body")
-                }
+                PulsoEmptyState(Text("discussion_topics_empty"), description: Text("discussion_topics_empty_body"))
             }
             ForEach(Array(model.topics.enumerated()), id: \.element.id) { index, topic in
                 TopicRow(

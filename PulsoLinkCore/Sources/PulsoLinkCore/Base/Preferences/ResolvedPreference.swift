@@ -91,9 +91,9 @@ public struct ResolvedAndroidNavSlot: Codable, Sendable, Hashable {
  */
 public struct ResolvedAndroidPreference: Codable, Sendable, Hashable {
     public var slot1 = ResolvedAndroidNavSlot(.explore, iconPack: .explore)
-    public var slot2 = ResolvedAndroidNavSlot(.venueSearch, iconPack: .place)
-    public var slot3 = ResolvedAndroidNavSlot(.search, iconPack: .sports)
-    public var slot4 = ResolvedAndroidNavSlot(.forum, iconPack: .forum)
+    public var slot2 = ResolvedAndroidNavSlot(.search, iconPack: .sports)
+    public var slot3 = ResolvedAndroidNavSlot(.venueSearch, iconPack: .place)
+    public var slot4 = ResolvedAndroidNavSlot(.chatHub, iconPack: .chat)
     public var slot6 = ResolvedAndroidNavSlot(.create, iconPack: .create)
     /** Loop app 的桌面图标；Near 不读。 */
     public var loopLauncherIcon: LauncherIcon = .fallback

@@ -53,11 +53,7 @@ struct MarkPlaceView: View {
         if model.loading {
             ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if model.unavailable {
-            ContentUnavailableView {
-                Label("place_mark_unavailable", systemImage: "mappin.slash")
-            } description: {
-                Text("place_mark_unavailable_hint")
-            }
+            PulsoEmptyState(Text("place_mark_unavailable"), description: Text("place_mark_unavailable_hint"))
         } else {
             form
         }

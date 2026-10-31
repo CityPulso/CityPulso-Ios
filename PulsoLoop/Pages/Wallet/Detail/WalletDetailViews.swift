@@ -113,12 +113,8 @@ struct MyMembershipView: View {
             } else if let error = model.value.error, error.kind != .notFound {
                 PulsoLoadErrorView(error) { Container.shared.membershipService().invalidate() }
             } else if model.value.error != nil {
-                ContentUnavailableView {
-                    Label("my_membership_not_found", systemImage: "person.text.rectangle")
-                } description: {
-                    Text("my_membership_not_found_body")
-                } actions: {
-                    Button("my_membership_back") { shell?.push(LoopRoute.wallet(tab: .memberships)) }
+                PulsoEmptyState(Text("my_membership_not_found"), description: Text("my_membership_not_found_body")) {
+                    Button("my_membership_back") { shell?.push(LoopRoute.wallet(tab: .memberships)) }.buttonStyle(.pulso())
                 }
             } else {
                 ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -302,12 +298,8 @@ struct MyBundleView: View {
             } else if let error = model.value.error, error.kind != .notFound {
                 PulsoLoadErrorView(error) { Container.shared.bundleService().invalidate() }
             } else if model.value.error != nil {
-                ContentUnavailableView {
-                    Label("my_bundle_not_found", systemImage: "ticket")
-                } description: {
-                    Text("my_bundle_not_found_body")
-                } actions: {
-                    Button("my_bundle_back") { shell?.push(LoopRoute.wallet(tab: .bundles)) }
+                PulsoEmptyState(Text("my_bundle_not_found"), description: Text("my_bundle_not_found_body")) {
+                    Button("my_bundle_back") { shell?.push(LoopRoute.wallet(tab: .bundles)) }.buttonStyle(.pulso())
                 }
             } else {
                 ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)

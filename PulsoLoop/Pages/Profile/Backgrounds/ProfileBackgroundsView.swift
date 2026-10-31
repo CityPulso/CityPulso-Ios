@@ -11,7 +11,7 @@ struct ProfileBackgroundsView: View {
         List {
             Section {
                 if model.items.isEmpty, model.loaded {
-                    ContentUnavailableView("profile_backgrounds_empty", systemImage: "photo.on.rectangle.angled")
+                    PulsoEmptyState(Text("profile_backgrounds_empty"))
                 }
                 ForEach(model.items) { item in
                     row(item)

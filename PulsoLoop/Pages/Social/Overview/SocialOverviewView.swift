@@ -84,11 +84,7 @@ struct SocialOverviewView: View {
         } else if let error = list.error {
             PulsoLoadErrorView(error) { Task { await list.refresh() } }.listRowBackground(Color.clear)
         } else {
-            ContentUnavailableView {
-                Text(emptyTitle(model.tab))
-            } description: {
-                Text(emptyHint(model.tab))
-            } actions: {
+            PulsoEmptyState(Text(emptyTitle(model.tab)), description: Text(emptyHint(model.tab))) {
                 if model.tab == .friends {
                     NavigationLink("shell_social_add_friend_title", value: LoopRoute.addFriend).buttonStyle(.pulso())
                 }

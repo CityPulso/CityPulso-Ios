@@ -118,7 +118,7 @@ struct GroupMembersView: View {
         Group {
             if let members = model.members.data {
                 if members.isEmpty {
-                    ContentUnavailableView("chat_settings_members_empty", systemImage: "person.3")
+                    PulsoEmptyState(Text("chat_settings_members_empty"))
                 } else {
                     List(members) { row in
                         HStack(spacing: 12) {
@@ -236,7 +236,7 @@ struct GroupAddMembersView: View {
         Group {
             if let candidates = model.candidates.data {
                 if candidates.isEmpty {
-                    ContentUnavailableView("chat_settings_add_members_empty", systemImage: "person.2", description: Text("chat_settings_add_members_empty_hint"))
+                    PulsoEmptyState(Text("chat_settings_add_members_empty"), description: Text("chat_settings_add_members_empty_hint"))
                 } else {
                     List(candidates, id: \.friendProfileId) { friend in
                         let selected = model.selectedIds.contains(friend.friendProfileId)

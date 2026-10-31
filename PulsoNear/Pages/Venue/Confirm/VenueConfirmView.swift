@@ -32,10 +32,8 @@ struct VenueConfirmView: View {
                 } else if let error = model.dayError, model.lines.isEmpty {
                     PulsoLoadErrorView(error) { model.refresh() }
                 } else if model.stale {
-                    ContentUnavailableView {
-                        Label("venue_confirm_stale", systemImage: "calendar.badge.exclamationmark")
-                    } actions: {
-                        Button("venue_confirm_back") { dismiss() }
+                    PulsoEmptyState(Text("venue_confirm_stale"), style: .calendar) {
+                        Button("venue_confirm_back") { dismiss() }.buttonStyle(.pulso())
                     }
                 } else if model.methods.isEmpty {
                     Text("venue_confirm_checkout_no_modes").foregroundStyle(.secondary)
@@ -62,12 +60,8 @@ struct VenueConfirmView: View {
             }
         } else if let error = model.venue.error {
             if error.kind == .notFound {
-                ContentUnavailableView {
-                    Label("venue_detail_not_found", systemImage: "building.2")
-                } description: {
-                    Text("venue_detail_not_found_body")
-                } actions: {
-                    Button("venue_confirm_back") { dismiss() }
+                PulsoEmptyState(Text("venue_detail_not_found"), description: Text("venue_detail_not_found_body")) {
+                    Button("venue_confirm_back") { dismiss() }.buttonStyle(.pulso())
                 }
             } else {
                 PulsoLoadErrorView(error) { model.refresh() }
