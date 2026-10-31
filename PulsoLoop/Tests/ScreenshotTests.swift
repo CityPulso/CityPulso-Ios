@@ -149,6 +149,13 @@ final class ScreenshotTests: XCTestCase {
         let venues = Container.shared.favoriteService().pageVenues(VenueFavoritesFilter())
         await venues.refresh()
         if let venue = venues.items.first {
+            // 详情页的收藏心形读不到状态就不显示；把这一次读的结果打到日志里，截图里没有心形时能查原因。
+            do {
+                let favorited = try await Container.shared.favoriteService().isFavorite(.venue, id: venue.venueId)
+                print("screenshot favorite check: \(favorited)")
+            } catch {
+                print("screenshot favorite check failed: \(error)")
+            }
             routes.append(("venue", .venue(venueId: venue.venueId)))
             routes.append(("building", .building(buildingId: venue.building.id)))
         }

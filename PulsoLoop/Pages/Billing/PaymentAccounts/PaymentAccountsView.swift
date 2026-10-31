@@ -143,13 +143,13 @@ private struct AccountCard: View {
                     Task { await model.onboard(account.id) }
                 }
                 .buttonStyle(.pulso(fullWidth: true))
-                .layoutPriority(1)
                 Button {
                     Task { await model.sync(account.id) }
                 } label: {
                     if model.syncingId == account.id { ProgressView() } else { PulsoButtonLabel("payment_accounts_sync", systemImage: "arrow.clockwise") }
                 }
-                .buttonStyle(.pulso(.soft, tone: .gray, fullWidth: true))
+                .buttonStyle(.pulso(.soft, tone: .gray))
+                .fixedSize()
                 .disabled(model.syncingId == account.id)
             }
             if !model.prefillVenues.isEmpty, !account.detailsSubmitted {

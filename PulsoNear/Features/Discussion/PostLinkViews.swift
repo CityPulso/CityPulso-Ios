@@ -105,8 +105,10 @@ struct LinkTargetCard: View {
     private var content: some View {
         switch variant {
         case .side:
-            LinkCover(state: state, type: link.type, imageURL: imageURL)
+            Color.clear
                 .aspectRatio(4 / 3, contentMode: .fit)
+                .overlay { LinkCover(state: state, type: link.type, imageURL: imageURL) }
+                .clipped()
                 .frame(width: 112)
                 .overlay(alignment: .bottomLeading) { LinkTypeTag(type: link.type, onCover: true).padding(4) }
         case .row:
@@ -140,7 +142,7 @@ struct LinkTargetCard: View {
             .background(.fill.quaternary, in: .rect(cornerRadius: 12))
         case .inline:
             HStack(alignment: .top, spacing: 12) {
-                LinkCover(state: state, type: link.type, imageURL: imageURL).aspectRatio(4 / 3, contentMode: .fit).frame(width: 112)
+                Color.clear.aspectRatio(4 / 3, contentMode: .fit).overlay { LinkCover(state: state, type: link.type, imageURL: imageURL) }.clipped().frame(width: 112)
                 VStack(alignment: .leading, spacing: 2) {
                     LinkTitle(state: state, font: .subheadline)
                     if let startsAt = info?.startsAt { LinkFact(symbol: "calendar", text: formatActivityWhen(startsAt, info?.endsAt, locale: locale)) }
@@ -157,8 +159,10 @@ struct LinkTargetCard: View {
             .background(.fill.quaternary, in: .rect(cornerRadius: 12))
         case .hero:
             VStack(alignment: .leading, spacing: 0) {
-                LinkCover(state: state, type: link.type, imageURL: imageURL)
+                Color.clear
                     .aspectRatio(16 / 7, contentMode: .fit)
+                    .overlay { LinkCover(state: state, type: link.type, imageURL: imageURL) }
+                    .clipped()
                     .overlay(alignment: link.type == .activity ? .bottomLeading : .topTrailing) { LinkTypeTag(type: link.type, onCover: true).padding(8) }
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {

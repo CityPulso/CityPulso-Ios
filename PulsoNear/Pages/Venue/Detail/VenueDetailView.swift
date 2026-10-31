@@ -63,7 +63,9 @@ struct VenueDetailView: View {
                 }
                 tabContent(venue)
             }
-            .listSectionSpacing(.compact)
+            // 平铺列表（不是分组卡片）：封面才能铺满宽度（分组列表会把第一行裁成圆角卡片）。
+            .listStyle(.plain)
+            .listSectionSeparator(.hidden)
             .ignoresSafeArea(edges: .top)
             .toolbarVisibility(.hidden, for: .navigationBar)
             .refreshable { model.refresh() }
@@ -105,14 +107,13 @@ struct VenueDetailView: View {
                 }
             }
             .frame(height: 300)
-            .containerRelativeFrame(.horizontal)
             .clipped()
             .overlay(alignment: .top) { heroButtons(venue) }
             .listRowInsets(EdgeInsets())
             .listRowBackground(Color.clear)
             if urls.count > 1 {
                 thumbnails(urls)
-                    .listRowInsets(EdgeInsets(top: PulsoSpace.s3, leading: 0, bottom: 0, trailing: 0))
+                    .listRowInsets(EdgeInsets(top: PulsoSpace.s3, leading: PulsoSpace.s4, bottom: 0, trailing: PulsoSpace.s4))
                     .listRowBackground(Color.clear)
             }
             VStack(alignment: .leading, spacing: 6) {
@@ -138,7 +139,7 @@ struct VenueDetailView: View {
                 }
                 quickActions(venue)
             }
-            .listRowInsets(EdgeInsets(top: PulsoSpace.s3, leading: 0, bottom: PulsoSpace.s3, trailing: 0))
+            .listRowInsets(EdgeInsets(top: PulsoSpace.s3, leading: PulsoSpace.s4, bottom: PulsoSpace.s3, trailing: PulsoSpace.s4))
             .listRowBackground(Color.clear)
         }
         .listRowSeparator(.hidden)

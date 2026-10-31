@@ -32,7 +32,8 @@ struct ProfileIdentitiesView: View {
                 } else {
                     ProgressView().frame(maxWidth: .infinity)
                 }
-                ForEach(AuthCommunityRole.applicable, id: \.self) { role in
+                // 已经有这个角色、也没有申请记录时不显示申请卡（Android 身份页）。
+                ForEach(AuthCommunityRole.applicable.filter { !(model.holds($0) && model.form($0).application == nil) }, id: \.self) { role in
                     applyCard(role)
                 }
                 PulsoCard {
