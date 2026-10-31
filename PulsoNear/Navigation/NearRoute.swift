@@ -98,8 +98,19 @@ enum NearRoute: Hashable {
     /** 分享收藏（建筑 / 门店 / 帖子 / 论坛）。 */
     case chatFavoritePicker(conversationId: String)
 
-    @MainActor @ViewBuilder
+    /**
+     * 这条路由的页面（同 Android `PulsoScaffold`）：窄标题（返回键和标题同一行，不要 iOS 大标题），
+     * 页面底是点阵 + 强调色光晕。
+     */
+    @MainActor
     var page: some View {
+        content
+            .toolbarTitleDisplayMode(.inline)
+            .pulsoPageBackground()
+    }
+
+    @MainActor @ViewBuilder
+    private var content: some View {
         switch self {
         case .theme: ThemeSettingsView()
         case .appIcon: LauncherIconView()

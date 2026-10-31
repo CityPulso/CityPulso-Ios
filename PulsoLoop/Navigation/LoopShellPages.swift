@@ -6,7 +6,11 @@ import SwiftUI
 @MainActor
 enum LoopShellPages {
     static func page(for destination: ShellDestination) -> some View {
-        root(for: destination).loopRoutes()
+        // 底栏页同二级页：窄标题、点阵页面底（Android `PulsoScaffold`）。
+        root(for: destination)
+            .toolbarTitleDisplayMode(.inline)
+            .pulsoPageBackground()
+            .loopRoutes()
     }
 
     @ViewBuilder

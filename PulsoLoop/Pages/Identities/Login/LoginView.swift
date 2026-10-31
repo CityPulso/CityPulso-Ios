@@ -1,99 +1,65 @@
 import AuthenticationServices
-import GoogleSignInSwift
 import PulsoLinkUI
 import SwiftUI
 
-/** 登录页（对应 Android `LoginScreen`）：系统表单，提交按钮用 Liquid Glass，Google 用官方按钮。 */
+/**
+ * 登录页（对应 Android `LoginScreen`）：极光背景全屏表单，logo + 标题，邮箱 / 密码，登录（实心）、
+ * 通过 Apple 登录（iOS 必须有）、使用 Google 登录（柔和 + 官方「G」），底部「去注册」。
+ */
 struct LoginView: View {
     @State private var model = LoginModel()
     @Environment(AuthNavigator.self) private var navigator
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.pulsoPalette) private var palette
 
     var body: some View {
-        Form {
-            Section {
-                AuthHeader(title: "login_title", subtitle: "login_subtitle")
-            }
+        PulsoAuthForm(scrollSignal: model.errorText) {
+            PulsoAuthHeader(logo: Image("logo"), title: "login_title", subtitle: "login_subtitle")
+                .padding(.top, PulsoSpace.s9)
 
-            Section {
-                TextField("login_email", text: $model.email, prompt: Text(verbatim: "you@example.com"))
+            VStack(spacing: PulsoSpace.s4) {
+                PulsoTextField("login_email", text: $model.email)
                     .textContentType(.username)
                     .keyboardType(.emailAddress)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
-                SecureField("login_password", text: $model.password)
+                PulsoTextField("login_password", text: $model.password, errorText: model.errorText, secure: true)
                     .textContentType(.password)
                     .onSubmit { Task { await model.submit() } }
-            } footer: {
-                if let errorText = model.errorText {
-                    Text(errorText).foregroundStyle(.red)
+
+                Button {
+                    Task { await model.submit() }
+                } label: {
+                    PulsoButtonLabel("login_submit", systemImage: "rectangle.portrait.and.arrow.forward", loading: model.loading)
                 }
-            }
+                .buttonStyle(.pulso(fullWidth: true))
+                .disabled(!model.canSubmit)
 
-            Section {
-                VStack(spacing: 12) {
-                    Button {
-                        Task { await model.submit() }
-                    } label: {
-                        Group {
-                            if model.loading {
-                                ProgressView()
-                            } else {
-                                Label("login_submit", systemImage: "rectangle.portrait.and.arrow.forward")
-                            }
-                        }
-                        .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.glassProminent)
-                    .controlSize(.large)
-                    .disabled(!model.canSubmit)
-
-                    SignInWithAppleButton(.signIn) { request in
-                        request.requestedScopes = AppleIdToken.scopes
-                    } onCompletion: { result in
-                        Task { await model.signInWithApple(result) }
-                    }
-                    .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
-                    .frame(height: 44)
-                    .disabled(model.loading)
-
-                    GoogleSignInButton(scheme: colorScheme == .dark ? .dark : .light, style: .wide) {
-                        Task { await model.signInWithGoogle() }
-                    }
-                    .disabled(model.loading)
-
-                    Button("login_go_signup") { navigator.openSignup() }
-                        .buttonStyle(.borderless)
-                        .padding(.top, 4)
+                SignInWithAppleButton(.signIn) { request in
+                    request.requestedScopes = AppleIdToken.scopes
+                } onCompletion: { result in
+                    Task { await model.signInWithApple(result) }
                 }
-                .listRowBackground(Color.clear)
-                .listRowInsets(EdgeInsets())
+                .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
+                .frame(height: PulsoControlSize.comfortable.height)
+                .clipShape(palette.controlShape)
+                .disabled(model.loading)
+
+                Button {
+                    Task { await model.signInWithGoogle() }
+                } label: {
+                    Label { Text("google_sign_in") } icon: { PulsoGoogleLogo() }
+                }
+                .buttonStyle(.pulso(.soft, fullWidth: true))
+                .disabled(model.loading)
             }
-        }
-        .scrollDismissesKeyboard(.interactively)
-    }
-}
+            .padding(.top, PulsoSpace.s6)
 
-/** 登录 / 注册页头：logo、标题、说明。 */
-struct AuthHeader: View {
-    let title: LocalizedStringKey
-    let subtitle: LocalizedStringKey
+            Button("login_go_signup") { navigator.openSignup() }
+                .buttonStyle(.pulso(.ghost))
+                .frame(maxWidth: .infinity)
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Image("logo")
-                .resizable()
-                .frame(width: 64, height: 64)
-                .clipShape(.rect(cornerRadius: 64 / 5))
-                .accessibilityHidden(true)
-                .padding(.bottom, 8)
-            Text(title)
-                .font(.largeTitle.bold())
-            Text(subtitle)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+            Spacer(minLength: PulsoSpace.s6)
         }
-        .listRowBackground(Color.clear)
-        .listRowInsets(EdgeInsets(top: 0, leading: 4, bottom: 4, trailing: 4))
     }
 }

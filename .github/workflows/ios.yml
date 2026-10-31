@@ -119,6 +119,8 @@ jobs:
           status=0
           for scheme in PulsoLoop PulsoNear; do
             # 连 dev 后端的公网域名（各 App 自己的 PULSO_PUBLIC_HOST），用截图账号登录拿真数据。
+            # 系统语言用简体中文：登录后 App 会把系统语言写回账号偏好（AppLanguageSync），截图账号是中文，
+            # 用英文跑会把账号改成英文；也和 Android 中文参照图对得上。
             TEST_RUNNER_SCREENSHOT_DIR="$PWD/screenshots/${{ matrix.device }}" \
             TEST_RUNNER_SCREENSHOT_EMAIL="$SCREENSHOT_EMAIL" \
             TEST_RUNNER_SCREENSHOT_PASSWORD="$SCREENSHOT_PASSWORD" \
@@ -127,6 +129,7 @@ jobs:
               -scheme "$scheme" \
               -destination "id=$SIMULATOR_UDID" \
               -derivedDataPath build \
+              -testLanguage zh-Hans -testRegion CN \
               'PULSO_API_BASE_URL=https://$(PULSO_PUBLIC_HOST)/api' \
               CODE_SIGNING_ALLOWED=NO || status=1
           done

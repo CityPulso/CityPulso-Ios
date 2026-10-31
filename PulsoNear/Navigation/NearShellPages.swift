@@ -6,7 +6,11 @@ import SwiftUI
 @MainActor
 enum NearShellPages {
     static func page(for destination: ShellDestination) -> some View {
-        root(for: destination).nearRoutes()
+        // 底栏页同二级页：窄标题、点阵页面底（Android `PulsoScaffold`）。
+        root(for: destination)
+            .toolbarTitleDisplayMode(.inline)
+            .pulsoPageBackground()
+            .nearRoutes()
     }
 
     @ViewBuilder

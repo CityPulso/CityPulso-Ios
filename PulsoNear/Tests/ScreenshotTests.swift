@@ -122,7 +122,8 @@ final class ScreenshotTests: XCTestCase {
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.first as? UIWindowScene)
         let window = UIWindow(windowScene: scene)
         window.overrideUserInterfaceStyle = style
-        window.rootViewController = UIHostingController(rootView: view)
+        // 和 App 根视图一样套上账号的主题偏好。
+        window.rootViewController = UIHostingController(rootView: view.pulsoTheme(Container.shared.preferenceService().preference.value.theme))
         window.makeKeyAndVisible()
         try await waitUntilLoaded(window)
 

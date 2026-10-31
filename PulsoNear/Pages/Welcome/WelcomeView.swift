@@ -3,7 +3,8 @@ import SwiftUI
 
 /**
  * 欢迎页（认证栈首页，对应 Android `WelcomeScreen`）：整屏背景图随翻页淡入淡出；logo + 应用名 →
- * 多页介绍（4.5 秒自动翻页、可手滑，系统页码点）→「加入社区！」（注册）/「登录」→ 服务条款与隐私政策。
+ * 多页介绍（4.5 秒自动翻页、可手滑；当前页的点拉长成强调色胶囊）→「加入社区！」（实心，注册）/「登录」（柔和）→
+ * 服务条款与隐私政策。
  * 背景图：亮 / 暗各一张，中文系统用中文版（见 Scripts/android_assets.py）。
  */
 struct WelcomeView: View {
@@ -24,6 +25,7 @@ struct WelcomeView: View {
     private static let logoSize: CGFloat = 44
 
     @Environment(AuthNavigator.self) private var navigator
+    @Environment(\.pulsoPalette) private var palette
     @State private var page = 0
 
     var body: some View {
@@ -38,54 +40,57 @@ struct WelcomeView: View {
                         .accessibilityLabel(Text("welcome_logo_desc"))
                     Text("app_display_name")
                         .font(.title.weight(.heavy))
+                        .foregroundStyle(palette.text)
                 }
-                .padding(.top, 24)
+                .padding(.top, PulsoSpace.s6)
 
                 TabView(selection: $page) {
                     ForEach(Self.pages.indices, id: \.self) { index in
-                        VStack(spacing: 8) {
+                        VStack(spacing: PulsoSpace.s2) {
                             Spacer()
                             Text(Self.pages[index].title)
                                 .font(.title2.bold())
+                                .foregroundStyle(palette.text)
                             Text(Self.pages[index].body)
                                 .font(.body)
-                                .opacity(0.88)
+                                .foregroundStyle(palette.text.opacity(0.88))
                         }
                         .multilineTextAlignment(.center)
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 48)
+                        .padding(.horizontal, PulsoSpace.s4)
+                        .padding(.vertical, PulsoSpace.s5)
                         .tag(index)
                     }
                 }
-                .tabViewStyle(.page(indexDisplayMode: .always))
-                .indexViewStyle(.page(backgroundDisplayMode: .always))
+                .tabViewStyle(.page(indexDisplayMode: .never))
 
-                VStack(spacing: 10) {
+                pageDots
+
+                VStack(spacing: PulsoSpace.s2) {
                     Button {
                         navigator.openSignup()
                     } label: {
                         Label("welcome_get_started", systemImage: "arrow.right")
-                            .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.glassProminent)
+                    .buttonStyle(.pulso(fullWidth: true))
 
                     Button {
                         navigator.openLogin()
                     } label: {
                         Label("welcome_login", systemImage: "rectangle.portrait.and.arrow.forward")
-                            .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.glass)
+                    .buttonStyle(.pulso(.soft, fullWidth: true))
                 }
-                .controlSize(.large)
+                .padding(.top, PulsoSpace.s5)
+                .environment(\.pulsoControlSize, .comfortable)
 
                 Text(terms)
                     .font(.footnote)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(palette.secondaryText)
+                    .tint(palette.accent.step(11))
                     .multilineTextAlignment(.center)
-                    .padding(.vertical, 16)
+                    .padding(.vertical, PulsoSpace.s4)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, PulsoSpace.s5)
         }
         .toolbarVisibility(.hidden, for: .navigationBar)
         .task(id: page) {
@@ -109,12 +114,12 @@ struct WelcomeView: View {
             }
             LinearGradient(
                 stops: [
-                    .init(color: Color(.systemBackground).opacity(0.5), location: 0),
+                    .init(color: palette.background.opacity(0.5), location: 0),
                     .init(color: .clear, location: 0.15),
                     .init(color: .clear, location: 0.48),
-                    .init(color: Color(.systemBackground).opacity(0.85), location: 0.64),
-                    .init(color: Color(.systemBackground).opacity(0.97), location: 0.78),
-                    .init(color: Color(.systemBackground), location: 1),
+                    .init(color: palette.background.opacity(0.85), location: 0.64),
+                    .init(color: palette.background.opacity(0.97), location: 0.78),
+                    .init(color: palette.background, location: 1),
                 ],
                 startPoint: .top,
                 endPoint: .bottom
@@ -122,6 +127,19 @@ struct WelcomeView: View {
         }
         .ignoresSafeArea()
         .animation(.easeInOut(duration: 0.6), value: page)
+    }
+
+    /** 页码点：当前页拉长成 24pt 的强调色胶囊，其余 8pt 灰点。 */
+    private var pageDots: some View {
+        HStack(spacing: PulsoSpace.s2) {
+            ForEach(Self.pages.indices, id: \.self) { index in
+                Capsule()
+                    .fill(index == page ? palette.accent.step(9) : palette.gray.step(6))
+                    .frame(width: index == page ? 24 : 8, height: 8)
+            }
+        }
+        .animation(.easeOut(duration: 0.2), value: page)
+        .accessibilityHidden(true)
     }
 
     /** 条款行：两段链接点开系统浏览器。 */

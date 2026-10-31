@@ -23,7 +23,6 @@ let package = Package(
                 "PulsoLinkCore",
                 "Factory",
                 .product(name: "GoogleSignIn", package: "GoogleSignIn-iOS"),
-                .product(name: "GoogleSignInSwift", package: "GoogleSignIn-iOS"),
                 "Nuke",
                 .product(name: "NukeUI", package: "Nuke"),
             ],

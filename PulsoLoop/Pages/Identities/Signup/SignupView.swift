@@ -1,28 +1,32 @@
 import AuthenticationServices
-import GoogleSignInSwift
 import PulsoLinkUI
 import SwiftUI
 
-/** 注册页（对应 Android `SignupScreen`）：系统表单，验证码用 `.oneTimeCode` 让键盘直接带出邮件里的码。 */
+/**
+ * 注册页（对应 Android `SignupScreen`）：极光背景全屏表单，邮箱、验证码 + 发送（柔和，倒计时）、密码两次，
+ * 注册（实心）、通过 Apple 注册、使用 Google 登录（柔和 + 官方「G」），底部「去登录」。
+ * 验证码用 `.oneTimeCode`，键盘直接带出邮件里的码。
+ */
 struct SignupView: View {
     @State private var model = SignupModel()
     @Environment(AuthNavigator.self) private var navigator
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.pulsoPalette) private var palette
 
     var body: some View {
-        Form {
-            Section {
-                AuthHeader(title: "signup_title", subtitle: "signup_subtitle")
-            }
+        PulsoAuthForm(scrollSignal: model.errorText ?? model.infoText) {
+            PulsoAuthHeader(logo: Image("logo"), title: "signup_title", subtitle: "signup_subtitle")
+                .padding(.top, PulsoSpace.s9)
 
-            Section {
-                TextField("signup_email", text: $model.email, prompt: Text(verbatim: "you@example.com"))
+            VStack(alignment: .leading, spacing: PulsoSpace.s4) {
+                PulsoTextField("signup_email", text: $model.email)
                     .textContentType(.username)
                     .keyboardType(.emailAddress)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
-                HStack {
-                    TextField("signup_code", text: $model.verificationCode, prompt: Text(verbatim: "123456"))
+
+                HStack(spacing: PulsoSpace.s2) {
+                    PulsoTextField("signup_code", text: $model.verificationCode)
                         .textContentType(.oneTimeCode)
                         .keyboardType(.numberPad)
                         .onChange(of: model.verificationCode) { _, value in
@@ -32,83 +36,73 @@ struct SignupView: View {
                     Button {
                         Task { await model.sendCode() }
                     } label: {
-                        if model.sendingCode {
-                            ProgressView()
-                        } else if model.resendCountdown > 0 {
+                        if model.resendCountdown > 0 {
                             Text(verbatim: "\(model.resendCountdown)s").monospacedDigit()
                         } else {
-                            Label("signup_send_code", systemImage: "paperplane")
+                            PulsoButtonLabel("signup_send_code", systemImage: "paperplane", loading: model.sendingCode)
                         }
                     }
-                    .buttonStyle(.glass)
+                    .buttonStyle(.pulso(.soft))
                     .disabled(!model.canSendCode)
                 }
-            }
 
-            Section {
-                SecureField("signup_password", text: $model.password)
-                    .textContentType(.newPassword)
-                SecureField("signup_confirm_password", text: $model.confirmPassword)
-                    .textContentType(.newPassword)
-            } footer: {
-                VStack(alignment: .leading, spacing: 4) {
-                    if model.passwordTooShort {
-                        Text("signup_password_too_short").foregroundStyle(.red)
-                    }
-                    if model.passwordsMismatch {
-                        Text("signup_passwords_mismatch").foregroundStyle(.red)
-                    }
-                    if let errorText = model.errorText {
-                        Text(errorText).foregroundStyle(.red)
-                    }
-                    if let infoText = model.infoText {
-                        Text(infoText).foregroundStyle(.tint)
-                    }
+                PulsoTextField(
+                    "signup_password",
+                    text: $model.password,
+                    errorText: model.passwordTooShort ? String(localized: "signup_password_too_short") : nil,
+                    secure: true
+                )
+                .textContentType(.newPassword)
+                PulsoTextField(
+                    "signup_confirm_password",
+                    text: $model.confirmPassword,
+                    errorText: model.passwordsMismatch ? String(localized: "signup_passwords_mismatch") : nil,
+                    secure: true
+                )
+                .textContentType(.newPassword)
+
+                if let errorText = model.errorText {
+                    Text(verbatim: errorText).font(.caption).foregroundStyle(palette.error)
                 }
-            }
-
-            Section {
-                VStack(spacing: 12) {
-                    Button {
-                        Task {
-                            if await model.submit() { navigator.openLogin() }
-                        }
-                    } label: {
-                        Group {
-                            if model.loading {
-                                ProgressView()
-                            } else {
-                                Label("signup_submit", systemImage: "person.badge.plus")
-                            }
-                        }
-                        .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.glassProminent)
-                    .controlSize(.large)
-                    .disabled(!model.canSubmit)
-
-                    SignInWithAppleButton(.signUp) { request in
-                        request.requestedScopes = AppleIdToken.scopes
-                    } onCompletion: { result in
-                        Task { await model.signInWithApple(result) }
-                    }
-                    .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
-                    .frame(height: 44)
-                    .disabled(model.loading)
-
-                    GoogleSignInButton(scheme: colorScheme == .dark ? .dark : .light, style: .wide) {
-                        Task { await model.signInWithGoogle() }
-                    }
-                    .disabled(model.loading)
-
-                    Button("signup_go_login") { navigator.openLogin() }
-                        .buttonStyle(.borderless)
-                        .padding(.top, 4)
+                if let infoText = model.infoText {
+                    Text(verbatim: infoText).font(.caption).foregroundStyle(palette.accent.step(9))
                 }
-                .listRowBackground(Color.clear)
-                .listRowInsets(EdgeInsets())
+
+                Button {
+                    Task {
+                        if await model.submit() { navigator.openLogin() }
+                    }
+                } label: {
+                    PulsoButtonLabel("signup_submit", systemImage: "person.badge.plus", loading: model.loading)
+                }
+                .buttonStyle(.pulso(fullWidth: true))
+                .disabled(!model.canSubmit)
+
+                SignInWithAppleButton(.signUp) { request in
+                    request.requestedScopes = AppleIdToken.scopes
+                } onCompletion: { result in
+                    Task { await model.signInWithApple(result) }
+                }
+                .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
+                .frame(height: PulsoControlSize.comfortable.height)
+                .clipShape(palette.controlShape)
+                .disabled(model.loading)
+
+                Button {
+                    Task { await model.signInWithGoogle() }
+                } label: {
+                    Label { Text("google_sign_in") } icon: { PulsoGoogleLogo() }
+                }
+                .buttonStyle(.pulso(.soft, fullWidth: true))
+                .disabled(model.loading)
             }
+            .padding(.top, PulsoSpace.s6)
+
+            Button("signup_go_login") { navigator.openLogin() }
+                .buttonStyle(.pulso(.ghost))
+                .frame(maxWidth: .infinity)
+
+            Spacer(minLength: PulsoSpace.s6)
         }
-        .scrollDismissesKeyboard(.interactively)
     }
 }

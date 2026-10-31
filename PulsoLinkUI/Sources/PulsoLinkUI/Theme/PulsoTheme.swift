@@ -2,9 +2,9 @@ import PulsoLinkCore
 import SwiftUI
 
 /*
- * iOS 用系统外观：系统色、SF 字体、原生控件与 Liquid Glass。
- * 服务端主题偏好里只取两项——强调色 → `.tint`，浅/深色 → `.preferredColorScheme`；
- * 灰阶、圆角、缩放、面板、字体在 iOS 上不生效。
+ * 主题入口（对应 Android `PulsoTheme`）：服务端主题偏好解成 [PulsoPalette]（强调色 / 灰阶 / 圆角 / 面板）放进环境，
+ * Pulso 组件都从它取色取形；强调色同时作为系统 `.tint`，浅 / 深色走 `.preferredColorScheme`。
+ * 字体用系统 SF 与动态字体（iOS 系统设置管字号）。
  */
 
 extension ThemeAccentColor {
@@ -62,6 +62,7 @@ extension View {
     /** 把主题偏好套到整棵视图树上。 */
     public func pulsoTheme(_ settings: PulsoThemeSettings) -> some View {
         tint(settings.accent.color)
+            .environment(\.pulsoPalette, PulsoPalette(settings))
             .preferredColorScheme(settings.appearance.colorScheme)
     }
 }
