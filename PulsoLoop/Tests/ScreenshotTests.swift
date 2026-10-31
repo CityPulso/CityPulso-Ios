@@ -23,6 +23,8 @@ final class ScreenshotTests: XCTestCase {
         let email = try XCTUnwrap(environment["SCREENSHOT_EMAIL"], "SCREENSHOT_EMAIL 没有设置")
         let password = try XCTUnwrap(environment["SCREENSHOT_PASSWORD"], "SCREENSHOT_PASSWORD 没有设置")
         try await Container.shared.communitySignIn().loginWithEmail(email: email, password: password)
+        // App 里是主界面回到前台时刷新定位；截图直接画页面，这里先拿一次（CI 把模拟器放在温哥华）。
+        await Container.shared.deviceLocationBootstrap().refresh()
         Self.signedIn = true
     }
 

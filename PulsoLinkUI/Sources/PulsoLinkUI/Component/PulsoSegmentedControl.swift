@@ -3,7 +3,7 @@ import SwiftUI
 /**
  * 分段选择（Android `PulsoSegmentedControl`，Radix SegmentedControl size 2）：高度与按钮 / 输入框同档；
  * 轨道 gray2 底 + 细边，选中是一块页面底色的滑块从旧格滑到新格，选中字半粗、其余次要字色。
- * 格子等分一行；字太长时缩小一点再省略。
+ * 放得下时格子等分一行；放不下（选项多、字长）时每格按字宽排开，轨道横向滚动。
  */
 public struct PulsoSegmentedControl<Option: Hashable>: View {
     let options: [Option]
@@ -21,6 +21,18 @@ public struct PulsoSegmentedControl<Option: Hashable>: View {
     }
 
     public var body: some View {
+        ViewThatFits(in: .horizontal) {
+            track(equal: true)
+            ScrollView(.horizontal) { track(equal: false) }
+                .scrollIndicators(.hidden)
+        }
+        .frame(height: size.height)
+        .background(palette.gray.step(2), in: palette.controlShape)
+        .overlay { palette.controlShape.stroke(palette.outlineVariant, lineWidth: pulsoHairline) }
+        .clipShape(palette.controlShape)
+    }
+
+    private func track(equal: Bool) -> some View {
         HStack(spacing: 2) {
             ForEach(options, id: \.self) { option in
                 let active = option == selection
@@ -32,9 +44,9 @@ public struct PulsoSegmentedControl<Option: Hashable>: View {
                         .font(.subheadline.weight(active ? .semibold : .regular))
                         .foregroundStyle(active ? palette.text : palette.secondaryText)
                         .lineLimit(1)
-                        .minimumScaleFactor(0.8)
-                        .padding(.horizontal, PulsoSpace.s1)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .fixedSize()
+                        .padding(.horizontal, PulsoSpace.s3)
+                        .frame(maxWidth: equal ? .infinity : nil, maxHeight: .infinity)
                         .background {
                             if active {
                                 palette.segmentThumbShape
@@ -50,10 +62,6 @@ public struct PulsoSegmentedControl<Option: Hashable>: View {
             }
         }
         .padding(2)
-        .frame(height: size.height)
-        .background(palette.gray.step(2), in: palette.controlShape)
-        .overlay { palette.controlShape.stroke(palette.outlineVariant, lineWidth: pulsoHairline) }
-        .clipShape(palette.controlShape)
     }
 }
 

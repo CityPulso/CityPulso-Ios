@@ -138,10 +138,14 @@ struct ProfileEditView: View {
     }
 
     private func field(_ label: LocalizedStringKey, text: Binding<String>, error: LocalizedStringKey?) -> some View {
+        // 标签一列（Android 资料行的固定宽度标签）+ 左对齐的值。
         VStack(alignment: .leading, spacing: 4) {
-            LabeledContent(label) {
+            HStack(spacing: 12) {
+                Text(label)
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+                    .frame(width: 110, alignment: .leading)
                 TextField(label, text: text, prompt: Text("profile_edit_placeholder_unset"))
-                    .multilineTextAlignment(.trailing)
             }
             if let error {
                 Text(error).font(.footnote).foregroundStyle(.red)
