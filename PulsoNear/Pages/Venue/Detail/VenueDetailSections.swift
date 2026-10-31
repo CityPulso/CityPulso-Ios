@@ -396,7 +396,7 @@ struct VenueMembershipSection: View {
                                 }
                             }
                             Text(verbatim: level.discountPercent > 0
-                                ? localizedFormat("membership_discount", level.name, bookingDiscountZhe(level.discountPercent), String(level.discountPercent))
+                                ? localizedFormat("membership_discount", String(level.discountPercent), bookingDiscountZhe(level.discountPercent))
                                 : String(localized: "membership_no_discount"))
                                 .font(.caption)
                                 .foregroundStyle(.secondary)

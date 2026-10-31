@@ -40,7 +40,7 @@ struct VenueDetailView: View {
                     Button { shell?.push(route) } label: {
                         Text(verbatim: localizedFormat("venue_detail_book_sport_cta", String(localized: sport.loopSport.labelResource))).frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.glassProminent)
+                    .buttonStyle(.pulso())
                     .controlSize(.large)
                     .padding()
                     .background(.bar)

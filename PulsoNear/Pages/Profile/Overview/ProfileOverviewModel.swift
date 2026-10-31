@@ -28,6 +28,8 @@ final class ProfileOverviewModel {
     private(set) var followingCount: Int?
     private(set) var followerCount: Int?
     private(set) var activityCount: Int?
+    /** 头部下面的活动中心（Android 资料页同样接 `activityCenterSection`）。 */
+    let activity = ActivityCenterModel()
 
     var avatarURL: URL? { ImageURLs.image(info?.avatarImageId, base: config.apiBaseURL) }
 

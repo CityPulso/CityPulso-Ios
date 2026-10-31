@@ -307,11 +307,11 @@ struct TournamentDetailView: View {
                     Button { shell?.push(LoopRoute.venue(venueId: venue.venueId, sheet: nil)) } label: {
                         Label("tournament_detail_view_venue", systemImage: "storefront")
                     }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(.pulso(.soft))
                     Button { directions(venue) } label: {
                         Label("tournament_detail_navigate", systemImage: "location")
                     }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(.pulso(.soft))
                     .tint(.secondary)
                 }
                 .controlSize(.small)
@@ -345,18 +345,18 @@ struct TournamentDetailView: View {
                         Text(verbatim: summary).font(.subheadline.weight(.semibold))
                         HStack(spacing: 8) {
                             Button { Task { await model.answer(accept: true) } } label: { Text("tournament_mine_accept").frame(maxWidth: .infinity) }
-                                .buttonStyle(.glassProminent)
+                                .buttonStyle(.pulso())
                             Button { Task { await model.answer(accept: false) } } label: { Text("tournament_mine_decline").frame(maxWidth: .infinity) }
-                                .buttonStyle(.glass)
+                                .buttonStyle(.pulso(.soft))
                         }
                     } else {
                         HStack(spacing: 12) {
                             Text(verbatim: summary).font(.subheadline.weight(.semibold)).lineLimit(2)
                             Spacer(minLength: 0)
                             if mine.captainProfileId == model.myProfileId, mine.status == .awaitingPayment {
-                                Button("tournament_mine_pay") { Task { await model.payMine() } }.buttonStyle(.glassProminent)
+                                Button("tournament_mine_pay") { Task { await model.payMine() } }.buttonStyle(.pulso())
                             } else {
-                                NavigationLink("tournament_detail_view_entry", value: LoopRoute.myTournaments).buttonStyle(.glass)
+                                NavigationLink("tournament_detail_view_entry", value: LoopRoute.myTournaments).buttonStyle(.pulso(.soft))
                             }
                         }
                     }
@@ -367,7 +367,7 @@ struct TournamentDetailView: View {
                 .background(.bar)
             } else if !model.openDivisions.isEmpty {
                 Button { model.registerNow() } label: { Text("tournament_detail_register_now").frame(maxWidth: .infinity) }
-                    .buttonStyle(.glassProminent)
+                    .buttonStyle(.pulso())
                     .controlSize(.large)
                     .padding(16)
                     .background(.bar)
@@ -439,7 +439,7 @@ struct TournamentDetailView: View {
                 } label: {
                     Text((division.placesLeft == 0 ? "tournament_join_waitlist" : "tournament_register") as LocalizedStringKey).frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.glassProminent)
+                .buttonStyle(.pulso())
                 .padding(.top, 4)
             } else if model.live {
                 muted("tournament_detail_closed")
@@ -628,7 +628,7 @@ private struct TournamentRegisterSheet: View {
                                 Text((division.placesLeft == 0 ? "tournament_join_waitlist" : "tournament_register") as LocalizedStringKey).frame(maxWidth: .infinity)
                             }
                         }
-                        .buttonStyle(.glassProminent)
+                        .buttonStyle(.pulso())
                         .disabled(!sheet.ready)
                         .listRowBackground(Color.clear)
                     }

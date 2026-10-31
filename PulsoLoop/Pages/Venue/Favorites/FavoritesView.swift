@@ -194,58 +194,49 @@ struct FavoritesView: View {
     @State private var model = FavoritesModel()
     @State private var filtersOpen = false
     @Environment(PulsoShellNavigator.self) private var shell: PulsoShellNavigator?
+    @Environment(\.pulsoPalette) private var palette
 
     var body: some View {
-        List {
-            Section {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        ForEach(FavoritesTab.allCases, id: \.self) { tab in
-                            let isOn = tab == model.tab
-                            Button { model.tab = tab } label: {
-                                Text(tab.labelKey)
-                                    .font(.subheadline.weight(isOn ? .semibold : .regular))
-                                    .padding(.horizontal, 14)
-                                    .frame(height: 34)
-                                    .foregroundStyle(isOn ? Color.white : Color.primary)
-                                    .background(isOn ? Color.accentColor : Color(.tertiarySystemFill), in: .capsule)
-                            }
-                            .buttonStyle(.plain)
-                        }
+        VStack(spacing: 0) {
+            // 一级标签，下面一行搜索（Android 收藏页：标签在顶栏下、搜索框在标签下）。
+            PulsoUnderlineTabRow(FavoritesTab.allCases, selection: $model.tab) { Text($0.labelKey) }
+            PulsoSearchField(text: Binding(get: { model.query }, set: { model.setQuery($0) }), prompt: Text(searchPrompt))
+                .padding(.horizontal, PulsoSpace.s4)
+                .padding(.vertical, PulsoSpace.s2)
+            ScrollView {
+                LazyVStack(spacing: PulsoSpace.s2) {
+                    switch model.tab {
+                    case .venues: venueRows
+                    case .buildings: buildingRows
+                    case .forums: forumRows
+                    case .posts: postRows
+                    case .comments: commentRows
                     }
                 }
-                .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
-                .listRowBackground(Color.clear)
+                .padding(.horizontal, PulsoSpace.s4)
+                .padding(.vertical, PulsoSpace.s2)
             }
-            switch model.tab {
-            case .venues: venueRows
-            case .buildings: buildingRows
-            case .forums: forumRows
-            case .posts: postRows
-            case .comments: commentRows
+            .refreshable {
+                switch model.tab {
+                case .venues: await model.venues.refresh()
+                case .buildings: await model.buildings.refresh()
+                case .forums: await model.forums.refresh()
+                case .posts: await model.posts.refresh()
+                case .comments: await model.comments.refresh()
+                }
             }
         }
         .navigationTitle("favorites_title")
         .toolbar {
             if model.tab == .venues || model.tab == .buildings {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button { filtersOpen = true } label: { Label("favorites_filter_open", systemImage: "line.3.horizontal.decrease") }
+                    Button { filtersOpen = true } label: { Label("favorites_filter_open", systemImage: "slider.horizontal.3") }
                         .badge(model.tab == .venues ? model.venueControls.activeFilterCount : model.buildingControls.activeFilterCount)
                 }
             }
         }
-        .searchable(text: Binding(get: { model.query }, set: { model.setQuery($0) }), prompt: Text(searchPrompt))
         .sheet(isPresented: $filtersOpen) {
             FavoritesFilterSheet(model: model)
-        }
-        .refreshable {
-            switch model.tab {
-            case .venues: await model.venues.refresh()
-            case .buildings: await model.buildings.refresh()
-            case .forums: await model.forums.refresh()
-            case .posts: await model.posts.refresh()
-            case .comments: await model.comments.refresh()
-            }
         }
         .task { await model.observe() }
         .task(id: ObjectIdentifier(model.venues)) { await model.venues.observe() }
@@ -253,6 +244,27 @@ struct FavoritesView: View {
         .task(id: ObjectIdentifier(model.forums)) { await model.forums.observe() }
         .task { await model.posts.observe() }
         .task { await model.comments.observe() }
+    }
+
+    /** 一张收藏卡片：面板底、卡片圆角，内边距 16。 */
+    private func card(@ViewBuilder _ content: () -> some View) -> some View {
+        PulsoCard { content().padding(PulsoSpace.s4) }
+    }
+
+    /** 红色实心爱心：点了取消收藏（Android 收藏卡片右上角）。 */
+    private func heart(_ action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: "heart.fill")
+                .font(.title3)
+                .foregroundStyle(palette.error)
+                .frame(width: 32, height: 32)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text("favorites_remove_saved"))
+    }
+
+    private func emptyText(_ key: LocalizedStringKey) -> some View {
+        PulsoEmptyState(Text(key)).frame(minHeight: 360)
     }
 
     private var searchPrompt: LocalizedStringKey {
@@ -310,9 +322,7 @@ struct FavoritesView: View {
                 HStack {
                     Spacer()
                     Button("favorites_remove_saved") { Task { await model.unbookmarkComment(row.commentId) } }
-                        .buttonStyle(.bordered)
-                        .controlSize(.small)
-                        .tint(.secondary)
+                        .buttonStyle(.pulso(.soft, tone: .gray, size: .small))
                 }
             }
         }
@@ -323,14 +333,14 @@ struct FavoritesView: View {
         _ list: PagedList<Item, Int>, empty: LocalizedStringKey, @ViewBuilder row: @escaping (Item) -> Row
     ) -> some View where Item: Identifiable {
         if list.isLoading {
-            ProgressView().frame(maxWidth: .infinity).listRowBackground(Color.clear)
+            ProgressView().frame(maxWidth: .infinity).padding(.top, PulsoSpace.s8)
         } else if let error = list.error {
-            PulsoLoadErrorView(error) { Task { await list.refresh() } }.listRowBackground(Color.clear)
+            PulsoLoadErrorView(error) { Task { await list.refresh() } }
         } else if list.isEmpty {
-            Text(empty).font(.subheadline).foregroundStyle(.secondary).listRowBackground(Color.clear)
+            emptyText(empty)
         } else {
             ForEach(list.items) { item in
-                row(item).onAppear { if item.id == list.items.last?.id { list.loadMore() } }
+                card { row(item) }.onAppear { if item.id == list.items.last?.id { list.loadMore() } }
             }
         }
     }
@@ -339,43 +349,47 @@ struct FavoritesView: View {
     private var venueRows: some View {
         let list = model.venues
         if list.isLoading {
-            ProgressView().frame(maxWidth: .infinity).listRowBackground(Color.clear)
+            ProgressView().frame(maxWidth: .infinity).padding(.top, PulsoSpace.s8)
         } else if let error = list.error {
-            PulsoLoadErrorView(error) { Task { await list.refresh() } }.listRowBackground(Color.clear)
+            PulsoLoadErrorView(error) { Task { await list.refresh() } }
         } else if list.isEmpty {
-            Text((model.venueControls.query.isEmpty && model.venueControls.filter == nil ? "favorites_empty_venues" : "favorites_no_results") as LocalizedStringKey)
-                .font(.subheadline).foregroundStyle(.secondary).listRowBackground(Color.clear)
+            emptyText((model.venueControls.query.isEmpty && model.venueControls.filter == nil ? "favorites_empty_venues" : "favorites_no_results") as LocalizedStringKey)
         } else {
             ForEach(list.items, id: \.id) { item in
-                NavigationLink(value: LoopRoute.venue(venueId: item.venueId)) {
-                    HStack(spacing: 12) {
-                        SportCover(url: model.imageURL(item.coverImageId), sport: item.venueSports.first?.loopSport ?? .badminton, iconSize: 24)
-                            .frame(width: 64, height: 64)
-                            .clipShape(.rect(cornerRadius: 12))
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text(verbatim: item.building.name).font(.headline).lineLimit(2)
-                            if !item.building.address.isEmpty {
-                                Text(verbatim: item.building.address).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                card {
+                    HStack(alignment: .top, spacing: PulsoSpace.s3) {
+                        NavigationLink(value: LoopRoute.venue(venueId: item.venueId)) {
+                            HStack(alignment: .top, spacing: PulsoSpace.s3) {
+                                SportCover(url: model.imageURL(item.coverImageId), sport: item.venueSports.first?.loopSport ?? .badminton, iconSize: 24)
+                                    .frame(width: 88, height: 112)
+                                    .clipShape(palette.innerShape)
+                                VStack(alignment: .leading, spacing: PulsoSpace.s1) {
+                                    Text(verbatim: item.building.name).font(.subheadline.weight(.semibold)).foregroundStyle(palette.text).lineLimit(2)
+                                    if !item.building.address.isEmpty {
+                                        Text(verbatim: item.building.address).font(.caption).foregroundStyle(palette.secondaryText).lineLimit(1)
+                                    }
+                                    HStack(spacing: PulsoSpace.s1) {
+                                        if let status = venueOpenStatus(venueWeek(item.hours), timezone: item.venueTimezone) {
+                                            VenueOpenChip(status: status)
+                                        }
+                                        Text(verbatim: localizedFormat("shell_views_count", item.venueView)).font(.caption2).foregroundStyle(palette.secondaryText)
+                                    }
+                                    PulsoFlowLayout(spacing: PulsoSpace.s1) {
+                                        ForEach(item.venueSports, id: \.self) { SportTag(sport: $0.loopSport) }
+                                    }
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
                             }
-                            if let status = venueOpenStatus(venueWeek(item.hours), timezone: item.venueTimezone) {
-                                VenueOpenChip(status: status)
-                            }
-                            PulsoFlowLayout(spacing: 4) {
-                                ForEach(item.venueSports, id: \.self) { SportTag(sport: $0.loopSport) }
-                            }
-                            Text(verbatim: localizedFormat("shell_views_count", item.venueView)).font(.caption2).foregroundStyle(.secondary)
                         }
-                    }
-                }
-                .swipeActions(edge: .trailing) {
-                    Button("favorites_remove_saved", systemImage: "heart.slash", role: .destructive) {
-                        Task { await model.unfavorite(.venue, id: item.venueId) }
-                    }
-                    if let sport = item.venueSports.first {
-                        NavigationLink(value: LoopRoute.venueBook(venueId: item.venueId, sport: sport)) {
-                            Label("favorites_book", systemImage: "calendar.badge.plus")
+                        .buttonStyle(.plain)
+                        VStack {
+                            heart { Task { await model.unfavorite(.venue, id: item.venueId) } }
+                            Spacer(minLength: PulsoSpace.s2)
+                            if let sport = item.venueSports.first {
+                                NavigationLink("favorites_book", value: LoopRoute.venueBook(venueId: item.venueId, sport: sport))
+                                    .buttonStyle(.pulso(size: .small))
+                            }
                         }
-                        .tint(.accentColor)
                     }
                 }
                 .onAppear { if item.id == list.items.last?.id { list.loadMore() } }
@@ -387,34 +401,35 @@ struct FavoritesView: View {
     private var buildingRows: some View {
         let list = model.buildings
         if list.isLoading {
-            ProgressView().frame(maxWidth: .infinity).listRowBackground(Color.clear)
+            ProgressView().frame(maxWidth: .infinity).padding(.top, PulsoSpace.s8)
         } else if let error = list.error {
-            PulsoLoadErrorView(error) { Task { await list.refresh() } }.listRowBackground(Color.clear)
+            PulsoLoadErrorView(error) { Task { await list.refresh() } }
         } else if list.isEmpty {
-            Text((model.buildingControls.query.isEmpty && model.buildingControls.filter == nil ? "favorites_empty_buildings" : "favorites_no_results") as LocalizedStringKey)
-                .font(.subheadline).foregroundStyle(.secondary).listRowBackground(Color.clear)
+            emptyText((model.buildingControls.query.isEmpty && model.buildingControls.filter == nil ? "favorites_empty_buildings" : "favorites_no_results") as LocalizedStringKey)
         } else {
             ForEach(list.items, id: \.id) { item in
-                NavigationLink(value: LoopRoute.building(buildingId: item.buildingId)) {
-                    HStack(spacing: 12) {
-                        let visual = BuildingTypeVisual.of(item.buildingType)
-                        Image(systemName: visual.systemImage)
-                            .font(.title3)
-                            .foregroundStyle(visual.accent)
-                            .frame(width: 48, height: 48)
-                            .background(visual.accentBg, in: .rect(cornerRadius: 12))
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text(verbatim: item.name).font(.headline).lineLimit(2)
-                            Text(BuildingType.fromWire(item.buildingType).labelKey).font(.caption).foregroundStyle(.secondary)
-                            if !item.address.isEmpty {
-                                Text(verbatim: item.address).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                card {
+                    HStack(alignment: .top, spacing: PulsoSpace.s3) {
+                        NavigationLink(value: LoopRoute.building(buildingId: item.buildingId)) {
+                            HStack(spacing: PulsoSpace.s3) {
+                                let visual = BuildingTypeVisual.of(item.buildingType)
+                                Image(systemName: visual.systemImage)
+                                    .font(.title3)
+                                    .foregroundStyle(visual.accent)
+                                    .frame(width: 48, height: 48)
+                                    .background(visual.accentBg, in: palette.innerShape)
+                                VStack(alignment: .leading, spacing: PulsoSpace.half) {
+                                    Text(verbatim: item.name).font(.subheadline.weight(.semibold)).foregroundStyle(palette.text).lineLimit(2)
+                                    Text(BuildingType.fromWire(item.buildingType).labelKey).font(.caption).foregroundStyle(palette.secondaryText)
+                                    if !item.address.isEmpty {
+                                        Text(verbatim: item.address).font(.caption).foregroundStyle(palette.secondaryText).lineLimit(1)
+                                    }
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
                             }
                         }
-                    }
-                }
-                .swipeActions(edge: .trailing) {
-                    Button("favorites_remove_saved", systemImage: "heart.slash", role: .destructive) {
-                        Task { await model.unfavorite(.building, id: item.buildingId) }
+                        .buttonStyle(.plain)
+                        heart { Task { await model.unfavorite(.building, id: item.buildingId) } }
                     }
                 }
                 .onAppear { if item.id == list.items.last?.id { list.loadMore() } }

@@ -1,7 +1,10 @@
 import PulsoLinkCore
 import SwiftUI
 
-/** 一页分页列表（Android `ProgramListScaffold`）：加载、错误、空状态、分页列表（滑到底取下一页），下拉刷新。 */
+/**
+ * 一页分页列表（Android `ProgramListScaffold` / `pulsoPagingItems`）：一列独立卡片（左右 16、卡片间 8），
+ * 每行自动套 [PulsoCard]（行内 NavigationLink 不显示系统箭头）；加载、错误、空状态，滑到底取下一页，下拉刷新。
+ */
 public struct PulsoPagedList<Item: Identifiable & Sendable, EmptyAction: View, Header: View, Row: View>: View {
     let list: PagedList<Item, Int>
     var observe = true
@@ -30,27 +33,26 @@ public struct PulsoPagedList<Item: Identifiable & Sendable, EmptyAction: View, H
     }
 
     public var body: some View {
-        List {
-            header()
-            if list.isLoading {
-                ProgressView().frame(maxWidth: .infinity).listRowBackground(Color.clear)
-            } else if let error = list.error {
-                PulsoLoadErrorView(error) { Task { await list.refresh() } }.listRowBackground(Color.clear)
-            } else if list.isEmpty {
-                ContentUnavailableView {
-                    Text(emptyTitle)
-                } description: {
-                    Text(emptyBody)
-                } actions: {
-                    emptyAction()
-                }
-                .listRowBackground(Color.clear)
-            } else {
-                ForEach(list.items) { item in
-                    row(item)
-                        .onAppear { if item.id == list.items.last?.id { list.loadMore() } }
+        ScrollView {
+            LazyVStack(spacing: PulsoSpace.s2) {
+                header()
+                if list.isLoading {
+                    ProgressView().frame(maxWidth: .infinity).padding(.top, PulsoSpace.s8)
+                } else if let error = list.error {
+                    PulsoLoadErrorView(error) { Task { await list.refresh() } }
+                } else if list.isEmpty {
+                    PulsoEmptyState(Text(emptyTitle), description: Text(emptyBody)) { emptyAction() }
+                        .containerRelativeFrame(.vertical) { height, _ in height * 0.7 }
+                } else {
+                    ForEach(list.items) { item in
+                        PulsoCard { row(item).padding(PulsoSpace.s4) }
+                            .buttonStyle(.plain)
+                            .onAppear { if item.id == list.items.last?.id { list.loadMore() } }
+                    }
                 }
             }
+            .padding(.horizontal, PulsoSpace.s4)
+            .padding(.vertical, PulsoSpace.s2)
         }
         .refreshable { await list.refresh() }
         .task { if observe { await list.observe() } }

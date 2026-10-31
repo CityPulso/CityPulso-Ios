@@ -3,9 +3,11 @@ import SwiftUI
 
 /**
  * 头像（对应 Android `PulsoAvatar`）：有 [url] 时用 Nuke 加载，否则显示 [systemImage]，再退到 [fallbackText] 的首字。
- * 圆形，与 iOS 系统头像一致。
+ * 形状跟主题圆角档位（iOS 档是正圆，其余是 r4 圆角方）；底色强调色 step3，占位字 / 图标 step11。
  */
 public struct PulsoAvatar: View {
+    @Environment(\.pulsoPalette) private var palette
+
     private let url: URL?
     private let size: CGFloat
     private let systemImage: String?
@@ -27,8 +29,8 @@ public struct PulsoAvatar: View {
             }
         }
         .frame(width: size, height: size)
-        .background(.fill.secondary)
-        .clipShape(.circle)
+        .background(palette.accent.step(3))
+        .clipShape(palette.avatarShape)
         .accessibilityHidden(true)
     }
 
@@ -37,11 +39,11 @@ public struct PulsoAvatar: View {
         if let systemImage {
             Image(systemName: systemImage)
                 .font(.system(size: size * 0.45))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(palette.accent.step(11))
         } else {
             Text(String((fallbackText ?? "?").prefix(1)).uppercased())
                 .font(.system(size: size * 0.4, weight: .semibold))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(palette.accent.step(11))
         }
     }
 }

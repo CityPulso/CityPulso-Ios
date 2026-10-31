@@ -193,7 +193,7 @@ struct PostCreateView: View {
                 } label: {
                     if model.submitting { ProgressView() } else { Text("discussion_publish") }
                 }
-                .buttonStyle(.glassProminent)
+                .buttonStyle(.pulso())
                 .disabled(!model.canSubmit)
             }
         }
@@ -229,7 +229,7 @@ struct PostCreateView: View {
                 }
                 .font(.subheadline.weight(.medium))
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(.pulso(.soft))
             .tint(model.forums.isEmpty ? .secondary : .accentColor)
         }
     }

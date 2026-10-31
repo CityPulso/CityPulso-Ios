@@ -115,10 +115,10 @@ struct ForumManageView: View {
                 } label: {
                     if model.saving { ProgressView() } else { Text("discussion_save").frame(maxWidth: .infinity) }
                 }
-                .buttonStyle(.glassProminent)
+                .buttonStyle(.pulso())
                 .disabled(!model.canSave)
                 Button { model.discard() } label: { Text("discussion_discard").frame(maxWidth: .infinity) }
-                    .buttonStyle(.glass)
+                    .buttonStyle(.pulso(.soft))
                     .disabled(!model.dirty)
             }
             .listRowBackground(Color.clear)
@@ -186,10 +186,10 @@ struct ForumManageView: View {
                     Button(localizedFormat("discussion_manage_approve_as", String(localized: role.labelResource))) {
                         Task { await model.approveRequest(member, role: role) }
                     }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(.pulso(.soft))
                     .tint(role == .moderator ? .accentColor : .primary)
                 }
-                Button("discussion_manage_reject") { Task { await model.rejectRequest(member) } }.buttonStyle(.bordered).tint(.secondary)
+                Button("discussion_manage_reject") { Task { await model.rejectRequest(member) } }.buttonStyle(.pulso(.soft, tone: .gray))
                 if model.busyId == member.id { ProgressView() }
             }
             .controlSize(.small)
@@ -252,8 +252,8 @@ struct ForumManageView: View {
                         hideForums: true
                     )
                     HStack {
-                        Button("discussion_pending_approve") { Task { await model.approvePost(post) } }.buttonStyle(.borderedProminent)
-                        Button("discussion_pending_reject") { model.reasonPrompt = ReasonPrompt(postId: post.id, remove: false) }.buttonStyle(.bordered).tint(.secondary)
+                        Button("discussion_pending_approve") { Task { await model.approvePost(post) } }.buttonStyle(.pulso())
+                        Button("discussion_pending_reject") { model.reasonPrompt = ReasonPrompt(postId: post.id, remove: false) }.buttonStyle(.pulso(.soft, tone: .gray))
                         if model.busyId == post.id { ProgressView() }
                     }
                     .controlSize(.small)
@@ -302,10 +302,10 @@ struct ForumManageView: View {
                 HStack {
                     ForEach(report.targetType == .comment ? [ForumReportAction.deleteComment, .none] : [.removePost, .none], id: \.self) { action in
                         Button(action.labelKey) { Task { await model.resolveReport(report, action: action) } }
-                            .buttonStyle(.bordered)
+                            .buttonStyle(.pulso(.soft))
                             .tint(action == .none ? .primary : .accentColor)
                     }
-                    Button("discussion_report_dismiss") { Task { await model.dismissReport(report) } }.buttonStyle(.bordered).tint(.secondary)
+                    Button("discussion_report_dismiss") { Task { await model.dismissReport(report) } }.buttonStyle(.pulso(.soft, tone: .gray))
                     if model.busyId == report.id { ProgressView() }
                 }
                 .controlSize(.small)
@@ -338,7 +338,7 @@ struct ForumManageView: View {
                     }
                     RichTextBody(html: announcement.contentHtml, lineLimit: 3)
                     HStack {
-                        Button("discussion_action_edit") { model.editAnnouncement(announcement) }.buttonStyle(.bordered)
+                        Button("discussion_action_edit") { model.editAnnouncement(announcement) }.buttonStyle(.pulso(.soft))
                         Button("discussion_action_delete") {
                             confirm = PulsoHoldConfirm(
                                 title: String(localized: "discussion_announcement_delete_title"),
@@ -346,7 +346,7 @@ struct ForumManageView: View {
                                 label: String(localized: "discussion_action_delete")
                             ) { Task { await model.deleteAnnouncement(announcement) } }
                         }
-                        .buttonStyle(.bordered)
+                        .buttonStyle(.pulso(.soft))
                         .tint(.secondary)
                     }
                     .controlSize(.small)
@@ -485,9 +485,9 @@ private struct TopicRow: View {
                         onRename(name.trimmingCharacters(in: .whitespaces))
                         editing = false
                     }
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(.pulso())
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty || name.trimmingCharacters(in: .whitespaces) == topic.name)
-                    Button("discussion_cancel") { editing = false }.buttonStyle(.bordered)
+                    Button("discussion_cancel") { editing = false }.buttonStyle(.pulso(.soft))
                 }
                 .controlSize(.small)
             }

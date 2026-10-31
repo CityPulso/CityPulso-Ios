@@ -23,7 +23,7 @@ enum LoopShellPages {
         case .search:
             EventSearchView()
         case .calendar:
-            CalendarView()
+            CalendarView(isRoot: true)
         case .create:
             CreateEventView()
         case .explore:

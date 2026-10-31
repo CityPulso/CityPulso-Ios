@@ -39,6 +39,8 @@ private struct ActivityTypePickCard: View {
     let kind: NearActivityKind
     let onTap: () -> Void
 
+    @Environment(\.pulsoPalette) private var palette
+
     var body: some View {
         let scale = kind.colorScale
         Button(action: onTap) {
@@ -49,7 +51,7 @@ private struct ActivityTypePickCard: View {
                         .scaledToFit()
                         .frame(width: 40, height: 40)
                         .frame(width: 56, height: 56)
-                        .background(scale.step(5), in: .circle)
+                        .background(scale.step(5), in: palette.innerShape)
                     Spacer(minLength: 8)
                     // 标签在右上角、和图标同一行，有没有标签卡片都一样高。
                     VStack(alignment: .trailing, spacing: 4) {
@@ -69,7 +71,7 @@ private struct ActivityTypePickCard: View {
             }
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(LinearGradient(colors: [scale.step(3), scale.step(4)], startPoint: .top, endPoint: .bottom), in: .rect(cornerRadius: 16))
+            .background(LinearGradient(colors: [scale.step(3), scale.step(4)], startPoint: .top, endPoint: .bottom), in: palette.cardShape)
             .foregroundStyle(.primary)
         }
         .buttonStyle(.plain)

@@ -36,7 +36,7 @@ struct MyCoursesView: View {
 
     var body: some View {
         PulsoPagedList(list: model.enrollments, emptyTitle: "my_courses_empty", emptyBody: "my_courses_empty_body") {
-            Button("my_courses_browse") { shell?.open(.explore) }.buttonStyle(.glassProminent)
+            Button("my_courses_browse") { shell?.open(.explore) }.buttonStyle(.pulso())
         } row: { enrollment in
             NavigationLink(value: LoopRoute.course(courseId: enrollment.courseId)) {
                 VStack(alignment: .leading, spacing: 4) {
@@ -183,13 +183,13 @@ struct MyCoachingView: View {
                     HStack {
                         if me.status == .invited {
                             Button("my_coaching_accept") { Task { await model.answer(session.id, accept: true) } }
-                                .buttonStyle(.glassProminent)
+                                .buttonStyle(.pulso())
                             Button("my_coaching_decline") { Task { await model.answer(session.id, accept: false) } }
-                                .buttonStyle(.glass)
+                                .buttonStyle(.pulso(.soft))
                         }
                         if me.status == .accepted, me.paymentStatus == .unpaid || me.paymentStatus == .awaitingPayment {
                             Button("my_coaching_pay") { Task { await model.pay(session.id) } }
-                                .buttonStyle(.glass)
+                                .buttonStyle(.pulso(.soft))
                         }
                         if model.busyId == session.id { ProgressView() }
                     }

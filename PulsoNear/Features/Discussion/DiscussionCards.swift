@@ -74,6 +74,8 @@ struct ActionCount: View {
     var text: String?
     let action: () -> Void
 
+    @Environment(\.pulsoPalette) private var palette
+
     var body: some View {
         Button(action: action) {
             HStack(spacing: 4) {
@@ -84,11 +86,13 @@ struct ActionCount: View {
                     Text(count, format: .number).font(.caption)
                 }
             }
-            .foregroundStyle(active ? AnyShapeStyle(activeTint) : AnyShapeStyle(.secondary))
+            // 平时正文色（Android onSurface），点亮时用 [activeTint]。
+            .foregroundStyle(active ? activeTint : palette.text)
             .padding(.vertical, 4)
             .padding(.horizontal, 6)
+            .contentShape(Rectangle())
         }
-        .buttonStyle(.borderless)
+        .buttonStyle(.plain)
         .accessibilityLabel(Text(label))
     }
 }

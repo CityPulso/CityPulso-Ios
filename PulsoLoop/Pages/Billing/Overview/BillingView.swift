@@ -68,16 +68,30 @@ final class BillingModel {
     }
 }
 
-/** 账单（Android `BillingScreen`）：运动标签 → 范围分段 + 状态菜单 → 列表；主持的点进收款清单，我的点进活动。 */
+/**
+ * 账单（Android `BillingScreen`）：一级运动标签 → 二级「我主持的 | 我的付款」+ 行尾状态下拉 → 卡片列表。
+ * 主持的卡片点进收款清单、日历按钮看活动；我的付款点进活动。
+ */
 struct BillingView: View {
     @State private var model = BillingModel()
+    @Environment(\.pulsoPalette) private var palette
 
     var body: some View {
         VStack(spacing: 0) {
-            sportTabs
+            PulsoUnderlineTabRow(LoopSport.allCases, selection: $model.sport, image: { Image($0.iconAsset) }) { Text($0.labelKey) }
             if !model.sport.available {
-                PulsoComingSoonView(title: model.sport.labelKey, systemImage: "hourglass")
+                PulsoEmptyState(Text(model.sport.labelKey), description: Text("coming_soon_subtitle"), style: .comingSoon)
             } else {
+                PulsoHighlightTabRow(BillingScope.allCases, selection: $model.scope, label: { Text($0.labelKey) }) {
+                    switch model.scope {
+                    case .hosted:
+                        PulsoMenuSelect(BillingHostedFilter.allCases, selection: $model.hostedFilter, size: .small) { Text($0.labelKey) }
+                    case .mine:
+                        PulsoMenuSelect(BillingMineFilter.allCases, selection: $model.mineFilter, size: .small) { Text($0.labelKey) }
+                    }
+                }
+                .padding(.vertical, PulsoSpace.s1)
+                .padding(.trailing, PulsoSpace.s2)
                 list
             }
         }
@@ -85,139 +99,69 @@ struct BillingView: View {
         .task { await model.observe() }
     }
 
-    private var sportTabs: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(LoopSport.allCases, id: \.self) { sport in
-                    let selected = sport == model.sport
-                    Button {
-                        model.sport = sport
-                    } label: {
-                        HStack(spacing: 4) {
-                            Image(sport.iconAsset).resizable().frame(width: 18, height: 18)
-                            Text(sport.labelKey)
-                        }
-                        .font(.subheadline.weight(selected ? .semibold : .regular))
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                    }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(selected ? AnyShapeStyle(.tint) : AnyShapeStyle(.secondary))
-                    .background(selected ? AnyShapeStyle(.tint.opacity(0.15)) : AnyShapeStyle(.clear), in: .capsule)
-                }
-            }
-            .padding(.horizontal)
-            .padding(.vertical, 6)
-        }
-        .background(.bar)
-    }
-
-    private var list: some View {
-        List {
-            Section {
-                HStack {
-                    Picker(selection: $model.scope) {
-                        ForEach(BillingScope.allCases, id: \.self) { Text($0.labelKey).tag($0) }
-                    } label: {
-                        EmptyView()
-                    }
-                    .pickerStyle(.segmented)
-                    switch model.scope {
-                    case .hosted:
-                        Picker(selection: $model.hostedFilter) {
-                            ForEach(BillingHostedFilter.allCases, id: \.self) { Text($0.labelKey).tag($0) }
-                        } label: {
-                            EmptyView()
-                        }
-                        .pickerStyle(.menu)
-                    case .mine:
-                        Picker(selection: $model.mineFilter) {
-                            ForEach(BillingMineFilter.allCases, id: \.self) { Text($0.labelKey).tag($0) }
-                        } label: {
-                            EmptyView()
-                        }
-                        .pickerStyle(.menu)
-                    }
-                }
-            }
-            .listRowBackground(Color.clear)
-            .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
-            if let hosted = model.hosted {
-                rows(hosted, emptyTitle: "shell_billing_hosted_empty", emptyHint: "shell_billing_hosted_empty_hint") { row in
-                    HostedChecklistRow(row: row, sport: model.sport)
-                }
-            } else if let mine = model.mine {
-                rows(mine, emptyTitle: "shell_billing_mine_empty", emptyHint: "shell_billing_mine_empty_hint") { row in
-                    NavigationLink(value: LoopRoute.event(sport: model.sport, eventId: row.eventId)) {
-                        MyChecklistItemRow(row: row)
-                    }
-                }
-            } else {
-                ContentUnavailableView {
-                    Text((model.scope == .hosted ? "shell_billing_hosted_empty" : "shell_billing_mine_empty") as LocalizedStringKey)
-                } description: {
-                    Text((model.scope == .hosted ? "shell_billing_hosted_empty_hint" : "shell_billing_mine_empty_hint") as LocalizedStringKey)
-                }
-                .listRowBackground(Color.clear)
-            }
-        }
-        .refreshable { await model.refresh() }
-        .task(id: model.generation) { await model.observeList() }
-    }
-
     @ViewBuilder
-    private func rows<Item: Identifiable & Codable & Sendable, Row: View>(
-        _ list: PagedList<Item, Int>,
-        emptyTitle: LocalizedStringKey,
-        emptyHint: LocalizedStringKey,
-        @ViewBuilder row: @escaping (Item) -> Row
-    ) -> some View {
-        if list.isLoading {
-            ProgressView().frame(maxWidth: .infinity).listRowBackground(Color.clear)
-        } else if let error = list.error {
-            PulsoLoadErrorView(error) { Task { await list.refresh() } }.listRowBackground(Color.clear)
-        } else if list.isEmpty {
-            ContentUnavailableView {
-                Text(emptyTitle)
-            } description: {
-                Text(emptyHint)
+    private var list: some View {
+        if let hosted = model.hosted {
+            PulsoPagedList(list: hosted, observe: false, emptyTitle: "shell_billing_hosted_empty", emptyBody: "shell_billing_hosted_empty_hint") {
+                EmptyView()
+            } row: { row in
+                HostedChecklistRow(row: row, sport: model.sport)
             }
-            .listRowBackground(Color.clear)
+            .task(id: model.generation) { await model.observeList() }
+        } else if let mine = model.mine {
+            PulsoPagedList(list: mine, observe: false, emptyTitle: "shell_billing_mine_empty", emptyBody: "shell_billing_mine_empty_hint") {
+                EmptyView()
+            } row: { row in
+                NavigationLink(value: LoopRoute.event(sport: model.sport, eventId: row.eventId)) {
+                    MyChecklistItemRow(row: row)
+                }
+            }
+            .task(id: model.generation) { await model.observeList() }
         } else {
-            ForEach(list.items) { item in
-                row(item)
-                    .onAppear { if item.id == list.items.last?.id { list.loadMore() } }
-            }
+            PulsoEmptyState(
+                Text((model.scope == .hosted ? "shell_billing_hosted_empty" : "shell_billing_mine_empty") as LocalizedStringKey),
+                description: Text((model.scope == .hosted ? "shell_billing_hosted_empty_hint" : "shell_billing_mine_empty_hint") as LocalizedStringKey)
+            )
         }
     }
 }
 
-/** 我主持的一张收款清单：状态图标、标题、球馆 / 时间、结清状态；点行进清单，日历按钮看活动。 */
+/** 我主持的一张收款清单：状态图标、标题、球馆 / 时间、结清状态；点卡片进清单，日历按钮看活动。 */
 private struct HostedChecklistRow: View {
     let row: HostedChecklistRowUi
     let sport: LoopSport
 
+    @Environment(\.pulsoPalette) private var palette
+
     var body: some View {
-        HStack(spacing: 14) {
+        HStack(spacing: PulsoSpace.s4) {
             NavigationLink(value: LoopRoute.checklist(sport: sport, eventId: row.eventId)) {
-                HStack(spacing: 14) {
-                    Image(systemName: row.isAllSettled ? "checkmark.circle.fill" : "clock.badge.exclamationmark")
-                        .foregroundStyle(row.isAllSettled ? Color.accentColor : .red)
+                HStack(spacing: PulsoSpace.s4) {
+                    Image(systemName: row.isAllSettled ? "checkmark.circle.fill" : "list.clipboard")
                         .font(.title3)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(verbatim: row.title).font(.subheadline.weight(.semibold)).lineLimit(1)
-                        Text(verbatim: row.venueName ?? row.startsAt).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                        .foregroundStyle(row.isAllSettled ? palette.accent.step(9) : palette.error)
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text(verbatim: row.title)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(palette.text)
+                            .lineLimit(1)
+                        Text(verbatim: row.venueName ?? row.startsAt)
+                            .font(.caption)
+                            .foregroundStyle(palette.secondaryText)
+                            .lineLimit(1)
                         Text((row.isAllSettled ? "shell_billing_status_settled" : "shell_billing_status_unsettled") as LocalizedStringKey)
                             .font(.caption.weight(.medium))
-                            .foregroundStyle(row.isAllSettled ? Color.accentColor : .red)
+                            .foregroundStyle(row.isAllSettled ? palette.accent.step(9) : palette.error)
                     }
-                    Spacer(minLength: 0)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
             NavigationLink(value: LoopRoute.event(sport: sport, eventId: row.eventId)) {
                 Image(systemName: "calendar")
+                    .font(.title3)
+                    .foregroundStyle(palette.text)
+                    .frame(width: 40, height: 40)
             }
-            .buttonStyle(.borderless)
             .accessibilityLabel(Text("shell_billing_view_event"))
         }
     }
@@ -227,19 +171,29 @@ private struct HostedChecklistRow: View {
 private struct MyChecklistItemRow: View {
     let row: MyChecklistItemRowUi
 
+    @Environment(\.pulsoPalette) private var palette
+
     var body: some View {
-        HStack(spacing: 14) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(verbatim: row.title).font(.subheadline.weight(.semibold)).lineLimit(1)
-                Text(verbatim: row.venueName ?? row.startsAt).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+        HStack(spacing: PulsoSpace.s4) {
+            VStack(alignment: .leading, spacing: 0) {
+                Text(verbatim: row.title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(palette.text)
+                    .lineLimit(1)
+                Text(verbatim: row.venueName ?? row.startsAt)
+                    .font(.caption)
+                    .foregroundStyle(palette.secondaryText)
+                    .lineLimit(1)
                 if let amount = row.priceAmount {
-                    Text(verbatim: formatMoney(amount, currency: row.currency)).font(.caption).foregroundStyle(.secondary)
+                    Text(verbatim: formatMoney(amount, currency: row.currency))
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(palette.secondaryText)
                 }
             }
-            Spacer(minLength: 0)
+            .frame(maxWidth: .infinity, alignment: .leading)
             Text((row.paid ? "shell_billing_status_paid" : "shell_billing_status_unpaid") as LocalizedStringKey)
                 .font(.caption.weight(.semibold))
-                .foregroundStyle(row.paid ? Color.accentColor : .red)
+                .foregroundStyle(row.paid ? palette.accent.step(9) : palette.error)
         }
     }
 }

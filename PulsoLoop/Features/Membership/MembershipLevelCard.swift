@@ -59,7 +59,7 @@ struct MembershipLevelCard: View {
                                 Text(verbatim: subtitle).font(.caption).foregroundStyle(ink.opacity(0.75)).lineLimit(1)
                             }
                             Text(verbatim: discountPercent > 0
-                                ? localizedFormat("membership_discount", name, bookingDiscountZhe(discountPercent), String(discountPercent))
+                                ? localizedFormat("membership_discount", String(discountPercent), bookingDiscountZhe(discountPercent))
                                 : String(localized: "membership_no_discount"))
                                 .font(.caption.weight(.semibold))
                                 .foregroundStyle(ink)

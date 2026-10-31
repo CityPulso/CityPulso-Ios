@@ -507,7 +507,7 @@ struct PostDetailView: View {
                     let text = String(draft.characters)
                     Task { if await model.comment(html: html, text: text) { draft = AttributedString() } }
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.pulso())
                 .disabled(model.posting || String(draft.characters).trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
         }

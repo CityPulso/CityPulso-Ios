@@ -148,7 +148,7 @@ struct LinkPickerSheet: View {
                         Button("discussion_link_picker_paste_add") {
                             if let link = model.pastedLink() { pick(link) }
                         }
-                        .buttonStyle(.bordered)
+                        .buttonStyle(.pulso(.soft))
                         .disabled(model.pasted.trimmingCharacters(in: .whitespaces).isEmpty)
                     }
                 } footer: {

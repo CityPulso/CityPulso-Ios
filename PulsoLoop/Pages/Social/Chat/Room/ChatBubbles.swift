@@ -274,11 +274,11 @@ struct ChatShareCard: View {
                 }
                 HStack {
                     Button(primaryLabel) { callbacks.onCard(type, card) }
-                        .buttonStyle(.bordered)
+                        .buttonStyle(.pulso(.soft))
                         .tint(mine ? .white : .accentColor)
                     if type == .venueShare {
                         Button("shell_chat_card_book") { callbacks.onBook(card) }
-                            .buttonStyle(.borderedProminent)
+                            .buttonStyle(.pulso())
                             .tint(mine ? .white.opacity(0.3) : .accentColor)
                     }
                 }

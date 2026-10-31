@@ -148,7 +148,7 @@ struct CreateStepWhenWhere: View {
                 if !building.address.isEmpty { Text(verbatim: building.address).font(.caption).foregroundStyle(.secondary) }
             }
             Spacer(minLength: 0)
-            Button(action, action: onAction).buttonStyle(.bordered).controlSize(.small)
+            Button(action, action: onAction).buttonStyle(.pulso(.soft)).controlSize(.small)
         }
     }
 
@@ -404,7 +404,7 @@ struct CreateStepPublish: View {
                     .clipped()
                     .overlay(alignment: .topTrailing) {
                         Button { model.goToStep(.basics) } label: { Label("create_publish_edit", systemImage: "pencil") }
-                            .buttonStyle(.bordered)
+                            .buttonStyle(.pulso(.soft))
                             .controlSize(.small)
                             .padding(8)
                     }

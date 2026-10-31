@@ -118,12 +118,12 @@ struct ChecklistView: View {
             Button { Task { await model.settleAll() } } label: {
                 Group { if model.isActionInProgress { ProgressView() } else { Text("checklist_settle_all") } }.frame(maxWidth: .infinity)
             }
-            .buttonStyle(.glassProminent)
+            .buttonStyle(.pulso())
             .disabled(model.isActionInProgress || model.unpaidCount == 0)
             Button { Task { await model.remindAll() } } label: {
                 Label("checklist_remind_all", systemImage: "bell").frame(maxWidth: .infinity)
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(.pulso(.soft))
             .disabled(model.isActionInProgress || model.remindableIds.isEmpty)
         }
         .controlSize(.large)

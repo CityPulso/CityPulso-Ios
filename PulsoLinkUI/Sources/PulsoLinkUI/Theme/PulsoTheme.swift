@@ -62,6 +62,8 @@ extension View {
     /** 把主题偏好套到整棵视图树上。 */
     public func pulsoTheme(_ settings: PulsoThemeSettings) -> some View {
         tint(settings.accent.color)
+            // 还有页面直接用 `Color.accentColor`（读环境强调色，不跟 `.tint`）；对齐时逐页换成色板。
+            .accentColor(settings.accent.color)
             .environment(\.pulsoPalette, PulsoPalette(settings))
             .preferredColorScheme(settings.appearance.colorScheme)
     }

@@ -146,7 +146,7 @@ private struct VerifyEmailSheet: View {
                                 if digits != value { model.verifyCode = digits }
                             }
                         Button("signup_send_code") { Task { await model.sendCode() } }
-                            .buttonStyle(.glass)
+                            .buttonStyle(.pulso(.soft))
                             .disabled(model.busyEmailId != nil)
                     }
                 }

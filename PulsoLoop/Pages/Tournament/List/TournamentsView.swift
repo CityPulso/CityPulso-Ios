@@ -44,6 +44,7 @@ final class TournamentsModel {
  */
 struct TournamentsView: View {
     @State private var model = TournamentsModel()
+    @Environment(\.pulsoPalette) private var palette
 
     var body: some View {
         List {
@@ -62,63 +63,30 @@ struct TournamentsView: View {
         .task(id: model.search) { await model.searchChanged() }
     }
 
-    /** 搜索 + 运动标签（图标 + 名字），滚动时贴在顶部。 */
+    /** 搜索 +「我的赛事」，一级运动标签（全部 + 各运动），滚动时贴在顶部。 */
     private var filters: some View {
-        VStack(spacing: 8) {
-            HStack(spacing: 8) {
-                HStack(spacing: 8) {
-                    Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
-                    TextField("tournament_list_search", text: $model.search)
-                        .submitLabel(.search)
-                    if !model.search.isEmpty {
-                        Button { model.search = "" } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(.tertiary) }
-                            .buttonStyle(.plain)
-                    }
-                }
-                .padding(.horizontal, 12)
-                .frame(height: 40)
-                .background(.fill.tertiary, in: .capsule)
+        VStack(spacing: 0) {
+            HStack(spacing: PulsoSpace.s2) {
+                PulsoSearchField(text: $model.search, prompt: Text("tournament_list_search"))
                 // 「我的赛事」是搜索框旁边的图标（Android：作为底栏页时没有顶栏，入口放这里）。
                 NavigationLink(value: LoopRoute.myTournaments) {
                     Image(systemName: "trophy")
-                        .frame(width: 40, height: 40)
-                        .background(.fill.tertiary, in: .circle)
+                        .font(.title3)
+                        .foregroundStyle(palette.text)
+                        .frame(width: PulsoControlSize.compact.height, height: PulsoControlSize.compact.height)
                 }
+                .buttonStyle(.plain)
                 .accessibilityLabel(Text("tournament_mine_title"))
             }
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 4) {
-                    sportTab(nil)
-                    ForEach(TournamentSport.allCases, id: \.self) { sportTab($0) }
-                }
+            .padding(.horizontal, PulsoSpace.s4)
+            .padding(.vertical, PulsoSpace.s2)
+            PulsoUnderlineTabRow([nil] + TournamentSport.allCases.map(Optional.some), selection: $model.sport, image: { $0.map { Image($0.loopSport.iconAsset) } }) { sport in
+                Text(sport.map { $0.loopSport.labelKey } ?? "tournament_list_all")
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
-        .background(.bar)
+        .background(palette.background)
         .listRowInsets(EdgeInsets())
         .textCase(nil)
-    }
-
-    private func sportTab(_ sport: TournamentSport?) -> some View {
-        let selected = model.sport == sport
-        return Button { model.sport = sport } label: {
-            VStack(spacing: 6) {
-                HStack(spacing: 6) {
-                    if let sport {
-                        Image(sport.loopSport.iconAsset).resizable().scaledToFit().frame(width: 18, height: 18)
-                    }
-                    Text(sport.map { $0.loopSport.labelKey } ?? "tournament_list_all")
-                        .font(.subheadline.weight(selected ? .semibold : .regular))
-                }
-                .padding(.horizontal, 10)
-                Capsule().fill(selected ? Color.accentColor : .clear).frame(height: 2)
-            }
-            .foregroundStyle(selected ? Color.accentColor : .secondary)
-            .contentShape(.rect)
-        }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
     @ViewBuilder
@@ -132,12 +100,10 @@ struct TournamentsView: View {
         } else if let error = list.error {
             PulsoLoadErrorView(error) { Task { await list.refresh() } }.listRowSeparator(.hidden)
         } else if list.isEmpty {
-            ContentUnavailableView {
-                Label("tournament_list_empty", systemImage: "trophy")
-            } description: {
-                Text("tournament_list_empty_body")
-            }
-            .listRowSeparator(.hidden)
+            PulsoEmptyState(Text("tournament_list_empty"), description: Text("tournament_list_empty_body"))
+                .frame(minHeight: 360)
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
         } else {
             ForEach(list.items, id: \.id) { item in
                 NavigationLink(value: LoopRoute.tournament(tournamentId: item.id)) {
@@ -145,7 +111,8 @@ struct TournamentsView: View {
                 }
                 .navigationLinkIndicatorVisibility(.hidden)
                 .listRowSeparator(.hidden)
-                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
                 .onAppear { if item.id == list.items.last?.id { list.loadMore() } }
             }
         }

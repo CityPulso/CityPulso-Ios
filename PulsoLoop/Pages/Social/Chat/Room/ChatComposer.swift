@@ -54,7 +54,7 @@ struct ChatComposer: View {
                     .accessibilityLabel(Text("shell_chat_plus"))
                 } else {
                     Button("shell_chat_send") { Task { await model.sendText() } }
-                        .buttonStyle(.borderedProminent)
+                        .buttonStyle(.pulso())
                         .controlSize(.small)
                 }
             }

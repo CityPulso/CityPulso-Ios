@@ -252,7 +252,7 @@ private struct StatusBanner: View {
                 }
                 if phone, let venuePhone = booking.venuePhone, !venuePhone.isEmpty, let url = URL(string: "tel:\(venuePhone.filter { !$0.isWhitespace })") {
                     Button(localizedFormat("space_booking_banner_call", venuePhone)) { openURL(url) }
-                        .buttonStyle(.bordered)
+                        .buttonStyle(.pulso(.soft))
                 }
             }
         case .awaitingPayment:

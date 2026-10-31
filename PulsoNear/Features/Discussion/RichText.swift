@@ -1,4 +1,5 @@
 import PulsoLinkCore
+import PulsoLinkUI
 import SwiftUI
 import UIKit
 
@@ -222,7 +223,7 @@ struct RichTextEditor: View {
 
     private func tool(_ symbol: String, _ label: LocalizedStringKey, action: @escaping () -> Void) -> some View {
         Button(action: action) { Image(systemName: symbol).frame(width: 32, height: 28) }
-            .buttonStyle(.bordered)
+            .buttonStyle(.pulso(.soft))
             .controlSize(.small)
             .accessibilityLabel(Text(label))
     }

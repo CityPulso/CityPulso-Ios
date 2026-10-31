@@ -59,7 +59,7 @@ struct BlockedListView: View {
                             }
                         }
                         Button("shell_social_unblock") { Task { await model.unblock(item) } }
-                            .buttonStyle(.glass)
+                            .buttonStyle(.pulso(.soft))
                             .disabled(model.busyId == item.blockedProfileId)
                     }
                     .onAppear { if item.blockedProfileId == rows.items.last?.blockedProfileId { rows.loadMore() } }

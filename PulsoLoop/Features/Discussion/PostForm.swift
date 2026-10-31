@@ -256,7 +256,7 @@ struct SelectedForumPanel: View {
                             }
                             .font(.caption)
                         }
-                        .buttonStyle(.bordered)
+                        .buttonStyle(.pulso(.soft))
                         .tint(on ? .accentColor : .secondary)
                         .disabled(!on && picked.count >= postTopicsPerForum)
                     }
@@ -324,7 +324,7 @@ struct PostKindSheet: View {
                     } label: {
                         Text(option.labelKey).font(.subheadline)
                     }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(.pulso(.soft))
                     .tint(option == kind ? .accentColor : .secondary)
                 }
             }

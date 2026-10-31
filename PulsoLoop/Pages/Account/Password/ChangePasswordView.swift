@@ -30,7 +30,7 @@ struct ChangePasswordView: View {
                     } label: {
                         if model.sendingCode { ProgressView() } else { Text("signup_send_code") }
                     }
-                    .buttonStyle(.glass)
+                    .buttonStyle(.pulso(.soft))
                     .disabled(model.sendingCode)
                 }
             } footer: {
@@ -50,7 +50,7 @@ struct ChangePasswordView: View {
                     }
                     .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.glassProminent)
+                .buttonStyle(.pulso())
                 .controlSize(.large)
                 .disabled(model.submitting)
                 .listRowBackground(Color.clear)

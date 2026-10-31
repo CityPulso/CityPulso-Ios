@@ -240,7 +240,7 @@ struct VenueConfirmView: View {
                     }
                     .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.glassProminent)
+                .buttonStyle(.pulso())
                 .controlSize(.large)
                 .disabled(!model.canSubmit)
             } else {

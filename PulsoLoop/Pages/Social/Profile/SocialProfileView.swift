@@ -152,7 +152,7 @@ struct SocialProfileView: View {
                 Label((model.isFollowing ? "social_profile_following" : "shell_social_follow") as LocalizedStringKey, systemImage: model.isFollowing ? "checkmark" : "plus")
                     .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.glassProminent)
+            .buttonStyle(.pulso())
             if model.canMessage {
                 Button {
                     Task {
@@ -161,16 +161,16 @@ struct SocialProfileView: View {
                 } label: {
                     Image(systemName: "bubble.left")
                 }
-                .buttonStyle(.glass)
+                .buttonStyle(.pulso(.soft))
                 .accessibilityLabel(Text("shell_social_message"))
             }
             if !model.isFriend {
                 if let direction = model.pendingDirection {
                     Button((direction == .outgoing ? "shell_social_request_sent" : "shell_social_requests") as LocalizedStringKey) {}
-                        .buttonStyle(.glass)
+                        .buttonStyle(.pulso(.soft))
                         .disabled(true)
                 } else if model.canSendFriendRequest {
-                    Button("shell_social_add_friend") { Task { await model.sendFriendRequest() } }.buttonStyle(.glass)
+                    Button("shell_social_add_friend") { Task { await model.sendFriendRequest() } }.buttonStyle(.pulso(.soft))
                 }
             }
         }

@@ -108,10 +108,10 @@ struct FriendRequestsView: View {
             HStack {
                 switch item.direction {
                 case .incoming:
-                    Button("shell_social_accept") { Task { await model.accept(item.friendRequestId) } }.buttonStyle(.glassProminent)
-                    Button("shell_social_reject") { Task { await model.reject(item.friendRequestId) } }.buttonStyle(.glass)
+                    Button("shell_social_accept") { Task { await model.accept(item.friendRequestId) } }.buttonStyle(.pulso())
+                    Button("shell_social_reject") { Task { await model.reject(item.friendRequestId) } }.buttonStyle(.pulso(.soft))
                 case .outgoing:
-                    Button("shell_social_cancel_request") { Task { await model.cancel(item.friendRequestId) } }.buttonStyle(.glass)
+                    Button("shell_social_cancel_request") { Task { await model.cancel(item.friendRequestId) } }.buttonStyle(.pulso(.soft))
                 }
                 if acting { ProgressView() }
             }

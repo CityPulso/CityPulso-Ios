@@ -113,7 +113,7 @@ struct AgendaView: View {
             Text(spaces ? "home_agenda_empty_spaces_hint" : "home_agenda_empty_hint")
         } actions: {
             if !spaces, model.isPulser {
-                Button("shell_empty_action_create") { open(root: .create) }.buttonStyle(.borderedProminent)
+                Button("shell_empty_action_create") { open(root: .create) }.buttonStyle(.pulso())
             }
             Button(spaces ? "space_bookings_browse" : "shell_empty_action_join") { open(root: .explore) }
         }

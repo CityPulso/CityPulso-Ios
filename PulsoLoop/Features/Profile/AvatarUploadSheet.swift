@@ -37,7 +37,7 @@ struct AvatarUploadSheet: View {
                     Label(uploading ? "avatar_upload_uploading" : "avatar_upload_choose", systemImage: "photo.on.rectangle")
                         .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(.pulso(.soft))
                 .controlSize(.large)
                 .disabled(model.isBusy)
                 Spacer()

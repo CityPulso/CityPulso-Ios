@@ -187,7 +187,7 @@ struct MyTournamentsView: View {
             } description: {
                 Text("tournament_mine_empty_body")
             } actions: {
-                Button("tournament_mine_browse") { shell?.open(.explore) }.buttonStyle(.glassProminent)
+                Button("tournament_mine_browse") { shell?.open(.explore) }.buttonStyle(.pulso())
             }
         } else {
             ForEach(rows, id: \.id) { entry in
@@ -197,7 +197,7 @@ struct MyTournamentsView: View {
                 EntryCard(entry: entry, line: entryLine(entry), busy: model.busyId == entry.id, showActions: pay || withdraw) {
                     if pay {
                         Button { Task { await model.pay(entry.id) } } label: { Text("tournament_mine_pay").frame(maxWidth: .infinity) }
-                            .buttonStyle(.glassProminent)
+                            .buttonStyle(.pulso())
                     }
                     if withdraw {
                         Button {
@@ -207,7 +207,7 @@ struct MyTournamentsView: View {
                                 label: String(localized: "tournament_mine_withdraw")
                             ) { Task { await model.withdraw(entry.id) } }
                         } label: { Text("tournament_mine_withdraw").frame(maxWidth: .infinity) }
-                            .buttonStyle(.glass)
+                            .buttonStyle(.pulso(.soft))
                     }
                 }
             }
@@ -248,9 +248,9 @@ struct MyTournamentsView: View {
                     showActions: true
                 ) {
                     Button { Task { await model.answer(entry.id, accept: true) } } label: { Text("tournament_mine_accept").frame(maxWidth: .infinity) }
-                        .buttonStyle(.glassProminent)
+                        .buttonStyle(.pulso())
                     Button { Task { await model.answer(entry.id, accept: false) } } label: { Text("tournament_mine_decline").frame(maxWidth: .infinity) }
-                        .buttonStyle(.glass)
+                        .buttonStyle(.pulso(.soft))
                 }
             }
             moreFooter(list)

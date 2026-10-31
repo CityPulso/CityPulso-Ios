@@ -72,7 +72,7 @@ struct EquipmentEditor: View {
                 } label: {
                     Label("create_equipment_add", systemImage: "plus")
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(.pulso(.soft))
                 .disabled(!enabled || full || custom.trimmingCharacters(in: .whitespaces).isEmpty)
             }
             if let customError {

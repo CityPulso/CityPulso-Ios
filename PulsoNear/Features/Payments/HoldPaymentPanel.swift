@@ -70,12 +70,12 @@ struct HoldPaymentPanel: View {
                 } label: {
                     Label("payments_hold_add_card", systemImage: "plus")
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(.pulso(.soft))
                 .disabled(paying || paid || methods.adding)
                 Button("payments_hold_manage_cards") {
                     shell?.push(NearRoute.paymentMethods)
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(.pulso(.soft))
                 .tint(.secondary)
             }
             if let error {
@@ -95,7 +95,7 @@ struct HoldPaymentPanel: View {
                 }
                 .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(.pulso())
             .controlSize(.large)
             .disabled(paying || paid || chosenId == nil || (expiry.map { $0 <= .now } ?? false))
         }

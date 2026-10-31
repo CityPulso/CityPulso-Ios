@@ -92,7 +92,7 @@ private struct CreatePaymentAccountForm: View {
             }
             .pickerStyle(.segmented)
             HStack {
-                Button("event_detail_dialog_cancel", action: onCancel).buttonStyle(.bordered)
+                Button("event_detail_dialog_cancel", action: onCancel).buttonStyle(.pulso(.soft))
                 Spacer()
                 Button {
                     touched = true
@@ -101,7 +101,7 @@ private struct CreatePaymentAccountForm: View {
                 } label: {
                     if model.creating { ProgressView() } else { Text("payment_accounts_create_submit") }
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.pulso())
                 .disabled(model.creating)
             }
         }
@@ -129,13 +129,13 @@ private struct AccountCard: View {
                 Button((account.detailsSubmitted ? "payment_accounts_update" : "payment_accounts_onboard") as LocalizedStringKey) {
                     Task { await model.onboard(account.id) }
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.pulso())
                 Button {
                     Task { await model.sync(account.id) }
                 } label: {
                     if model.syncingId == account.id { ProgressView() } else { Text("payment_accounts_sync") }
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(.pulso(.soft))
                 .disabled(model.syncingId == account.id)
             }
             if !model.prefillVenues.isEmpty, !account.detailsSubmitted {

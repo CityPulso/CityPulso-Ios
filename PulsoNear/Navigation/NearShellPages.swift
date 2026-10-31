@@ -23,7 +23,7 @@ enum NearShellPages {
         case .create:
             CreateActivityView()
         case .calendar:
-            CalendarView(initialTab: nil)
+            CalendarView(isRoot: true)
         case .search:
             ActivitySearchView()
         case .explore:

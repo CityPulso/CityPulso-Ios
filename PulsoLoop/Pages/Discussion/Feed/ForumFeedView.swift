@@ -129,51 +129,43 @@ final class ForumFeedModel {
 struct ForumFeedView: View {
     @State private var model = ForumFeedModel()
     @Environment(PulsoShellNavigator.self) private var shell: PulsoShellNavigator?
+    @Environment(\.pulsoPalette) private var palette
 
     var body: some View {
-        List {
-            Section {
-                Picker(selection: $model.tab) {
-                    ForEach(ForumFeedTab.allCases, id: \.self) { Text($0.labelKey).tag($0) }
-                } label: {
-                    EmptyView()
+        ScrollView {
+            LazyVStack(spacing: PulsoSpace.s2, pinnedViews: .sectionHeaders) {
+                Section {
+                    if model.tab == .mine { mine } else { feed }
+                } header: {
+                    header
                 }
-                .pickerStyle(.segmented)
-                .padding(.horizontal)
-                if model.tab != .mine { filters }
             }
-            .listRowBackground(Color.clear)
-            .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
-            if model.tab == .mine { mine } else { feed }
+            .padding(.bottom, PulsoSpace.s9)
         }
-        .listStyle(.plain)
-        .searchable(text: $model.query, prompt: Text("discussion_search_posts_placeholder"))
         .navigationTitle("shell_dest_forum")
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
-                NavigationLink(value: LoopRoute.forumSearch) { Image(systemName: "magnifyingglass.circle") }
-                    .accessibilityLabel(Text("discussion_search_forums"))
-                NavigationLink(value: LoopRoute.myForums) {
-                    Image(systemName: "text.bubble")
-                        .overlay(alignment: .topTrailing) { if model.pendingTotal > 0 { Circle().fill(.red).frame(width: 8, height: 8).offset(x: 3, y: -3) } }
-                }
-                .accessibilityLabel(Text("discussion_my_forums"))
-                NavigationLink(value: LoopRoute.likedPosts) { Image(systemName: "heart") }
+                NavigationLink(value: LoopRoute.likedPosts) { Image(systemName: "heart.fill") }
                     .accessibilityLabel(Text("discussion_liked_title"))
                 Button { model.pickerOpen = true } label: {
                     Image(systemName: "slider.horizontal.3")
-                        .overlay(alignment: .topTrailing) { if model.forum != nil { Circle().fill(.tint).frame(width: 8, height: 8).offset(x: 3, y: -3) } }
+                        .overlay(alignment: .topTrailing) { if model.forum != nil { Circle().fill(palette.accent.step(9)).frame(width: 8, height: 8).offset(x: 3, y: -3) } }
                 }
                 .accessibilityLabel(Text("discussion_choose_forum"))
             }
         }
         .overlay(alignment: .bottomTrailing) {
+            // 发帖：浅强调色圆角方块 + 强调色铅笔（Android FAB）。
             NavigationLink(value: LoopRoute.postCreate(prefill: PostCreatePrefill(forumId: model.forum?.id))) {
-                Image(systemName: "square.and.pencil").font(.title2).padding(16)
+                Image(systemName: "pencil")
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(palette.accent.step(11))
+                    .frame(width: 56, height: 56)
+                    .background(palette.accent.step(3), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .shadow(color: .black.opacity(0.15), radius: 6, y: 3)
             }
-            .buttonStyle(.glassProminent)
-            .clipShape(.circle)
-            .padding(20)
+            .buttonStyle(.plain)
+            .padding(PulsoSpace.s4)
             .accessibilityLabel(Text("discussion_new_post"))
         }
         .refreshable {
@@ -190,55 +182,83 @@ struct ForumFeedView: View {
         }
     }
 
+    /** 吸顶头部：搜帖子 + 发现论坛 / 我的论坛，一级标签，运动筛选（我的帖子不筛）。 */
+    private var header: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: PulsoSpace.s2) {
+                PulsoSearchField(text: $model.query, prompt: Text("discussion_search_posts_placeholder"))
+                NavigationLink(value: LoopRoute.forumSearch) {
+                    headerIcon("location.magnifyingglass")
+                }
+                .accessibilityLabel(Text("discussion_search_forums"))
+                NavigationLink(value: LoopRoute.myForums) {
+                    headerIcon("text.bubble")
+                        .overlay(alignment: .topTrailing) {
+                            if model.pendingTotal > 0 { Circle().fill(palette.error).frame(width: 8, height: 8).offset(x: -4, y: 6) }
+                        }
+                }
+                .accessibilityLabel(Text("discussion_my_forums"))
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, PulsoSpace.s4)
+            .padding(.vertical, PulsoSpace.s2)
+            PulsoUnderlineTabRow(ForumFeedTab.allCases, selection: $model.tab) { Text($0.labelKey) }
+            if model.tab != .mine { filters }
+        }
+        .background(palette.background)
+    }
+
+    private func headerIcon(_ systemImage: String) -> some View {
+        Image(systemName: systemImage)
+            .font(.title3)
+            .foregroundStyle(palette.text)
+            .frame(width: PulsoControlSize.compact.height, height: PulsoControlSize.compact.height)
+    }
+
     private var filters: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 6) {
+            HStack(spacing: PulsoSpace.s2) {
                 if let forum = model.forum {
-                    chip(Text(verbatim: forum.name), selected: true) { model.clearForum() }
+                    PulsoChoiceChip(Text(verbatim: forum.name), selected: true) { model.clearForum() }
                 }
-                chip(Text("discussion_all_sports"), selected: model.sport == nil) { model.sport = nil }
+                PulsoChoiceChip(Text("discussion_all_sports"), selected: model.sport == nil) { model.sport = nil }
                 ForEach(ForumSport.allCases, id: \.self) { sport in
-                    chip(Text(sport.labelKey), selected: model.sport == sport) { model.sport = sport }
+                    PulsoChoiceChip(Text(sport.labelKey), image: sport.sport.map { Image($0.iconAsset) }, selected: model.sport == sport) { model.sport = sport }
                 }
             }
-            .padding(.horizontal)
+            .padding(.horizontal, PulsoSpace.s4)
+            .padding(.vertical, PulsoSpace.s2)
         }
     }
 
-    private func chip(_ label: Text, selected: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            label.font(.subheadline.weight(selected ? .semibold : .regular))
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .foregroundStyle(selected ? AnyShapeStyle(.tint) : AnyShapeStyle(.secondary))
-                .background(selected ? AnyShapeStyle(.tint.opacity(0.15)) : AnyShapeStyle(.fill.tertiary), in: .capsule)
-        }
-        .buttonStyle(.plain)
+    /** 一张帖子卡（Android 信息流里每条都是 PulsoCard）。 */
+    private func card(_ content: some View) -> some View {
+        PulsoCard { content.padding(PulsoSpace.s4) }
+            .padding(.horizontal, PulsoSpace.s4)
     }
 
     @ViewBuilder
     private var feed: some View {
         let posts = model.posts
         if posts.isLoading {
-            ProgressView().frame(maxWidth: .infinity, minHeight: 200).listRowBackground(Color.clear)
+            ProgressView().frame(maxWidth: .infinity, minHeight: 200)
         } else if let error = posts.error {
-            PulsoLoadErrorView(error) { Task { await posts.refresh() } }.listRowBackground(Color.clear)
+            PulsoLoadErrorView(error) { Task { await posts.refresh() } }
         } else if posts.isEmpty {
-            ContentUnavailableView {
-                Text(emptyTitle)
-            } description: {
-                Text((model.tab == .following ? "discussion_feed_empty_following_body" : "discussion_feed_empty_latest_body") as LocalizedStringKey)
-            } actions: {
+            PulsoEmptyState(
+                Text(emptyTitle),
+                description: Text((model.tab == .following ? "discussion_feed_empty_following_body" : "discussion_feed_empty_latest_body") as LocalizedStringKey)
+            ) {
                 if model.tab == .following {
-                    NavigationLink("discussion_search_forums", value: LoopRoute.forumSearch).buttonStyle(.glassProminent)
+                    NavigationLink("discussion_search_forums", value: LoopRoute.forumSearch).buttonStyle(.pulso())
                 } else {
-                    NavigationLink("discussion_new_post", value: LoopRoute.postCreate(prefill: PostCreatePrefill())).buttonStyle(.glassProminent)
+                    NavigationLink("discussion_new_post", value: LoopRoute.postCreate(prefill: PostCreatePrefill())).buttonStyle(.pulso())
                 }
             }
-            .listRowBackground(Color.clear)
+            .frame(minHeight: 420)
         } else {
             ForEach(posts.items) { post in
-                PostCardView(
+                card(PostCardView(
                     post: post,
                     imageURL: model.imageURL,
                     onOpen: { shell?.push(LoopRoute.post(postId: post.id)) },
@@ -249,7 +269,7 @@ struct ForumFeedView: View {
                     onOpenAuthor: { shell?.push(LoopRoute.socialProfile(profileId: post.author.profileId)) },
                     onOpenTopic: { shell?.push(LoopRoute.forum(forumId: $0.forumId)) },
                     onReport: { model.reporting = post }
-                )
+                ))
                 .onAppear { if post.id == posts.items.last?.id { posts.loadMore() } }
             }
         }
@@ -267,21 +287,17 @@ struct ForumFeedView: View {
     private var mine: some View {
         let posts = model.myPosts
         if posts.isLoading {
-            ProgressView().frame(maxWidth: .infinity, minHeight: 200).listRowBackground(Color.clear)
+            ProgressView().frame(maxWidth: .infinity, minHeight: 200)
         } else if let error = posts.error {
-            PulsoLoadErrorView(error) { Task { await posts.refresh() } }.listRowBackground(Color.clear)
+            PulsoLoadErrorView(error) { Task { await posts.refresh() } }
         } else if posts.isEmpty {
-            ContentUnavailableView {
-                Text("discussion_feed_empty_mine")
-            } description: {
-                Text("discussion_feed_empty_mine_body")
-            } actions: {
-                NavigationLink("discussion_new_post", value: LoopRoute.postCreate(prefill: PostCreatePrefill())).buttonStyle(.glassProminent)
+            PulsoEmptyState(Text("discussion_feed_empty_mine"), description: Text("discussion_feed_empty_mine_body")) {
+                NavigationLink("discussion_new_post", value: LoopRoute.postCreate(prefill: PostCreatePrefill())).buttonStyle(.pulso())
             }
-            .listRowBackground(Color.clear)
+            .frame(minHeight: 420)
         } else {
             ForEach(posts.items) { post in
-                PostCardView(
+                card(PostCardView(
                     post: post,
                     imageURL: model.imageURL,
                     onOpen: { shell?.push(LoopRoute.post(postId: post.id)) },
@@ -290,7 +306,7 @@ struct ForumFeedView: View {
                     status: post.status,
                     pinned: post.isPinned,
                     reason: post.rejectReason ?? post.removedReason
-                )
+                ))
                 .onAppear { if post.id == posts.items.last?.id { posts.loadMore() } }
             }
         }

@@ -235,13 +235,13 @@ struct ForumDetailView: View {
                         Label((forum.favoritedByMe ? "discussion_unfollow" : "discussion_follow") as LocalizedStringKey, systemImage: forum.favoritedByMe ? "star.fill" : "star")
                             .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.glassProminent)
+                    .buttonStyle(.pulso())
                     .disabled(model.busy)
                     if forum.status == .active {
                         NavigationLink(value: NearRoute.postCreate(prefill: PostCreatePrefill(forumId: forum.id))) {
                             Text("discussion_post_here").frame(maxWidth: .infinity)
                         }
-                        .buttonStyle(.glass)
+                        .buttonStyle(.pulso(.soft))
                     }
                     Menu {
                         if forum.canManage {
@@ -257,7 +257,7 @@ struct ForumDetailView: View {
                     } label: {
                         Image(systemName: "ellipsis").frame(width: 36, height: 30)
                     }
-                    .buttonStyle(.glass)
+                    .buttonStyle(.pulso(.soft))
                     .accessibilityLabel(Text("discussion_more_actions"))
                 }
             }
@@ -317,7 +317,7 @@ struct ForumDetailView: View {
                 Text("discussion_forum_empty_body")
             } actions: {
                 if forum.status == .active {
-                    NavigationLink("discussion_post_here", value: NearRoute.postCreate(prefill: PostCreatePrefill(forumId: forum.id))).buttonStyle(.glassProminent)
+                    NavigationLink("discussion_post_here", value: NearRoute.postCreate(prefill: PostCreatePrefill(forumId: forum.id))).buttonStyle(.pulso())
                 }
             }
             .listRowBackground(Color.clear)

@@ -210,7 +210,7 @@ struct CourseDetailView: View {
                 } label: {
                     if model.enrolling { ProgressView().frame(maxWidth: .infinity) } else { Text("course_detail_enroll").frame(maxWidth: .infinity) }
                 }
-                .buttonStyle(.glassProminent)
+                .buttonStyle(.pulso())
                 .disabled(model.selectedMethod == nil || model.enrolling)
             }
         }

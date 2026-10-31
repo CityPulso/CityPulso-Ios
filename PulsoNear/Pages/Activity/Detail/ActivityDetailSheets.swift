@@ -139,7 +139,7 @@ private struct JoinSheet: View {
                 }
                 .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.glassProminent)
+            .buttonStyle(.pulso())
             .controlSize(.large)
             .disabled(loading)
         }
@@ -248,10 +248,10 @@ private struct JoinSuccessSheet: View {
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
                 Button { model.closeSheet() } label: { Text("activity_join_success_view_activity").frame(maxWidth: .infinity) }
-                    .buttonStyle(.glassProminent)
+                    .buttonStyle(.pulso())
                     .controlSize(.large)
                 Button { calendar = calendarDraft(activity) } label: { Text("activity_join_success_add_calendar").frame(maxWidth: .infinity) }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(.pulso(.soft))
                     .controlSize(.large)
                 Divider()
                 VStack(alignment: .leading, spacing: 8) {
@@ -321,12 +321,12 @@ private struct MyRegistrationSheet: View {
                     Button { calendar = calendarDraft(activity) } label: {
                         Label("activity_join_success_add_calendar", systemImage: "calendar").frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(.pulso(.soft))
                     if model.isHost {
                         HostCannotExitButton()
                     } else if model.canExit {
                         Button { model.sheet = .exit } label: { Text("activity_detail_cancel_registration").frame(maxWidth: .infinity) }
-                            .buttonStyle(.bordered)
+                            .buttonStyle(.pulso(.soft))
                             .tint(.secondary)
                     }
                 }
@@ -379,7 +379,7 @@ private struct ExitSheet: View {
                 }
                 HStack(spacing: 8) {
                     Button { model.closeSheet() } label: { Text("activity_exit_keep").frame(maxWidth: .infinity, minHeight: 36) }
-                        .buttonStyle(.bordered)
+                        .buttonStyle(.pulso(.soft))
                         .tint(.secondary)
                         .disabled(model.isActionInProgress)
                     PulsoHoldButton(waitlisted ? "activity_exit_confirm_waitlist" : "activity_exit_confirm", loading: model.isActionInProgress) {
@@ -443,7 +443,7 @@ private struct ParticipantsSheet: View {
                 } else if model.rosterError != nil, !model.rosterReady {
                     VStack(spacing: 8) {
                         Text("activity_detail_roster_load_failed").foregroundStyle(.secondary)
-                        Button("shell_home_retry") { model.refresh() }.buttonStyle(.bordered)
+                        Button("shell_home_retry") { model.refresh() }.buttonStyle(.pulso(.soft))
                     }
                     .frame(maxWidth: .infinity)
                 } else if rows.isEmpty {
@@ -507,7 +507,7 @@ private struct ParticipantRow: View {
             }
             Spacer(minLength: 0)
             Button("activity_detail_participants_view_profile", action: onOpenProfile)
-                .buttonStyle(.bordered)
+                .buttonStyle(.pulso(.soft))
                 .controlSize(.small)
         }
     }
@@ -527,7 +527,7 @@ struct SeatPaymentSheet: View {
             SheetHeading(title: "activity_join_registration_pay_title", message: Text("activity_join_registration_pay_body"))
             HoldPaymentPanel(session: session, payee: String(localized: "activity_join_registration_host_payee"), pay: pay, onPaid: onPaid)
             Button(action: onDismiss) { Text("activity_join_registration_pay_later").frame(maxWidth: .infinity) }
-                .buttonStyle(.bordered)
+                .buttonStyle(.pulso(.soft))
                 .tint(.secondary)
                 .controlSize(.large)
         }

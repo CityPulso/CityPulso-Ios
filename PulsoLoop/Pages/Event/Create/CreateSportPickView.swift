@@ -6,6 +6,7 @@ import SwiftUI
  * 箭头、插画），还没开放的运动在底部变暗显示。
  */
 struct CreateSportPickView: View {
+    @Environment(\.pulsoPalette) private var palette
     let onSelect: (LoopSport) -> Void
 
     var body: some View {
@@ -44,7 +45,7 @@ struct CreateSportPickView: View {
                     .font(.subheadline.bold())
                     .foregroundStyle(.white)
                     .frame(width: 32, height: 32)
-                    .background(scale.step(9), in: .circle)
+                    .background(scale.step(9), in: palette.controlShape)
                     .padding(.top, 8)
             }
             Spacer(minLength: 0)
@@ -53,12 +54,13 @@ struct CreateSportPickView: View {
                 .scaledToFit()
                 .frame(width: 72, height: 72)
                 .frame(width: 104, height: 104)
-                .background(scale.step(5), in: .circle)
+                .background(scale.step(5), in: palette.innerShape)
         }
         .padding(.leading, 20)
         .padding([.trailing, .vertical], 16)
-        .background(LinearGradient(colors: [scale.step(3), scale.step(4)], startPoint: .leading, endPoint: .trailing), in: .rect(cornerRadius: 20))
-        .contentShape(.rect(cornerRadius: 20))
+        .background(LinearGradient(colors: [scale.step(3), scale.step(4)], startPoint: .leading, endPoint: .trailing), in: palette.cardShape)
+        .shadow(color: .black.opacity(0.08), radius: 3, y: 1)
+        .contentShape(palette.cardShape)
     }
 
     private func comingSoonTile(_ sport: LoopSport) -> some View {
@@ -75,7 +77,7 @@ struct CreateSportPickView: View {
         .padding(.vertical, 12)
         .padding(.horizontal, 8)
         .frame(maxWidth: .infinity)
-        .background(.background.secondary, in: .rect(cornerRadius: 16))
+        .background(palette.panel, in: palette.cardShape)
         .opacity(0.7)
     }
 }

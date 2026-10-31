@@ -265,7 +265,7 @@ struct ChatLocationView: View {
                 } label: {
                     Label("shell_chat_location_view_directions", systemImage: "arrow.triangle.turn.up.right.diamond").frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.glassProminent)
+                .buttonStyle(.pulso())
                 .padding(.top, 8)
             }
             .padding()

@@ -266,7 +266,7 @@ private struct ExploreTopPanel: View {
                                 model.clearAddressSearch()
                                 addressFocused.wrappedValue = false
                             }
-                            .buttonStyle(.glass)
+                            .buttonStyle(.pulso(.soft))
                             .controlSize(.large)
                         }
                     }
@@ -290,7 +290,7 @@ private struct ExploreTopPanel: View {
             }
             if model.error != nil, !model.isLoading {
                 Button("explore_load_failed_retry") { model.retryNearby() }
-                    .buttonStyle(.glass)
+                    .buttonStyle(.pulso(.soft))
             }
         }
         .animation(.snappy, value: model.sportRowVisible)

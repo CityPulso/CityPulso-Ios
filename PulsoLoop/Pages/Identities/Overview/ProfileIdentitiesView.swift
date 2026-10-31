@@ -103,7 +103,7 @@ struct ProfileIdentitiesView: View {
                     Button("profile_identities_citypulso_id_cancel", role: .cancel) { model.citypulsoIdDraft = nil }
                     Spacer()
                     Button("profile_identities_citypulso_id_save") { Task { await model.saveCitypulsoId() } }
-                        .buttonStyle(.borderedProminent)
+                        .buttonStyle(.pulso())
                         .disabled(!model.citypulsoIdDraftValid || model.savingCitypulsoId)
                 }
                 .buttonStyle(.borderless)

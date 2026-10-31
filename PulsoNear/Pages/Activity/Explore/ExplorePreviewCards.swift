@@ -76,10 +76,10 @@ private struct ExploreActivityPreviewCard: View {
             }
             VStack(spacing: 8) {
                 Button(action: onDetails) { Text("explore_preview_activity_details").frame(maxWidth: .infinity) }
-                    .buttonStyle(.glassProminent)
+                    .buttonStyle(.pulso())
                 if !pin.isEnded {
                     Button(action: onJoin) { Text("explore_preview_join").frame(maxWidth: .infinity) }
-                        .buttonStyle(.glass)
+                        .buttonStyle(.pulso(.soft))
                 }
             }
             .controlSize(.large)
@@ -111,10 +111,10 @@ private struct ExploreVenuePreviewCard: View {
             VStack(spacing: 8) {
                 if !pin.activityTypes.isEmpty {
                     Button(action: onBook) { Text("explore_preview_book").frame(maxWidth: .infinity) }
-                        .buttonStyle(.glassProminent)
+                        .buttonStyle(.pulso())
                 }
                 Button(action: onDetails) { Text("explore_preview_venue_details").frame(maxWidth: .infinity) }
-                    .buttonStyle(.glass)
+                    .buttonStyle(.pulso(.soft))
             }
             .controlSize(.large)
             .padding(.top, 4)

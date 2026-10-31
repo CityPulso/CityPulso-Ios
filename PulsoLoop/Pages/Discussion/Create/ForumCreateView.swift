@@ -178,7 +178,7 @@ struct ForumCreateView: View {
                 } label: {
                     if model.submitting { ProgressView() } else { Text("discussion_create") }
                 }
-                .buttonStyle(.glassProminent)
+                .buttonStyle(.pulso())
                 .disabled(!model.ready)
             }
         }

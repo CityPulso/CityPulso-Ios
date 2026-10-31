@@ -292,7 +292,7 @@ struct SpaceSelectedBar: View {
                 }
             }
             Button(action: onContinue) { Text("venue_book_goto_confirm").frame(maxWidth: .infinity) }
-                .buttonStyle(.glassProminent)
+                .buttonStyle(.pulso())
                 .controlSize(.large)
                 .disabled(!canContinue)
         }

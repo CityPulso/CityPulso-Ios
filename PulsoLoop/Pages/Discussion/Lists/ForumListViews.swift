@@ -145,7 +145,7 @@ struct ForumSearchView: View {
             } description: {
                 Text("discussion_search_empty_body")
             } actions: {
-                NavigationLink("discussion_create_forum", value: LoopRoute.forumCreate).buttonStyle(.glassProminent)
+                NavigationLink("discussion_create_forum", value: LoopRoute.forumCreate).buttonStyle(.pulso())
             }
             .listRowSeparator(.hidden)
         } else {
@@ -174,7 +174,7 @@ struct MyForumsView: View {
 
     var body: some View {
         PulsoPagedList(list: forums, emptyTitle: "discussion_my_forums_empty", emptyBody: "discussion_my_forums_empty_body") {
-            NavigationLink("discussion_create_forum", value: LoopRoute.forumCreate).buttonStyle(.glassProminent)
+            NavigationLink("discussion_create_forum", value: LoopRoute.forumCreate).buttonStyle(.pulso())
         } header: {
             NavigationLink(value: LoopRoute.forumCreate) {
                 Label("discussion_create_forum", systemImage: "plus")
@@ -209,7 +209,7 @@ struct MyForumsView: View {
                 Spacer()
                 if forum.canManage {
                     NavigationLink("discussion_manage", value: LoopRoute.forumManage(forumId: forum.id))
-                        .buttonStyle(.bordered)
+                        .buttonStyle(.pulso(.soft))
                         .controlSize(.small)
                 }
             }
@@ -255,7 +255,7 @@ struct LikedPostsView: View {
 
     var body: some View {
         PulsoPagedList(list: model.posts, emptyTitle: "discussion_liked_empty", emptyBody: "discussion_liked_empty_body") {
-            Button("discussion_browse_feed") { shell?.open(.forum) }.buttonStyle(.glassProminent)
+            Button("discussion_browse_feed") { shell?.open(.forum) }.buttonStyle(.pulso())
         } row: { post in
             PostCardView(
                 post: post,

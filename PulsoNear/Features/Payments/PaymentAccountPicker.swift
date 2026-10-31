@@ -156,7 +156,7 @@ struct PaymentAccountPicker: View {
             } label: {
                 Label("payments_account_select_manage", systemImage: "building.columns")
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(.pulso(.soft))
         }
         .task { await model.observe() }
         .onChange(of: model.chargeable.map(\.id)) { _, ids in

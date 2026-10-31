@@ -45,7 +45,7 @@ struct CoachPanelView: View {
     private var sessionsTab: some View {
         Section {
             Button { model.openDraft() } label: { Text("coach_panel_create").frame(maxWidth: .infinity) }
-                .buttonStyle(.glassProminent)
+                .buttonStyle(.pulso())
                 .disabled(model.partnerVenues.isEmpty)
                 .listRowBackground(Color.clear)
         } footer: {
@@ -86,10 +86,10 @@ struct CoachPanelView: View {
                         PulsoFlowLayout(spacing: 6) {
                             ForEach(CoachPanelModel.collectMethods, id: \.self) { method in
                                 Button(method.collectLabelKey) { Task { await model.markPaid(session.id, profileId: participant.profileId, method: method) } }
-                                    .buttonStyle(.bordered)
+                                    .buttonStyle(.pulso(.soft))
                             }
                             Button("coach_panel_waive") { Task { await model.markPaid(session.id, profileId: participant.profileId, method: nil) } }
-                                .buttonStyle(.bordered)
+                                .buttonStyle(.pulso(.soft))
                                 .tint(.secondary)
                         }
                         .controlSize(.small)
@@ -103,11 +103,11 @@ struct CoachPanelView: View {
                             Button(localizedFormat("coach_panel_request_court", String(localized: method.courtLabelResource))) {
                                 Task { await model.requestCourt(session.id, method: method) }
                             }
-                            .buttonStyle(.bordered)
+                            .buttonStyle(.pulso(.soft))
                         }
                     }
                     if session.venueState == .confirmed {
-                        Button("coach_panel_complete") { Task { await model.completeSession(session.id) } }.buttonStyle(.bordered)
+                        Button("coach_panel_complete") { Task { await model.completeSession(session.id) } }.buttonStyle(.pulso(.soft))
                     }
                     Button("coach_panel_cancel_session") {
                         confirm = PulsoHoldConfirm(
@@ -116,7 +116,7 @@ struct CoachPanelView: View {
                             label: String(localized: "coach_panel_cancel_session")
                         ) { Task { await model.cancelSession(session.id) } }
                     }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(.pulso(.soft))
                     .tint(.secondary)
                 }
                 .controlSize(.small)
@@ -132,7 +132,7 @@ struct CoachPanelView: View {
     private var venuesTab: some View {
         Section {
             paged(model.venues, emptyTitle: "coach_panel_venues_empty", emptyBody: nil, emptyAction: {
-                Button("coach_panel_explore") { shell?.open(.explore) }.buttonStyle(.glassProminent)
+                Button("coach_panel_explore") { shell?.open(.explore) }.buttonStyle(.pulso())
             }) { link in
                 venueRow(link)
             }
@@ -155,8 +155,8 @@ struct CoachPanelView: View {
             .buttonStyle(.plain)
             HStack {
                 if link.status == .pending, link.initiatedBy == .venue {
-                    Button("coach_panel_accept") { Task { await model.answer(link.id, accept: true) } }.buttonStyle(.borderedProminent)
-                    Button("coach_panel_decline") { Task { await model.answer(link.id, accept: false) } }.buttonStyle(.bordered).tint(.secondary)
+                    Button("coach_panel_accept") { Task { await model.answer(link.id, accept: true) } }.buttonStyle(.pulso())
+                    Button("coach_panel_decline") { Task { await model.answer(link.id, accept: false) } }.buttonStyle(.pulso(.soft, tone: .gray))
                 }
                 if active || (link.status == .pending && link.initiatedBy == .coach) {
                     Button((active ? "coach_panel_leave" : "coach_panel_withdraw") as LocalizedStringKey) {
@@ -166,7 +166,7 @@ struct CoachPanelView: View {
                             label: String(localized: (active ? "coach_panel_leave" : "coach_panel_withdraw") as String.LocalizationValue)
                         ) { Task { await model.leave(link.id) } }
                     }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(.pulso(.soft))
                     .tint(.secondary)
                 }
             }
@@ -332,7 +332,7 @@ private struct CoachProfileForm: View {
             } label: {
                 Text("coach_panel_save").frame(maxWidth: .infinity)
             }
-            .buttonStyle(.glassProminent)
+            .buttonStyle(.pulso())
             .disabled(sports.isEmpty || model.busy)
             .listRowBackground(Color.clear)
         }
@@ -376,8 +376,8 @@ private struct CoachServiceRow: View {
                         .font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer()
-                Button("coach_panel_edit") { editing = true }.buttonStyle(.bordered)
-                Button("coach_panel_archive", action: onArchive).buttonStyle(.bordered).tint(.secondary)
+                Button("coach_panel_edit") { editing = true }.buttonStyle(.pulso(.soft))
+                Button("coach_panel_archive", action: onArchive).buttonStyle(.pulso(.soft, tone: .gray))
             }
             .controlSize(.small)
         }
@@ -422,10 +422,10 @@ private struct CoachServiceForm: View {
                     }
                     onDone()
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.pulso())
                 .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty)
                 if existing != nil {
-                    Button("coach_panel_cancel_edit", action: onDone).buttonStyle(.bordered).tint(.secondary)
+                    Button("coach_panel_cancel_edit", action: onDone).buttonStyle(.pulso(.soft, tone: .gray))
                 }
             }
             .controlSize(.small)
@@ -536,7 +536,7 @@ private struct CoachCreateSessionSheet: View {
             Button { Task { await model.createSessions() } } label: {
                 if model.busy { ProgressView().frame(maxWidth: .infinity) } else { Text("coach_panel_submit").frame(maxWidth: .infinity) }
             }
-            .buttonStyle(.glassProminent)
+            .buttonStyle(.pulso())
             .disabled(model.draft?.venueId == nil || model.draft?.courtId == nil || model.busy)
             .listRowBackground(Color.clear)
         }

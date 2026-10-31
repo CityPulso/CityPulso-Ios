@@ -140,7 +140,7 @@ struct PostEditView: View {
                     } label: {
                         if model.saving { ProgressView() } else { Text("discussion_save") }
                     }
-                    .buttonStyle(.glassProminent)
+                    .buttonStyle(.pulso())
                     .disabled(model.saving || draft.uploading || draft.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }

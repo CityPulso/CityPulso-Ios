@@ -69,7 +69,7 @@ struct LocationPickView: View {
                 } label: {
                     Group { if model.isConfirming { ProgressView() } else { Text(confirmText) } }.frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.glassProminent)
+                .buttonStyle(.pulso())
                 .controlSize(.large)
                 .disabled(model.isConfirming)
             }
@@ -122,7 +122,7 @@ struct LocationPickView: View {
                         model.clearSearch()
                         searchFocused = false
                     }
-                    .buttonStyle(.glass)
+                    .buttonStyle(.pulso(.soft))
                 }
             }
             if model.isSearching || model.searchSucceeded || !model.hits.isEmpty || model.searchError != nil {

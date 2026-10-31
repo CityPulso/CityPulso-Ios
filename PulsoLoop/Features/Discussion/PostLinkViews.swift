@@ -132,7 +132,7 @@ struct LinkTargetCard: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 if info != nil {
-                    Button("discussion_card_view_venue", action: onOpen).buttonStyle(.bordered).controlSize(.small)
+                    Button("discussion_card_view_venue", action: onOpen).buttonStyle(.pulso(.soft)).controlSize(.small)
                 }
             }
             .padding(.horizontal, 12)
@@ -148,7 +148,7 @@ struct LinkTargetCard: View {
                     HStack {
                         if let spots { LinkFact(symbol: "person.2", text: spots) }
                         Spacer(minLength: 4)
-                        if info != nil { Button("discussion_card_join_event", action: onOpen).buttonStyle(.borderedProminent).controlSize(.small) }
+                        if info != nil { Button("discussion_card_join_event", action: onOpen).buttonStyle(.pulso()).controlSize(.small) }
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -180,7 +180,7 @@ struct LinkTargetCard: View {
                     }
                     if link.type == .event, info != nil {
                         Button(action: onOpen) { Text("discussion_card_view_event").frame(maxWidth: .infinity) }
-                            .buttonStyle(.borderedProminent)
+                            .buttonStyle(.pulso())
                             .padding(.top, 4)
                     }
                 }
@@ -271,10 +271,10 @@ struct PostFactsBox: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             if event == nil {
                 Button(action: onInterested) { Label("discussion_card_interested", systemImage: "person") }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(.pulso(.soft))
                     .controlSize(.small)
             } else if info != nil {
-                Button("discussion_card_join_event", action: onJoin).buttonStyle(.borderedProminent).controlSize(.small)
+                Button("discussion_card_join_event", action: onJoin).buttonStyle(.pulso()).controlSize(.small)
             }
         }
         .padding(12)

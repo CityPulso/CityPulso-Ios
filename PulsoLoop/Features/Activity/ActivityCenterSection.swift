@@ -10,6 +10,7 @@ struct ActivityCenterSection: View {
     @Bindable var model: ActivityCenterModel
     @State private var filterOpen = false
     @Environment(PulsoShellNavigator.self) private var shell: PulsoShellNavigator?
+    @Environment(\.pulsoPalette) private var palette
 
     var body: some View {
         Section {
@@ -23,48 +24,38 @@ struct ActivityCenterSection: View {
         }
     }
 
+    /** 一级运动标签，二级「我发起的 | 我参加的 | 我的订场」，行尾筛选（灰色方钮，有条件时右上角数字）。 */
     private var header: some View {
-        VStack(spacing: 8) {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(LoopSport.allCases) { sport in
-                        let selected = sport == model.sport
-                        Button {
-                            model.sport = sport
-                        } label: {
-                            HStack(spacing: 4) {
-                                Image(sport.iconAsset).resizable().frame(width: 18, height: 18)
-                                Text(sport.labelKey)
-                            }
-                            .font(.subheadline.weight(selected ? .semibold : .regular))
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .foregroundStyle(selected ? AnyShapeStyle(.tint) : AnyShapeStyle(.secondary))
-                            .background(selected ? AnyShapeStyle(.tint.opacity(0.15)) : AnyShapeStyle(.clear), in: .capsule)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-                .padding(.horizontal)
-            }
+        VStack(spacing: 0) {
+            PulsoUnderlineTabRow(LoopSport.allCases, selection: $model.sport, image: { Image($0.iconAsset) }) { Text($0.labelKey) }
             if model.sport.available {
-                HStack {
-                    Picker("activity_filter_title", selection: $model.tab) {
-                        ForEach(model.tabs, id: \.self) { Text($0.labelKey).tag($0) }
-                    }
-                    .pickerStyle(.segmented)
+                PulsoHighlightTabRow(model.tabs, selection: $model.tab, label: { Text($0.labelKey) }) {
                     Button { filterOpen = true } label: {
-                        Image(systemName: "line.3.horizontal.decrease")
+                        Image(systemName: "slider.horizontal.3")
+                            .font(.body)
+                            .foregroundStyle(palette.gray.step(12))
+                            .frame(width: PulsoControlSize.compact.height, height: PulsoControlSize.compact.height)
+                            .background(palette.gray.step(3), in: palette.controlShape)
+                            .overlay(alignment: .topTrailing) {
+                                let count = model.filter.activeCount(model.tab)
+                                if count > 0 {
+                                    Text(verbatim: "\(count)")
+                                        .font(.caption2.bold())
+                                        .foregroundStyle(.white)
+                                        .padding(.horizontal, PulsoSpace.s1)
+                                        .background(palette.error, in: Capsule())
+                                        .offset(x: 4, y: -4)
+                                }
+                            }
                     }
-                    .buttonStyle(.bordered)
-                    .badge(model.filter.activeCount(model.tab))
+                    .buttonStyle(.plain)
                     .accessibilityLabel(Text("activity_filter_title"))
                 }
-                .padding(.horizontal)
+                .padding(.vertical, PulsoSpace.s1)
+                .padding(.trailing, PulsoSpace.s2)
             }
         }
-        .padding(.vertical, 8)
-        .background(.bar)
+        .background(palette.background)
     }
 
     @ViewBuilder
@@ -83,7 +74,7 @@ struct ActivityCenterSection: View {
     @ViewBuilder
     private var contentBody: some View {
         if !model.sport.available {
-            PulsoComingSoonView(title: model.sport.labelKey, systemImage: "hourglass")
+            PulsoEmptyState(Text(model.sport.labelKey), description: Text("coming_soon_subtitle"), style: .comingSoon)
                 .frame(minHeight: 320)
         } else if model.isLoadingList {
             ProgressView().frame(maxWidth: .infinity, minHeight: 200)
@@ -128,32 +119,28 @@ struct ActivityCenterSection: View {
     private var empty: some View {
         switch model.tab {
         case .hosted:
-            ContentUnavailableView {
-                Label("profile_activity_empty", systemImage: "calendar")
-            } description: {
-                Text("profile_activity_hosted_empty_hint")
-            } actions: {
-                Button("shell_empty_action_create") { shell?.open(.create) }.buttonStyle(.borderedProminent)
+            PulsoEmptyState(Text("profile_activity_empty"), description: Text("profile_activity_hosted_empty_hint"), style: .calendar) {
+                Button("shell_empty_action_create") { shell?.open(.create) }.buttonStyle(.pulso())
             }
         case .joined:
             let waitlist = model.filter.joined == .waitlisted
-            ContentUnavailableView {
-                Label(waitlist ? "shell_home_queues_empty" : "profile_activity_empty", systemImage: "calendar")
-            } description: {
-                Text(waitlist ? "shell_home_queues_empty_hint" : "profile_activity_joined_empty_hint")
-            } actions: {
-                Button("shell_empty_action_join") { shell?.open(.explore) }.buttonStyle(.borderedProminent)
+            PulsoEmptyState(
+                Text(waitlist ? "shell_home_queues_empty" : "profile_activity_empty"),
+                description: Text(waitlist ? "shell_home_queues_empty_hint" : "profile_activity_joined_empty_hint"),
+                style: .calendar
+            ) {
+                Button("shell_empty_action_join") { shell?.open(.explore) }.buttonStyle(.pulso())
                 if model.isPulser, !waitlist {
-                    Button("shell_empty_action_create") { shell?.open(.create) }
+                    Button("shell_empty_action_create") { shell?.open(.create) }.buttonStyle(.pulso(.outline, tone: .gray))
                 }
             }
         case .courtBookings:
-            ContentUnavailableView {
-                Label(model.filter.bookings == .past ? "court_bookings_empty_past" : "court_bookings_empty_upcoming", systemImage: "sportscourt")
-            } description: {
-                Text("court_bookings_empty_body")
-            } actions: {
-                Button("court_bookings_browse") { shell?.open(.explore) }.buttonStyle(.borderedProminent)
+            PulsoEmptyState(
+                Text(model.filter.bookings == .past ? "court_bookings_empty_past" : "court_bookings_empty_upcoming"),
+                description: Text("court_bookings_empty_body"),
+                style: .calendar
+            ) {
+                Button("court_bookings_browse") { shell?.open(.explore) }.buttonStyle(.pulso())
             }
         }
     }

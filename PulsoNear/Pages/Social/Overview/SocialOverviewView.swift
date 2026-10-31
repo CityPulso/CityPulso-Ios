@@ -100,7 +100,7 @@ struct SocialOverviewView: View {
                 Text(emptyHint(model.tab))
             } actions: {
                 if model.tab == .friends {
-                    NavigationLink("shell_social_add_friend_title", value: NearRoute.addFriend).buttonStyle(.glassProminent)
+                    NavigationLink("shell_social_add_friend_title", value: NearRoute.addFriend).buttonStyle(.pulso())
                 }
             }
             .listRowBackground(Color.clear)

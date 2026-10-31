@@ -108,6 +108,12 @@ jobs:
           ' "${{ matrix.device }}")
           echo "SIMULATOR_UDID=$UDID" >> "$GITHUB_ENV"
           xcrun simctl list devices | grep "$UDID"
+          # 附近的活动 / 球馆要定位：开机、给两个 App 定位权限、放在温哥华（dev 数据在那边）。
+          xcrun simctl boot "$UDID"
+          for app in com.citypulso.pulsoloop com.citypulso.pulsonear; do
+            xcrun simctl privacy "$UDID" grant location-always "$app"
+          done
+          xcrun simctl location "$UDID" set 49.2827,-123.1207
       - name: Run screenshot tests
         env:
           SCREENSHOT_EMAIL: ${{ secrets.SCREENSHOT_EMAIL }}

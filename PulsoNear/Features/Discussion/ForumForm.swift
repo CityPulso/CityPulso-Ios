@@ -142,7 +142,7 @@ struct ForumPicturesEditor: View {
                     PhotosPicker(selection: $avatarItem, matching: .images) {
                         Text((pictures.avatar == nil ? "discussion_forum_avatar_pick" : "discussion_forum_avatar_change") as LocalizedStringKey)
                     }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(.pulso(.soft))
                     .disabled(!enabled)
                     Text("discussion_forum_avatar_hint").font(.caption).foregroundStyle(.secondary)
                 }

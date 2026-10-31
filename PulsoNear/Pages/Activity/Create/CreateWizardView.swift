@@ -61,7 +61,7 @@ struct CreateWizardView: View {
             HStack(spacing: 12) {
                 if !isFirst {
                     Button { model.previousStep() } label: { Text("create_flow_previous").frame(maxWidth: .infinity) }
-                        .buttonStyle(.bordered)
+                        .buttonStyle(.pulso(.soft))
                         .tint(.secondary)
                         .disabled(model.isSubmitting)
                 }
@@ -79,7 +79,7 @@ struct CreateWizardView: View {
                     }
                     .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.glassProminent)
+                .buttonStyle(.pulso())
                 .layoutPriority(1)
                 .disabled(model.isSubmitting)
             }

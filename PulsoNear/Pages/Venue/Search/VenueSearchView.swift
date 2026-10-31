@@ -8,68 +8,68 @@ struct VenueSearchView: View {
     @State private var search = ""
     @State private var filtersOpen = false
     @Environment(PulsoShellNavigator.self) private var shell: PulsoShellNavigator?
+    @Environment(\.pulsoPalette) private var palette
 
     var body: some View {
-        TabView(selection: Binding(get: { model.page }, set: { model.selectPage($0) })) {
-            ForEach(VenueSearchModel.tabs.indices, id: \.self) { index in
-                page(index).tag(index)
-            }
-        }
-        .tabViewStyle(.page(indexDisplayMode: .never))
-        .safeAreaInset(edge: .top, spacing: 0) { tabs }
-        .navigationTitle("shell_dest_venue_search")
-        .navigationBarTitleDisplayMode(.inline)
-        .searchable(text: $search, prompt: Text("shell_venue_search_hint"))
-        .onChange(of: search) { _, value in model.onSearchChange(value) }
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                NavigationLink(value: NearRoute.locationPick) {
-                    Label { Text(verbatim: model.searches[model.page].location?.label ?? "") } icon: { Image(systemName: "location.fill") }
-                        .labelStyle(.titleAndIcon)
-                        .lineLimit(1)
+        VStack(spacing: 0) {
+            header
+            TabView(selection: Binding(get: { model.page }, set: { model.selectPage($0) })) {
+                ForEach(VenueSearchModel.tabs.indices, id: \.self) { index in
+                    page(index).tag(index)
                 }
             }
-            ToolbarItem(placement: .topBarTrailing) {
-                Button { filtersOpen = true } label: { Label("nearby_filter_venue_title", systemImage: "line.3.horizontal.decrease") }
-                    .badge(model.filters.activeCount)
-            }
+            .tabViewStyle(.page(indexDisplayMode: .never))
         }
+        .navigationTitle("shell_dest_venue_search")
+        // 底栏根页：没有顶栏（Android 同样只有状态栏底色 + 自己的搜索行）。
+        .toolbarVisibility(.hidden, for: .navigationBar)
+        .onChange(of: search) { _, value in model.onSearchChange(value) }
         .sheet(isPresented: $filtersOpen) {
             VenueFilterSheet(filters: model.filters) { model.store($0) }
         }
         .task { await model.observe() }
     }
 
-    private var tabs: some View {
-        ScrollViewReader { proxy in
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(VenueSearchModel.tabs.indices, id: \.self) { index in
-                        let activityType = VenueSearchModel.tabs[index]
-                        let selected = index == model.page
-                        Button {
-                            withAnimation { model.selectPage(index) }
-                        } label: {
-                            HStack(spacing: 4) {
-                                if let activityType { Image(activityType.iconAsset).resizable().frame(width: 18, height: 18) }
-                                if let activityType { Text(activityType.labelKey) } else { Text("nearby_filter_all_activity_types") }
+    /** 位置 / 搜索双槽 + 筛选方钮，下面活动类型标签（全部 + 各类型），跟着翻页。 */
+    private var header: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: PulsoSpace.s2) {
+                PulsoAddressSearchBar(
+                    locationLabel: model.searches[model.page].location?.label,
+                    unknownLocation: Text("shell_calendar_location_unknown"),
+                    search: $search,
+                    searchHint: Text("shell_venue_search_hint")
+                ) { shell?.push(NearRoute.locationPick) }
+                Button { filtersOpen = true } label: {
+                    Image(systemName: "slider.horizontal.3")
+                        .foregroundStyle(palette.gray.step(12))
+                        .frame(width: PulsoControlSize.compact.height, height: PulsoControlSize.compact.height)
+                        .background(palette.gray.step(3), in: palette.controlShape)
+                        .overlay(alignment: .topTrailing) {
+                            if model.filters.activeCount > 0 {
+                                Text(verbatim: "\(model.filters.activeCount)")
+                                    .font(.caption2.bold())
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, PulsoSpace.s1)
+                                    .background(palette.error, in: Capsule())
+                                    .offset(x: 4, y: -4)
                             }
-                            .font(.subheadline.weight(selected ? .semibold : .regular))
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
                         }
-                        .buttonStyle(.plain)
-                        .foregroundStyle(selected ? AnyShapeStyle(.tint) : AnyShapeStyle(.secondary))
-                        .background(selected ? AnyShapeStyle(.tint.opacity(0.15)) : AnyShapeStyle(.clear), in: .capsule)
-                        .id(index)
-                    }
                 }
-                .padding(.horizontal)
-                .padding(.vertical, 6)
+                .buttonStyle(.plain)
+                .accessibilityLabel(Text("nearby_filter_venue_title"))
             }
-            .onChange(of: model.page) { _, page in withAnimation { proxy.scrollTo(page, anchor: .center) } }
+            .padding(.horizontal, PulsoSpace.s4)
+            .padding(.vertical, PulsoSpace.s2)
+            PulsoUnderlineTabRow(
+                Array(VenueSearchModel.tabs.indices),
+                selection: Binding(get: { model.page }, set: { page in withAnimation { model.selectPage(page) } }),
+                image: { VenueSearchModel.tabs[$0].map { Image($0.iconAsset) } }
+            ) { index in
+                if let activityType = VenueSearchModel.tabs[index] { Text(activityType.labelKey) } else { Text("nearby_filter_all_activity_types") }
+            }
         }
-        .background(.bar)
+        .background(palette.background)
     }
 
     @ViewBuilder
@@ -77,34 +77,40 @@ struct VenueSearchView: View {
         let activityType = VenueSearchModel.tabs[index]
         let search = model.searches[index]
         if !VenueSearchModel.venuesAvailable(activityType), let activityType {
-            PulsoComingSoonView(title: activityType.labelKey, systemImage: "hourglass")
+            PulsoEmptyState(Text(activityType.labelKey), description: Text("coming_soon_subtitle"), style: .comingSoon)
         } else if let items = search.results.data, !items.isEmpty {
-            List {
-                ForEach(items, id: \.id) { pin in
-                    NavigationLink(value: NearRoute.venue(venueId: pin.id)) {
-                        NearbyVenueCard(
-                            pin: pin,
-                            imageURL: model.imageURL(pin.coverImageId),
-                            favorited: model.favoriteIds.map { $0.contains(pin.id) }
-                        ) {
-                            Task { await model.toggleFavorite(pin.id) }
+            ScrollView {
+                LazyVStack(spacing: PulsoSpace.s2) {
+                    ForEach(items, id: \.id) { pin in
+                        NavigationLink(value: NearRoute.venue(venueId: pin.id)) {
+                            PulsoCard {
+                                NearbyVenueCard(
+                                    pin: pin,
+                                    imageURL: model.imageURL(pin.coverImageId),
+                                    favorited: model.favoriteIds.map { $0.contains(pin.id) }
+                                ) {
+                                    Task { await model.toggleFavorite(pin.id) }
+                                }
+                                .padding(PulsoSpace.s3)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                        .contextMenu {
+                            Button("search_show_on_map_cd", systemImage: "map") {
+                                if model.focusOnMap(pin) { shell?.open(.explore) }
+                            }
+                        }
+                        .onAppear {
+                            if pin.id == items.last?.id { search.loadNextPage() }
                         }
                     }
-                    .swipeActions(edge: .trailing) {
-                        Button("search_show_on_map_cd", systemImage: "map") {
-                            if model.focusOnMap(pin) { shell?.open(.explore) }
-                        }
-                        .tint(.accentColor)
-                    }
-                    .onAppear {
-                        if pin.id == items.last?.id { search.loadNextPage() }
+                    if search.isLoadingMore {
+                        ProgressView().frame(maxWidth: .infinity)
                     }
                 }
-                if search.isLoadingMore {
-                    ProgressView().frame(maxWidth: .infinity)
-                }
+                .padding(.horizontal, PulsoSpace.s4)
+                .padding(.vertical, PulsoSpace.s2)
             }
-            .listStyle(.plain)
             .refreshable { await model.refresh(index) }
             .task(id: items.map(\.id)) { await model.refreshFavorites() }
         } else if search.results.isLoading {
@@ -112,13 +118,9 @@ struct VenueSearchView: View {
         } else if let error = search.results.error {
             PulsoLoadErrorView(error) { Task { await model.refresh(index) } }
         } else {
-            ContentUnavailableView {
-                Label("shell_venue_search_empty", systemImage: "building.2")
-            } description: {
-                Text("shell_venue_search_empty_hint")
-            } actions: {
+            PulsoEmptyState(Text("shell_venue_search_empty"), description: Text("shell_venue_search_empty_hint")) {
                 Button("venue_detail_back_to_explore") { shell?.open(.explore) }
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(.pulso())
             }
         }
     }
@@ -135,21 +137,22 @@ struct NearbyVenueCard: View {
     let onToggleFavorite: () -> Void
 
     @Environment(\.locale) private var locale
+    @Environment(\.pulsoPalette) private var palette
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             ActivityTypeCover(url: imageURL, activityType: pin.activityTypes.first?.kind ?? .boardGame)
                 .frame(width: 96, height: 96)
-                .clipShape(.rect(cornerRadius: 14))
+                .clipShape(palette.innerShape)
             VStack(alignment: .leading, spacing: 4) {
                 HStack(alignment: .top) {
-                    Text(verbatim: pin.displayName).font(.headline).lineLimit(2)
+                    Text(verbatim: pin.displayName).font(.subheadline.weight(.semibold)).foregroundStyle(palette.text).lineLimit(2)
                     Spacer(minLength: 4)
                     if let favorited {
                         Button(action: onToggleFavorite) {
-                            Image(systemName: favorited ? "heart.fill" : "heart").foregroundStyle(favorited ? Color.accentColor : Color.secondary)
+                            Image(systemName: favorited ? "heart.fill" : "heart").font(.title3).foregroundStyle(favorited ? palette.error : palette.secondaryText)
                         }
-                        .buttonStyle(.borderless)
+                        .buttonStyle(.plain)
                         .accessibilityLabel(Text(verbatim: localizedFormat(favorited ? "favorites_remove_named" : "favorites_add_named", pin.displayName)))
                     }
                 }
@@ -170,7 +173,6 @@ struct NearbyVenueCard: View {
                 }
             }
         }
-        .padding(.vertical, 4)
     }
 
     private var openLine: String {

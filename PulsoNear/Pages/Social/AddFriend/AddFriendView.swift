@@ -225,22 +225,22 @@ struct AddFriendView: View {
         HStack {
             Spacer()
             if relation?.isBlockedByMe == true {
-                Button("shell_social_unblock") { Task { await model.unblock(row) } }.buttonStyle(.glass)
+                Button("shell_social_unblock") { Task { await model.unblock(row) } }.buttonStyle(.pulso(.soft))
             } else {
                 if relation?.isFollowing == true {
-                    Button("shell_social_unfollow") { Task { await model.unfollow(row) } }.buttonStyle(.glass)
+                    Button("shell_social_unfollow") { Task { await model.unfollow(row) } }.buttonStyle(.pulso(.soft))
                 } else {
-                    Button("shell_social_follow") { Task { await model.follow(row) } }.buttonStyle(.glass)
+                    Button("shell_social_follow") { Task { await model.follow(row) } }.buttonStyle(.pulso(.soft))
                 }
                 if relation?.isFriend == true {
-                    Button("shell_social_friends_tag") {}.buttonStyle(.glass).disabled(true)
+                    Button("shell_social_friends_tag") {}.buttonStyle(.pulso(.soft)).disabled(true)
                 } else if relation?.pendingFriendRequest?.direction == .incoming {
-                    Button("shell_social_accept") { Task { await model.accept(row) } }.buttonStyle(.glassProminent)
-                    Button("shell_social_reject") { Task { await model.reject(row) } }.buttonStyle(.glass)
+                    Button("shell_social_accept") { Task { await model.accept(row) } }.buttonStyle(.pulso())
+                    Button("shell_social_reject") { Task { await model.reject(row) } }.buttonStyle(.pulso(.soft))
                 } else if relation?.pendingFriendRequest?.direction == .outgoing {
-                    Button("shell_social_cancel_request") { Task { await model.cancelRequest(row) } }.buttonStyle(.glass)
+                    Button("shell_social_cancel_request") { Task { await model.cancelRequest(row) } }.buttonStyle(.pulso(.soft))
                 } else {
-                    Button("shell_social_add_friend") { Task { await model.sendFriendRequest(row) } }.buttonStyle(.glassProminent)
+                    Button("shell_social_add_friend") { Task { await model.sendFriendRequest(row) } }.buttonStyle(.pulso())
                 }
             }
             if busy { ProgressView() }

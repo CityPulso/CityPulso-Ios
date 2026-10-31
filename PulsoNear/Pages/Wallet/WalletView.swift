@@ -32,6 +32,7 @@ final class WalletModel {
 struct WalletView: View {
     @State private var model: WalletModel
     @Environment(\.locale) private var locale
+    @Environment(\.pulsoPalette) private var palette
     @Environment(PulsoShellNavigator.self) private var shell: PulsoShellNavigator?
 
     init() {
@@ -39,16 +40,20 @@ struct WalletView: View {
     }
 
     var body: some View {
-        List {
-            Section {
-                HStack(spacing: 10) {
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: PulsoSpace.s2) {
+                HStack(spacing: PulsoSpace.s2) {
                     entry("creditcard", "wallet_payment_methods", "wallet_payment_methods_hint", .paymentMethods)
                     entry("building.columns", "wallet_payment_accounts", "wallet_payment_accounts_hint", .paymentAccounts)
                 }
-                .listRowInsets(EdgeInsets())
-                .listRowBackground(Color.clear)
+                .padding(.horizontal, PulsoSpace.s4)
+                .padding(.top, PulsoSpace.s4)
+                .padding(.bottom, PulsoSpace.s3)
+
+                // Near 没有时长包：钱包里只有会员卡（卡片 | 待确认）。
+                memberships
             }
-            membershipsSection
+            .padding(.bottom, PulsoSpace.s4)
         }
         .navigationTitle("shell_dest_wallet")
         .refreshable {
@@ -58,107 +63,105 @@ struct WalletView: View {
         .task { await model.waiting.observe() }
     }
 
-    /** 卡片本身就是入口，用按钮推页面，列表不会再在外面加一个箭头。 */
+    /** 入口卡片：强调色图标、标题、一行说明，细边框（Android 钱包顶部两格）。 */
     private func entry(_ systemImage: String, _ title: LocalizedStringKey, _ hint: LocalizedStringKey, _ route: NearRoute) -> some View {
         Button { shell?.push(route) } label: {
-            VStack(alignment: .leading, spacing: 4) {
-                Image(systemName: systemImage).font(.title3).foregroundStyle(Color.accentColor)
-                Text(title).font(.subheadline.weight(.semibold)).foregroundStyle(Color.primary).lineLimit(1)
-                Text(hint).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+            VStack(alignment: .leading, spacing: PulsoSpace.s1) {
+                Image(systemName: systemImage).font(.title3).foregroundStyle(palette.accent.step(9))
+                Text(title).font(.subheadline.weight(.semibold)).foregroundStyle(palette.text).lineLimit(1)
+                Text(hint).font(.caption).foregroundStyle(palette.secondaryText).lineLimit(1)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(14)
-            .background(Color(.secondarySystemGroupedBackground), in: .rect(cornerRadius: 16))
+            .padding(PulsoSpace.s4)
+            .background(palette.panel, in: palette.cardShape)
+            .overlay { palette.cardShape.strokeBorder(palette.outlineVariant, lineWidth: pulsoHairline) }
         }
         .buttonStyle(.plain)
     }
 
+    /** 二级标签下面的一行说明。 */
+    private func subtitle(_ key: LocalizedStringKey) -> some View {
+        Text(key)
+            .font(.caption)
+            .foregroundStyle(palette.secondaryText)
+            .padding(.horizontal, PulsoSpace.s4)
+            .padding(.vertical, PulsoSpace.s2)
+    }
+
+    /** 加载 / 出错 / 空 / 一列条目（滑到底取下一页）。 */
     @ViewBuilder
-    private var membershipsSection: some View {
-        Section {
-            Picker(selection: $model.membershipsTab) {
-                Text("my_memberships_tab_cards").tag(MyMembershipsTab.cards)
-                Text("my_memberships_tab_pending").tag(MyMembershipsTab.pending)
-            } label: {
-                EmptyView()
+    private func paged<Item: Sendable, ID: Hashable, Empty: View, Row: View>(
+        _ list: PagedList<Item, Int>,
+        id: KeyPath<Item, ID>,
+        @ViewBuilder empty: () -> Empty,
+        @ViewBuilder row: @escaping (Item) -> Row
+    ) -> some View {
+        if list.isLoading {
+            ProgressView().frame(maxWidth: .infinity).padding(.top, PulsoSpace.s8)
+        } else if let error = list.error {
+            PulsoLoadErrorView(error) { Task { await list.refresh() } }
+        } else if list.isEmpty {
+            empty().frame(minHeight: 360)
+        } else {
+            ForEach(list.items, id: id) { item in
+                row(item)
+                    .padding(.horizontal, PulsoSpace.s4)
+                    .onAppear { if item[keyPath: id] == list.items.last?[keyPath: id] { list.loadMore() } }
             }
-            .pickerStyle(.segmented)
-        } footer: {
-            Text("my_memberships_subtitle")
         }
+    }
+
+    @ViewBuilder
+    private var memberships: some View {
+        PulsoHighlightTabRow([MyMembershipsTab.cards, .pending], selection: $model.membershipsTab) { tab in
+            Text(tab == .cards ? "my_memberships_tab_cards" : "my_memberships_tab_pending")
+        }
+        subtitle("my_memberships_subtitle")
         if model.membershipsTab == .cards {
-            let list = model.memberships
-            if list.isLoading {
-                ProgressView().frame(maxWidth: .infinity).listRowBackground(Color.clear)
-            } else if let error = list.error {
-                PulsoLoadErrorView(error) { Task { await list.refresh() } }.listRowBackground(Color.clear)
-            } else if list.isEmpty {
-                ContentUnavailableView {
-                    Label("my_memberships_empty_title", systemImage: "person.text.rectangle")
-                } description: {
-                    Text("my_memberships_empty_body")
-                } actions: {
-                    Button("my_memberships_empty_cta") { shell?.open(.explore) }.buttonStyle(.borderedProminent)
+            paged(model.memberships, id: \.id) {
+                PulsoEmptyState(Text("my_memberships_empty_title"), description: Text("my_memberships_empty_body")) {
+                    Button("my_memberships_empty_cta") { shell?.open(.explore) }.buttonStyle(.pulso())
                 }
-                .listRowBackground(Color.clear)
-            } else {
-                ForEach(list.items, id: \.id) { membership in
-                    NavigationLink(value: NearRoute.myMembership(membershipId: membership.id)) {
-                        MembershipLevelCard(
-                            name: membership.venueName,
-                            icon: membership.levelIcon,
-                            color: membership.levelColor,
-                            discountPercent: membership.discountPercent,
-                            tag: String(localized: membership.status.labelResource),
-                            subtitle: membership.venueAddress,
-                            footer: "\(membership.levelName) · \(formatMoney(membership.termPriceAmount, currency: membership.venueCurrency, locale: locale))",
-                            portraitURL: model.coverURL(membership.venueCoverImageId),
-                            portraitFallback: String(membership.venueName.prefix(1))
-                        )
-                    }
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                    .onAppear { if membership.id == list.items.last?.id { list.loadMore() } }
+            } row: { membership in
+                NavigationLink(value: NearRoute.myMembership(membershipId: membership.id)) {
+                    MembershipLevelCard(
+                        name: membership.venueName,
+                        icon: membership.levelIcon,
+                        color: membership.levelColor,
+                        discountPercent: membership.discountPercent,
+                        tag: String(localized: membership.status.labelResource),
+                        subtitle: membership.venueAddress,
+                        footer: "\(membership.levelName) · \(formatMoney(membership.termPriceAmount, currency: membership.venueCurrency, locale: locale))",
+                        portraitURL: model.coverURL(membership.venueCoverImageId),
+                        portraitFallback: String(membership.venueName.prefix(1))
+                    )
                 }
+                .buttonStyle(.plain)
             }
         } else {
-            let list = model.waiting
-            if list.isLoading {
-                ProgressView().frame(maxWidth: .infinity).listRowBackground(Color.clear)
-            } else if let error = list.error {
-                PulsoLoadErrorView(error) { Task { await list.refresh() } }.listRowBackground(Color.clear)
-            } else if list.isEmpty {
-                ContentUnavailableView {
-                    Label("my_memberships_pending_empty", systemImage: "hourglass")
-                } description: {
-                    Text("my_memberships_pending_hint")
+            paged(model.waiting, id: \.id) {
+                PulsoEmptyState(Text("my_memberships_pending_empty"), description: Text("my_memberships_pending_hint"))
+            } row: { order in
+                NavigationLink(value: NearRoute.myMembershipPurchase(purchaseId: order.id)) {
+                    MembershipLevelCard(
+                        name: order.venueName,
+                        icon: order.levelIcon,
+                        color: order.levelColor,
+                        discountPercent: order.discountPercent,
+                        tag: String(localized: "my_memberships_pending_badge"),
+                        subtitle: order.venueAddress,
+                        footer: [
+                            String(localized: order.kind.pendingLabelResource),
+                            order.levelName,
+                            formatMoney(order.chargedAmount, currency: order.currency, locale: locale),
+                            order.endsAt.map { VenueTime.date($0, timezone: TimeZone.current.identifier, locale: locale) } ?? String(localized: "membership_lifetime"),
+                        ].joined(separator: " · "),
+                        portraitURL: model.coverURL(order.venueCoverImageId),
+                        portraitFallback: String(order.venueName.prefix(1)),
+                        muted: true
+                    )
                 }
-                .listRowBackground(Color.clear)
-            } else {
-                ForEach(list.items, id: \.id) { order in
-                    NavigationLink(value: NearRoute.myMembershipPurchase(purchaseId: order.id)) {
-                        MembershipLevelCard(
-                            name: order.venueName,
-                            icon: order.levelIcon,
-                            color: order.levelColor,
-                            discountPercent: order.discountPercent,
-                            tag: String(localized: "my_memberships_pending_badge"),
-                            subtitle: order.venueAddress,
-                            footer: [
-                                String(localized: order.kind.pendingLabelResource),
-                                order.levelName,
-                                formatMoney(order.chargedAmount, currency: order.currency, locale: locale),
-                                order.endsAt.map { VenueTime.date($0, timezone: TimeZone.current.identifier, locale: locale) } ?? String(localized: "membership_lifetime"),
-                            ].joined(separator: " · "),
-                            portraitURL: model.coverURL(order.venueCoverImageId),
-                            portraitFallback: String(order.venueName.prefix(1)),
-                            muted: true
-                        )
-                    }
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                    .onAppear { if order.id == list.items.last?.id { list.loadMore() } }
-                }
+                .buttonStyle(.plain)
             }
         }
     }

@@ -54,22 +54,22 @@ struct ActivityDetailBottomBar: View {
         } else if model.isHost {
             HStack(spacing: 8) {
                 if model.canOpenChecklist {
-                    Button("activity_detail_open_checklist", action: onOpenChecklist).buttonStyle(.bordered).disabled(busy)
+                    Button("activity_detail_open_checklist", action: onOpenChecklist).buttonStyle(.pulso(.soft)).disabled(busy)
                 }
                 if !activity.isEnded {
-                    Button("activity_detail_end_activity", action: onEnd).buttonStyle(.bordered).tint(.secondary).disabled(busy)
+                    Button("activity_detail_end_activity", action: onEnd).buttonStyle(.pulso(.soft, tone: .gray)).disabled(busy)
                 }
             }
         } else if model.canRejoin {
             primary("activity_detail_cancel_exit", busy: busy) { Task { await model.rejoin() } }.disabled(busy || !model.isPulser)
         } else if model.hasRegistration {
-            Button("activity_detail_view_registration") { model.sheet = .myRegistration }.buttonStyle(.bordered).disabled(busy)
+            Button("activity_detail_view_registration") { model.sheet = .myRegistration }.buttonStyle(.pulso(.soft)).disabled(busy)
         } else if model.canJoinDirectly {
             primary("activity_detail_join", busy: busy) { model.sheet = .join }.disabled(busy || !model.isPulser)
         } else if model.canJoinWaitlist {
             primary("activity_detail_join_waitlist", busy: busy) { model.sheet = .waitlist }.disabled(busy || !model.isPulser)
         } else {
-            Button {} label: { Text(model.openStatus.labelKey) }.buttonStyle(.bordered).disabled(true)
+            Button {} label: { Text(model.openStatus.labelKey) }.buttonStyle(.pulso(.soft)).disabled(true)
         }
     }
 
@@ -77,7 +77,7 @@ struct ActivityDetailBottomBar: View {
         Button(action: action) {
             if busy { ProgressView() } else { Text(title) }
         }
-        .buttonStyle(.glassProminent)
+        .buttonStyle(.pulso())
     }
 }
 
@@ -104,18 +104,18 @@ struct MyStatusCard: View {
             }
             HStack(spacing: 8) {
                 Button { model.sheet = .myRegistration } label: { Text("activity_detail_view_registration").frame(maxWidth: .infinity) }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(.pulso(.soft))
                 if model.isHost {
                     HostCannotExitButton()
                 } else if model.canRejoin {
                     Button { Task { await model.rejoin() } } label: {
                         Group { if model.isActionInProgress { ProgressView() } else { Text("activity_detail_cancel_exit") } }.frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(.pulso())
                     .disabled(model.isActionInProgress)
                 } else if model.canExit {
                     Button { model.sheet = .exit } label: { Text("activity_detail_cancel_registration").frame(maxWidth: .infinity) }
-                        .buttonStyle(.bordered)
+                        .buttonStyle(.pulso(.soft))
                         .tint(.secondary)
                         .disabled(model.isActionInProgress)
                 }
@@ -146,7 +146,7 @@ struct HostCannotExitButton: View {
         Button {} label: {
             Label("activity_detail_host_cannot_exit", systemImage: "lock").frame(maxWidth: .infinity)
         }
-        .buttonStyle(.bordered)
+        .buttonStyle(.pulso(.soft))
         .disabled(true)
     }
 }
@@ -175,7 +175,7 @@ struct MyRegistrationPaymentCard: View {
                         Button { Task { await model.openPayment() } } label: {
                             if model.isPaymentLoading { ProgressView() } else { Label("activity_detail_my_payment_pay_now", systemImage: "creditcard") }
                         }
-                        .buttonStyle(.borderedProminent)
+                        .buttonStyle(.pulso())
                         .disabled(model.isPaymentLoading || left == 0)
                     }
                 }

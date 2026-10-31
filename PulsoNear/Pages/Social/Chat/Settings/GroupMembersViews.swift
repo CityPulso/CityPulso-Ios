@@ -133,7 +133,7 @@ struct GroupMembersView: View {
                             }
                             if !row.isSelf {
                                 Button("chat_settings_remove") { removing = row }
-                                    .buttonStyle(.glass)
+                                    .buttonStyle(.pulso(.soft))
                                     .disabled(model.removingProfileId != nil)
                             }
                         }
