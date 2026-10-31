@@ -55,14 +55,9 @@ struct ForumManageView: View {
     private func content(_ forum: ForumDetail) -> some View {
         List {
             Section {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    Picker("discussion_manage_title", selection: $model.tab) {
-                        ForEach(ForumManageTab.allCases, id: \.self) { Text($0.labelKey).tag($0) }
-                    }
-                    .pickerStyle(.segmented)
-                }
-                .listRowBackground(Color.clear)
-                .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+                PulsoUnderlineTabRow(ForumManageTab.allCases, selection: $model.tab) { Text($0.labelKey) }
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets())
             }
             switch model.tab {
             case .settings: settings(forum)
@@ -266,11 +261,9 @@ struct ForumManageView: View {
     @ViewBuilder
     private var reportsTab: some View {
         Section {
-            Picker("discussion_manage_tab_reports", selection: $model.reportStatus) {
-                ForEach(ForumReportStatus.allCases, id: \.self) { Text($0.labelKey).tag($0) }
-            }
-            .pickerStyle(.segmented)
-            .listRowBackground(Color.clear)
+            PulsoHighlightTabRow(ForumReportStatus.allCases, selection: $model.reportStatus) { Text($0.labelKey) }
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
         }
         Section {
             pagedRows(model.reports, empty: "discussion_reports_empty") { report in

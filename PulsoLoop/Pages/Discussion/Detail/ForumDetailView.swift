@@ -185,15 +185,10 @@ struct ForumDetailView: View {
         List {
             header(forum)
             Section {
-                Picker(selection: $model.tab) {
-                    ForEach(ForumDetailTab.allCases, id: \.self) { Text($0.labelKey).tag($0) }
-                } label: {
-                    EmptyView()
-                }
-                .pickerStyle(.segmented)
+                PulsoUnderlineTabRow(ForumDetailTab.allCases, selection: $model.tab) { Text($0.labelKey) }
             }
             .listRowBackground(Color.clear)
-            .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
+            .listRowInsets(EdgeInsets())
             switch model.tab {
             case .posts: posts(forum)
             case .about: about(forum)

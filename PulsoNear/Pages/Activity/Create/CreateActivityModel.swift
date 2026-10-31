@@ -21,7 +21,9 @@ final class CreateActivityModel {
     private(set) var step = CreateStep.activityType
     private(set) var formError: CreateFormError?
     private(set) var submitError: String?
-    private(set) var isSubmitting = false
+    /** The publish button's phase: the post prompt comes up after its tick. */
+    let publish = SubmitAction()
+    var isSubmitting: Bool { publish.phase.busy }
     private(set) var nearbyBuildings: [BuildingItem] = []
     private(set) var profileReady = false
     private(set) var isPulser = false
@@ -318,23 +320,21 @@ final class CreateActivityModel {
             }
         }
         guard let latitude = Double(draft.latitude), let longitude = Double(draft.longitude), let service = services[activityType] else { return }
-        isSubmitting = true
         submitError = nil
         formError = nil
-        do {
-            let activityId = try await service.createActivity(draft, buildingId: draft.buildingId, latitude: latitude, longitude: longitude)
-            savedDraft = nil
-            draftStore.clear()
-            draft = CreateDraft()
-            photoData = [:]
-            photoMimeTypes = [:]
-            nearbyBuildings = []
-            step = .activityType
-            isSubmitting = false
-            createdActivity = CreatedActivityPrompt(activityType: activityType, activityId: activityId)
-        } catch {
-            isSubmitting = false
-            submitError = UiError(error).text(fallback: String(localized: "create_flow_error_submit"))
-        }
+        await publish.run({
+            try await service.createActivity(draft, buildingId: draft.buildingId, latitude: latitude, longitude: longitude)
+        }, onFailure: { error in
+            self.submitError = UiError(error).text(fallback: String(localized: "create_flow_error_submit"))
+        }, afterSuccess: { activityId in
+            self.savedDraft = nil
+            self.draftStore.clear()
+            self.draft = CreateDraft()
+            self.photoData = [:]
+            self.photoMimeTypes = [:]
+            self.nearbyBuildings = []
+            self.step = .activityType
+            self.createdActivity = CreatedActivityPrompt(activityType: activityType, activityId: activityId)
+        })
     }
 }

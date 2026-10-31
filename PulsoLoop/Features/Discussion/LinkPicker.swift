@@ -156,12 +156,9 @@ struct LinkPickerSheet: View {
                         .foregroundStyle(model.pasteInvalid ? AnyShapeStyle(.red) : AnyShapeStyle(.secondary))
                 }
                 Section {
-                    Picker("discussion_link_picker_title", selection: $model.tab) {
-                        ForEach(PostLinkType.allCases, id: \.self) { Text($0.labelKey).tag($0) }
-                    }
-                    .pickerStyle(.segmented)
-                    .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets())
+                    PulsoUnderlineTabRow(PostLinkType.allCases, selection: $model.tab) { Text($0.labelKey) }
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets())
                     TextField(searchPlaceholder, text: $model.query)
                         .task(id: model.query) { await model.search(model.query) }
                 }

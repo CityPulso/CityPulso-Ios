@@ -17,6 +17,7 @@ private struct SocialHoldAction: Identifiable {
  * 右上角是消息和「+」（好友请求、找人、黑名单）。
  */
 struct SocialOverviewView: View {
+    @Environment(\.pulsoPalette) private var palette
     @State private var model: SocialOverviewModel
     @State private var holding: SocialHoldAction?
     @Environment(PulsoShellNavigator.self) private var shell: PulsoShellNavigator?
@@ -26,36 +27,26 @@ struct SocialOverviewView: View {
     }
 
     var body: some View {
-        List {
-            Section {
-                Picker(selection: Binding(get: { model.tab }, set: { model.selectTab($0) })) {
-                    ForEach(SocialConnectionsTab.allCases, id: \.self) { Text(tabLabel($0)).tag($0) }
-                } label: {
-                    EmptyView()
-                }
-                .pickerStyle(.segmented)
+        VStack(spacing: 0) {
+            PulsoUnderlineTabRow(SocialConnectionsTab.allCases, selection: Binding(get: { model.tab }, set: { model.selectTab($0) })) { Text(tabLabel($0)) }
+            VStack(spacing: PulsoSpace.s2) {
+                PulsoSearchField(text: $model.query, prompt: Text("shell_social_search_placeholder"))
                 HStack {
                     Text(verbatim: localizedFormat("shell_social_list_total", String(localized: totalLabel(model.tab)), model.counts[model.tab].map(String.init) ?? "—"))
-                        .font(.footnote).foregroundStyle(.secondary)
+                        .font(.footnote).foregroundStyle(palette.secondaryText)
                     Spacer()
-                    Menu {
-                        Picker(selection: $model.sort) {
-                            Text("shell_social_sort_newest").tag(SocialRelationSort.newest)
-                            Text("shell_social_sort_oldest").tag(SocialRelationSort.oldest)
-                        } label: {
-                            EmptyView()
-                        }
-                    } label: {
-                        Label((model.sort == .newest ? "shell_social_sort_newest" : "shell_social_sort_oldest") as LocalizedStringKey, systemImage: "arrow.up.arrow.down")
-                            .font(.footnote)
+                    PulsoMenuSelect([SocialRelationSort.newest, .oldest], selection: $model.sort, size: .small) { sort in
+                        Text(sort == .newest ? "shell_social_sort_newest" : "shell_social_sort_oldest")
                     }
                 }
             }
-            .listRowBackground(Color.clear)
-            .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
-            content
+            .padding(.horizontal, PulsoSpace.s4)
+            .padding(.vertical, PulsoSpace.s2)
+            List {
+                content
+            }
+            .refreshable { await model.refresh() }
         }
-        .searchable(text: $model.query, prompt: Text("shell_social_search_placeholder"))
         .navigationTitle("shell_dest_social")
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
@@ -69,7 +60,6 @@ struct SocialOverviewView: View {
                 }
             }
         }
-        .refreshable { await model.refresh() }
         .task { await model.observeCounts() }
         .task(id: "\(model.tab)-\(model.generation)") { await model.observeList() }
         .onDisappear { model.leave() }

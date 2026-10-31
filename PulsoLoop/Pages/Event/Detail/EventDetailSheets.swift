@@ -427,14 +427,13 @@ private struct ParticipantsSheet: View {
         NavigationStack {
             List {
                 Section {
-                    Picker(selection: $tab) {
-                        Text(verbatim: localizedFormat("event_detail_participants_all", model.seatedRegistrations.count + model.waitlistedRegistrations.count)).tag(ParticipantsTab.all)
-                        Text(verbatim: localizedFormat("event_detail_participants_joined", model.seatedRegistrations.count)).tag(ParticipantsTab.joined)
-                        Text(verbatim: localizedFormat("event_detail_participants_waitlist", model.waitlistedRegistrations.count)).tag(ParticipantsTab.waitlist)
-                    } label: {
-                        EmptyView()
+                    PulsoUnderlineTabRow([ParticipantsTab.all, .joined, .waitlist], selection: $tab) { tab in
+                        switch tab {
+                        case .all: Text(verbatim: localizedFormat("event_detail_participants_all", model.seatedRegistrations.count + model.waitlistedRegistrations.count))
+                        case .joined: Text(verbatim: localizedFormat("event_detail_participants_joined", model.seatedRegistrations.count))
+                        case .waitlist: Text(verbatim: localizedFormat("event_detail_participants_waitlist", model.waitlistedRegistrations.count))
+                        }
                     }
-                    .pickerStyle(.segmented)
                     .listRowBackground(Color.clear)
                     .listRowInsets(EdgeInsets())
                 }

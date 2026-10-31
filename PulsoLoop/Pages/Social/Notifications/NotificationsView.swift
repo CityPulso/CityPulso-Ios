@@ -247,52 +247,49 @@ struct NotificationsView: View {
     var body: some View {
         let list = model.list
         let rows = model.rows
-        List {
-            Section {
-                Picker(selection: $model.filter) {
-                    Text("shell_notifications_filter_all").tag(NotificationInboxFilter.all)
-                    if model.unreadCount > 0 {
-                        Text(verbatim: localizedFormat("shell_notifications_filter_unread_count", model.unreadCount)).tag(NotificationInboxFilter.unread)
-                    } else {
-                        Text("shell_notifications_filter_unread").tag(NotificationInboxFilter.unread)
-                    }
-                } label: {
-                    EmptyView()
+        VStack(spacing: 0) {
+            // 全部 / 未读（带数字），「全部已读」固定在这一行末尾（Android PulsoHighlightTabRow trailing）。
+            PulsoHighlightTabRow([NotificationInboxFilter.all, .unread], selection: $model.filter) { filter in
+                if filter == .all {
+                    Text("shell_notifications_filter_all")
+                } else if model.unreadCount > 0 {
+                    Text(verbatim: localizedFormat("shell_notifications_filter_unread_count", model.unreadCount))
+                } else {
+                    Text("shell_notifications_filter_unread")
                 }
-                .pickerStyle(.segmented)
-            }
-            .listRowBackground(Color.clear)
-            .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
-            if !rows.isEmpty {
-                if let stale = list.staleError { PulsoErrorBanner(stale) { Task { await list.refresh() } } }
-                ForEach(rows) { row in
-                    Button {
-                        Task { await model.markRead(row) }
-                        if let target = row.target { shell?.push(target.route) }
-                    } label: {
-                        notificationRow(row)
-                    }
-                    .buttonStyle(.plain)
-                    .onAppear { if row.id == rows.last?.id { list.loadMore() } }
-                }
-                if list.isLoadingMore { ProgressView().frame(maxWidth: .infinity) }
-            } else if list.isLoading {
-                ProgressView().frame(maxWidth: .infinity, minHeight: 200).listRowBackground(Color.clear)
-            } else if let error = list.error {
-                PulsoLoadErrorView(error) { Task { await list.refresh() } }.listRowBackground(Color.clear)
-            } else {
-                ContentUnavailableView("shell_notifications_empty", systemImage: "bell", description: Text("shell_notifications_empty_hint"))
-                    .listRowBackground(Color.clear)
-            }
-        }
-        .navigationTitle("shell_dest_notifications")
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            } trailing: {
                 Button("shell_notifications_mark_all_read") { Task { await model.markAllRead() } }
+                    .buttonStyle(.pulso(.ghost, size: .small))
                     .disabled(model.unreadCount == 0 || model.isMarkingAllRead)
             }
+            .padding(.vertical, PulsoSpace.s1)
+            List {
+                if !rows.isEmpty {
+                    if let stale = list.staleError { PulsoErrorBanner(stale) { Task { await list.refresh() } } }
+                    ForEach(rows) { row in
+                        Button {
+                            Task { await model.markRead(row) }
+                            if let target = row.target { shell?.push(target.route) }
+                        } label: {
+                            notificationRow(row)
+                        }
+                        .buttonStyle(.plain)
+                        .onAppear { if row.id == rows.last?.id { list.loadMore() } }
+                    }
+                    if list.isLoadingMore { ProgressView().frame(maxWidth: .infinity) }
+                } else if list.isLoading {
+                    ProgressView().frame(maxWidth: .infinity, minHeight: 200).listRowBackground(Color.clear)
+                } else if let error = list.error {
+                    PulsoLoadErrorView(error) { Task { await list.refresh() } }.listRowBackground(Color.clear)
+                } else {
+                    PulsoEmptyState(Text("shell_notifications_empty"), description: Text("shell_notifications_empty_hint"))
+                        .frame(minHeight: 420)
+                        .listRowBackground(Color.clear)
+                }
+            }
+            .refreshable { await list.refresh() }
         }
-        .refreshable { await list.refresh() }
+        .navigationTitle("shell_dest_notifications")
         .task(id: model.filter) { await model.list.observe() }
         .task { await model.observeUnread() }
     }
@@ -306,7 +303,7 @@ struct NotificationsView: View {
                     .font(.title3)
                     .foregroundStyle(.tint)
                     .frame(width: 40, height: 40)
-                    .background(.tint.opacity(0.12), in: .circle)
+                    .background(.tint.opacity(0.12), in: .rect(cornerRadius: 8))
             }
             VStack(alignment: .leading, spacing: 2) {
                 Text(LocalizedStringKey(row.titleKey)).font(.subheadline.weight(row.isRead ? .regular : .semibold))

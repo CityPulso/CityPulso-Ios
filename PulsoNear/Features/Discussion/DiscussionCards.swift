@@ -79,7 +79,9 @@ struct ActionCount: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 4) {
+                // Liking / saving pops the icon and bursts particles around it.
                 Image(systemName: symbol)
+                    .pulsoToggleBurst(active: active, color: activeTint)
                 if let text {
                     Text(verbatim: text).font(.caption)
                 } else if let count, count > 0 {
@@ -423,6 +425,7 @@ struct ForumRowView: View {
             if let favorited, let onToggleFollow {
                 Button(action: onToggleFollow) {
                     Image(systemName: favorited ? "star.fill" : "star").foregroundStyle(favorited ? AnyShapeStyle(.tint) : AnyShapeStyle(.secondary))
+                        .pulsoToggleBurst(active: favorited, color: .accentColor)
                 }
                 .buttonStyle(.borderless)
                 .disabled(busy)

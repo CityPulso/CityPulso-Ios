@@ -38,8 +38,8 @@ struct ActivityFilterSheet: View {
                         Label("nearby_filter_date", systemImage: "calendar")
                     }
                     if draft.datePreset == .custom {
-                        DatePicker("nearby_filter_date_from", selection: instant(\.customFrom))
-                        DatePicker("nearby_filter_date_to", selection: instant(\.customTo))
+                        PulsoWheelDatePicker("nearby_filter_date_from", selection: instant(\.customFrom))
+                        PulsoWheelDatePicker("nearby_filter_date_to", selection: instant(\.customTo))
                     }
                 }
                 Picker(selection: $draft.priceCap) {

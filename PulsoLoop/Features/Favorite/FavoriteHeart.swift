@@ -74,6 +74,7 @@ struct FavoriteHeart: View {
                     Task { await model.toggle() }
                 } label: {
                     Image(systemName: model.favorited ? "heart.fill" : "heart")
+                        .pulsoToggleBurst(active: model.favorited, color: .accentColor)
                         .foregroundStyle(model.favorited ? Color.accentColor : (overlay ? Color.white : Color.primary))
                         .frame(width: 36, height: 36)
                 }

@@ -60,18 +60,18 @@ struct FriendRequestsView: View {
     @State private var model = FriendRequestsModel()
 
     var body: some View {
-        List {
-            Section {
-                Picker(selection: $model.direction) {
-                    Text("shell_social_requests_incoming").tag(SocialFriendRequestDirection.incoming)
-                    Text("shell_social_requests_outgoing").tag(SocialFriendRequestDirection.outgoing)
-                } label: {
-                    EmptyView()
-                }
-                .pickerStyle(.segmented)
+        VStack(spacing: 0) {
+            PulsoUnderlineTabRow([SocialFriendRequestDirection.incoming, .outgoing], selection: $model.direction) { direction in
+                Text(direction == .incoming ? "shell_social_requests_incoming" : "shell_social_requests_outgoing")
             }
-            .listRowBackground(Color.clear)
-            .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
+            list
+        }
+        .navigationTitle("shell_social_requests")
+        .task { await model.observe() }
+    }
+
+    private var list: some View {
+        List {
             if let error = model.requests.error, model.requests.data != nil {
                 PulsoErrorBanner(error) { model.refresh() }
             }
@@ -82,15 +82,14 @@ struct FriendRequestsView: View {
                     ProgressView().frame(maxWidth: .infinity, minHeight: 200).listRowBackground(Color.clear)
                 }
             } else if model.visible.isEmpty {
-                ContentUnavailableView("shell_social_requests_empty", systemImage: "person.2", description: Text("shell_social_requests_empty_hint"))
+                PulsoEmptyState(Text("shell_social_requests_empty"), description: Text("shell_social_requests_empty_hint"), style: .campfire)
+                    .frame(minHeight: 420)
                     .listRowBackground(Color.clear)
             } else {
                 ForEach(model.visible, id: \.friendRequestId) { item in row(item) }
             }
         }
-        .navigationTitle("shell_social_requests")
         .refreshable { model.refresh() }
-        .task { await model.observe() }
     }
 
     private func row(_ item: FriendRequestItem) -> some View {

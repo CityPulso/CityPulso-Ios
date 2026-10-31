@@ -42,11 +42,15 @@ struct PaymentMethodsView: View {
         }
         .refreshable { model.refresh() }
         .navigationTitle("payment_methods_title")
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button("payment_methods_add", systemImage: "plus") { Task { await model.startAdd() } }
-                    .disabled(model.adding)
+        // Adding a card sits at the bottom of the page.
+        .safeAreaInset(edge: .bottom) {
+            Button { Task { await model.startAdd() } } label: {
+                PulsoButtonLabel("payment_methods_add", systemImage: "plus", loading: model.adding)
             }
+            .buttonStyle(.pulso(fullWidth: true))
+            .disabled(model.adding)
+            .padding(.horizontal, PulsoSpace.s4)
+            .padding(.vertical, PulsoSpace.s2)
         }
         .alert("payment_methods_nickname", isPresented: Binding(get: { renaming != nil }, set: { if !$0 { renaming = nil } })) {
             TextField("payment_methods_nickname_placeholder", text: $nickname)

@@ -100,6 +100,7 @@ struct MyTournamentsView: View {
     @State private var withdrawing: PulsoHoldConfirm?
     @Environment(PulsoShellNavigator.self) private var shell: PulsoShellNavigator?
     @Environment(\.locale) private var locale
+    @Environment(\.pulsoPalette) private var palette
 
     var body: some View {
         List {
@@ -121,54 +122,25 @@ struct MyTournamentsView: View {
         .pulsoHoldConfirm($withdrawing)
     }
 
-    /** 三个标签（图标 + 名字，邀请带红色数字）；「我的报名」下面再分进行中 / 已结束。 */
+    /** 一级三个标签（线条图标 + 名字，邀请带红色数字）；「我的报名」下面二级分进行中 / 已结束。 */
     private var tabs: some View {
-        VStack(spacing: 8) {
-            HStack(spacing: 0) {
-                ForEach(MyTournamentsTab.allCases, id: \.self) { tab in
-                    tabButton(tab)
-                }
-            }
+        VStack(spacing: 0) {
+            PulsoUnderlineTabRow(
+                MyTournamentsTab.allCases,
+                selection: $model.tab,
+                systemImage: { $0.symbol },
+                badge: { $0 == .invitations ? model.invitations.count : nil }
+            ) { Text($0.labelKey) }
             if model.tab == .entries {
-                Picker("tournament_mine_entries", selection: $model.entryFilter) {
-                    Text("tournament_mine_filter_active").tag(MyEntriesFilter.active)
-                    Text("tournament_mine_filter_ended").tag(MyEntriesFilter.ended)
+                PulsoHighlightTabRow([MyEntriesFilter.active, .ended], selection: $model.entryFilter) { filter in
+                    Text(filter == .active ? "tournament_mine_filter_active" : "tournament_mine_filter_ended")
                 }
-                .pickerStyle(.segmented)
+                .padding(.vertical, PulsoSpace.s1)
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
-        .background(.bar)
+        .background(palette.background)
         .listRowInsets(EdgeInsets())
         .textCase(nil)
-    }
-
-    private func tabButton(_ tab: MyTournamentsTab) -> some View {
-        let selected = model.tab == tab
-        let count = tab == .invitations ? model.invitations.count : 0
-        return Button { model.tab = tab } label: {
-            VStack(spacing: 6) {
-                HStack(spacing: 4) {
-                    Image(systemName: tab.symbol)
-                    Text(tab.labelKey).lineLimit(1).minimumScaleFactor(0.8)
-                    if count > 0 {
-                        Text(verbatim: "\(count)")
-                            .font(.caption2.bold())
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 5)
-                            .background(.red, in: .capsule)
-                    }
-                }
-                .font(.subheadline.weight(selected ? .semibold : .regular))
-                Capsule().fill(selected ? Color.accentColor : .clear).frame(height: 2)
-            }
-            .frame(maxWidth: .infinity)
-            .foregroundStyle(selected ? Color.accentColor : .secondary)
-            .contentShape(.rect)
-        }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
     /* ------------------------------ 我的报名 ------------------------------ */

@@ -107,13 +107,10 @@ struct BuildingDetailView: View {
                         Spacer()
                         FavoriteHeart(target: .building, id: building.id, name: building.name)
                     }
-                    Picker(selection: $model.tab) {
-                        Text("venue_detail_tab_venue").tag(VenueDetailTab.venue)
-                        Text("venue_detail_tab_events").tag(VenueDetailTab.events)
-                    } label: {
-                        EmptyView()
+                    PulsoUnderlineTabRow([VenueDetailTab.venue, .events], selection: $model.tab) { tab in
+                        Text(tab == .venue ? "venue_detail_tab_venue" : "venue_detail_tab_events")
                     }
-                    .pickerStyle(.segmented)
+                    .padding(.horizontal, -16)
                 }
                 switch model.tab {
                 case .venue:

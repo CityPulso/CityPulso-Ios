@@ -8,6 +8,8 @@ import SwiftUI
  */
 struct AgendaView: View {
     @State private var model = AgendaModel()
+    /** The events tab's time line lights up to the row in the middle once the list stops. */
+    @State private var timeline = PulsoTimelineTracker()
     @Environment(\.dismiss) private var dismiss
     @Environment(\.locale) private var locale
     /** 关掉日程后打开的页面（推进当前栈）或底栏页面。 */
@@ -18,17 +20,17 @@ struct AgendaView: View {
         NavigationStack {
             List {
                 Section {
-                    Picker("home_agenda_title", selection: $model.tab) {
-                        Text(verbatim: localizedFormat("home_agenda_tab_activities_count", model.activityItems.data?.count ?? 0)).tag(AgendaTab.activities)
-                        Text(verbatim: localizedFormat("home_agenda_tab_spaces_count", model.bookingItems.data?.count ?? 0)).tag(AgendaTab.spaces)
+                    PulsoUnderlineTabRow([AgendaTab.activities, .spaces], selection: $model.tab) { tab in
+                        Text(verbatim: tab == .activities ? localizedFormat("home_agenda_tab_activities_count", model.activityItems.data?.count ?? 0) : localizedFormat("home_agenda_tab_spaces_count", model.bookingItems.data?.count ?? 0))
                     }
-                    .pickerStyle(.segmented)
                     .listRowBackground(Color.clear)
                     .listRowInsets(EdgeInsets())
                 }
                 content
                 footer
             }
+            .pulsoTimelineList(timeline)
+            .task(id: model.eventsByDay.flatMap { $0.items.map(\.id) }) { timeline.order = model.eventsByDay.flatMap { $0.items.map { AnyHashable($0.id) } } }
             .refreshable { await model.refresh() }
             .navigationTitle("home_agenda_title")
             .navigationBarTitleDisplayMode(.inline)
@@ -54,7 +56,7 @@ struct AgendaView: View {
         } else if model.tab == .activities {
             ForEach(model.activitiesByDay, id: \.day) { group in
                 Section {
-                    ForEach(group.items) { item in row(item) }
+                    ForEach(group.items) { item in row(item).pulsoTimelineRow(item.id, tracker: timeline) }
                 } header: {
                     HStack {
                         Text(verbatim: dayLabel(group.day))

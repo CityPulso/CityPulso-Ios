@@ -25,15 +25,14 @@ struct LoginView: View {
                     .autocorrectionDisabled()
                 PulsoTextField("login_password", text: $model.password, errorText: model.errorText, secure: true)
                     .textContentType(.password)
-                    .onSubmit { Task { await model.submit() } }
+                    .onSubmit { Task { await model.login() } }
 
-                Button {
-                    Task { await model.submit() }
-                } label: {
-                    PulsoButtonLabel("login_submit", systemImage: "rectangle.portrait.and.arrow.forward", loading: model.loading)
+                PulsoSubmitButton("login_submit", systemImage: "rectangle.portrait.and.arrow.forward", phase: model.submit.phase) {
+                    Task { await model.login() }
+                } onSuccessShown: {
+                    Task { await model.submit.successShown() }
                 }
-                .buttonStyle(.pulso(fullWidth: true))
-                .disabled(!model.canSubmit)
+                .disabled(!model.canSubmit && !model.submit.phase.busy)
 
                 SignInWithAppleButton(.signIn) { request in
                     request.requestedScopes = AppleIdToken.scopes

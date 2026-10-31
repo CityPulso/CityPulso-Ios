@@ -84,12 +84,12 @@ struct CreateStepWhenWhere: View {
                 hint: Text(verbatim: localizedFormat("create_flow_timezone", TimeZone.current.identifier)),
                 systemImage: "calendar"
             ) {
-                DatePicker(selection: startBinding, in: Date.now..., displayedComponents: [.date, .hourAndMinute]) { EmptyView() }
+                PulsoWheelDatePicker(selection: startBinding, in: Date.now..., displayedComponents: [.date, .hourAndMinute]) { EmptyView() }
                     .labelsHidden()
             }
             durationChips
             WizardField(label: "create_ends_at_label", hint: Text("create_ends_at_hint"), systemImage: "clock") {
-                DatePicker(selection: endBinding, in: (DateTimeFormatters.parseInstant(draft.startsAt) ?? .now)..., displayedComponents: [.date, .hourAndMinute]) { EmptyView() }
+                PulsoWheelDatePicker(selection: endBinding, in: (DateTimeFormatters.parseInstant(draft.startsAt) ?? .now)..., displayedComponents: [.date, .hourAndMinute]) { EmptyView() }
                     .labelsHidden()
             }
         }

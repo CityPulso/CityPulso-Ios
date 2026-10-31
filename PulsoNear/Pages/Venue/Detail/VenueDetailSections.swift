@@ -484,13 +484,11 @@ struct BuildingActivitiesSection: View {
 
     var body: some View {
         Section {
-            Picker(selection: Binding(get: { activities.filter }, set: { activities.select($0) })) {
-                Text("building_detail_activities_upcoming").tag(BuildingActivityFilter.upcoming)
-                Text("building_detail_activities_history").tag(BuildingActivityFilter.history)
-            } label: {
-                EmptyView()
+            PulsoHighlightTabRow([BuildingActivityFilter.upcoming, .history], selection: Binding(get: { activities.filter }, set: { activities.select($0) })) { filter in
+                Text(filter == .upcoming ? "building_detail_activities_upcoming" : "building_detail_activities_history")
             }
-            .pickerStyle(.segmented)
+            .listRowInsets(EdgeInsets())
+            .listRowBackground(Color.clear)
             if let rows = activities.activities.data, !rows.isEmpty {
                 ForEach(rows) { row in
                     NavigationLink(value: NearRoute.activity(activityType: row.item.activityType, activityId: row.item.id)) {

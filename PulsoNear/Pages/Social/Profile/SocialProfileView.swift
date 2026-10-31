@@ -43,15 +43,10 @@ struct SocialProfileView: View {
             List {
                 header(card)
                 Section {
-                    Picker(selection: $model.tab) {
-                        ForEach(SocialProfileTab.allCases, id: \.self) { Text($0.labelKey).tag($0) }
-                    } label: {
-                        EmptyView()
-                    }
-                    .pickerStyle(.segmented)
+                    PulsoUnderlineTabRow(SocialProfileTab.allCases, selection: $model.tab) { Text($0.labelKey) }
                 }
                 .listRowBackground(Color.clear)
-                .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
+                .listRowInsets(EdgeInsets())
                 switch model.tab {
                 case .hosted: activities(model.hosted, empty: "shell_social_profile_hosted_empty", badge: .host)
                 case .joined: activities(model.joined, empty: "social_profile_joined_empty", badge: nil)

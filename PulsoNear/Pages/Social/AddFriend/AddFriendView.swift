@@ -138,32 +138,34 @@ final class AddFriendModel {
 struct AddFriendView: View {
     @State private var model = AddFriendModel()
 
+    @Environment(\.pulsoPalette) private var palette
+
     var body: some View {
-        List {
-            Section {
-                Picker(selection: $model.scope) {
-                    ForEach(ProfileKind.allCases, id: \.self) { Text(scopeLabel($0)).tag($0) }
-                } label: {
-                    EmptyView()
-                }
-                .pickerStyle(.segmented)
-            } footer: {
-                Text(scopeHint(model.scope))
-            }
-            Section {
-                HStack {
-                    TextField("shell_social_add_friend_title", text: $model.query, prompt: Text("shell_social_add_friend_placeholder"))
+        VStack(spacing: 0) {
+            // 身份类型是搜索范围（值筛选，分段）；下面搜索框只认完整的名字、@用户名或身份 id。
+            VStack(alignment: .leading, spacing: PulsoSpace.s2) {
+                PulsoSegmentedControl(ProfileKind.allCases, selection: $model.scope) { Text(scopeLabel($0)) }
+                Text(scopeHint(model.scope)).font(.caption).foregroundStyle(palette.secondaryText)
+                HStack(spacing: PulsoSpace.s2) {
+                    PulsoSearchField(text: $model.query, prompt: Text("shell_social_add_friend_placeholder"))
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
-                        .submitLabel(.search)
                         .onSubmit { model.submit() }
-                    Button { model.submit() } label: { Image(systemName: "magnifyingglass") }
-                        .accessibilityLabel(Text("shell_social_add_friend_submit"))
+                    Button { model.submit() } label: {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundStyle(palette.onAccent)
+                            .frame(width: PulsoControlSize.compact.height, height: PulsoControlSize.compact.height)
+                            .background(palette.accent.step(9), in: palette.controlShape)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(Text("shell_social_add_friend_submit"))
                 }
-            } footer: {
-                Text("shell_social_add_friend_exact_hint")
+                Text("shell_social_add_friend_exact_hint").font(.caption).foregroundStyle(palette.secondaryText)
             }
-            results
+            .padding(PulsoSpace.s4)
+            List {
+                results
+            }
         }
         .navigationTitle("shell_social_add_friend_title")
     }
@@ -177,7 +179,7 @@ struct AddFriendView: View {
         } else if model.submitted == nil {
             Text("shell_social_add_friend_idle").foregroundStyle(.secondary).frame(maxWidth: .infinity).multilineTextAlignment(.center).listRowBackground(Color.clear)
         } else if model.rows.isEmpty {
-            ContentUnavailableView("shell_social_add_friend_empty", systemImage: "person.crop.circle.badge.questionmark").listRowBackground(Color.clear)
+            PulsoEmptyState(Text("shell_social_add_friend_empty")).frame(minHeight: 300).listRowBackground(Color.clear)
         } else {
             Section {
                 ForEach(model.rows) { row in resultRow(row) }

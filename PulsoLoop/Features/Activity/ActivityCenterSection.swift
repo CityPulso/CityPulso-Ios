@@ -48,7 +48,7 @@ struct ActivityCenterSection: View {
                                 }
                             }
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.pulsoPressBounce)
                     .accessibilityLabel(Text("activity_filter_title"))
                 }
                 .padding(.vertical, PulsoSpace.s1)

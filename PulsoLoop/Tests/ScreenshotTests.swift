@@ -123,6 +123,48 @@ final class ScreenshotTests: XCTestCase {
         }
     }
 
+    /**
+     * 详情页：从截图账号自己的数据里各取第一条（我发起的活动、收藏的球馆、论坛最新帖子和它的论坛、公开赛事），
+     * 再打开详情。拿不到就跳过那一页（不写死 id，dev 库重置后照样能截）。
+     */
+    func testDetails() async throws {
+        try await signIn()
+        let session = PulsoSessionModel()
+        var routes: [(String, LoopRoute)] = []
+
+        let center = ActivityCenterModel()
+        let observing = Task { await center.observe() }
+        for _ in 0 ..< 40 where center.hostedItems.isEmpty { try await Task.sleep(for: .milliseconds(250)) }
+        observing.cancel()
+        if let event = center.hostedItems.first {
+            routes.append(("event", .event(sport: event.sport, eventId: event.id)))
+        }
+
+        let venues = Container.shared.favoriteService().pageVenues(VenueFavoritesFilter())
+        await venues.refresh()
+        if let venue = venues.items.first {
+            routes.append(("venue", .venue(venueId: venue.venueId)))
+            routes.append(("building", .building(buildingId: venue.building.id)))
+        }
+
+        let feed = Container.shared.discussionService().pageFeed(tab: .latest, sport: nil, forumId: nil)
+        await feed.refresh()
+        if let post = feed.items.first {
+            routes.append(("post", .post(postId: post.id)))
+            if let forum = post.forums.first { routes.append(("forum", .forum(forumId: forum.forumId))) }
+        }
+
+        let tournaments = Container.shared.tournamentService().pagePublic(search: nil, sport: nil)
+        await tournaments.refresh()
+        if let tournament = tournaments.items.first {
+            routes.append(("tournament", .tournament(tournamentId: tournament.id)))
+        }
+
+        for (name, route) in routes {
+            try await capture(NavigationStack { route.page.loopRoutes() }.environment(session), name: "loop-detail-\(name)")
+        }
+    }
+
     private func capture(_ view: some View, name: String, style: UIUserInterfaceStyle = .light) async throws {
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.first as? UIWindowScene)
         let window = UIWindow(windowScene: scene)

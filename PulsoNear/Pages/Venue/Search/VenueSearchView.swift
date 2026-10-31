@@ -56,7 +56,7 @@ struct VenueSearchView: View {
                             }
                         }
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.pulsoPressBounce)
                 .accessibilityLabel(Text("nearby_filter_venue_title"))
             }
             .padding(.horizontal, PulsoSpace.s4)
@@ -151,6 +151,7 @@ struct NearbyVenueCard: View {
                     if let favorited {
                         Button(action: onToggleFavorite) {
                             Image(systemName: favorited ? "heart.fill" : "heart").font(.title3).foregroundStyle(favorited ? palette.error : palette.secondaryText)
+                                .pulsoToggleBurst(active: favorited, color: .accentColor)
                         }
                         .buttonStyle(.plain)
                         .accessibilityLabel(Text(verbatim: localizedFormat(favorited ? "favorites_remove_named" : "favorites_add_named", pin.displayName)))

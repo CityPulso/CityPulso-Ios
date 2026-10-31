@@ -183,7 +183,7 @@ struct ProfileEditView: View {
     @ViewBuilder
     private var birthdayRow: some View {
         if let date = Birthday.date(model.form.birthday) {
-            DatePicker(
+            PulsoWheelDatePicker(
                 "profile_field_birthday",
                 selection: Binding(get: { date }, set: { model.form.birthday = Birthday.day($0) }),
                 in: ...Date.now,

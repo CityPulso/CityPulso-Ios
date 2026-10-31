@@ -487,13 +487,11 @@ struct BuildingEventsSection: View {
 
     var body: some View {
         Section {
-            Picker(selection: Binding(get: { events.filter }, set: { events.select($0) })) {
-                Text("building_detail_events_upcoming").tag(BuildingSessionFilter.upcoming)
-                Text("building_detail_events_history").tag(BuildingSessionFilter.history)
-            } label: {
-                EmptyView()
+            PulsoHighlightTabRow([BuildingSessionFilter.upcoming, .history], selection: Binding(get: { events.filter }, set: { events.select($0) })) { filter in
+                Text(filter == .upcoming ? "building_detail_events_upcoming" : "building_detail_events_history")
             }
-            .pickerStyle(.segmented)
+            .listRowInsets(EdgeInsets())
+            .listRowBackground(Color.clear)
             if let rows = events.events.data, !rows.isEmpty {
                 ForEach(rows) { row in
                     NavigationLink(value: LoopRoute.event(sport: row.item.sport, eventId: row.item.id)) {

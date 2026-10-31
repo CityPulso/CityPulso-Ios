@@ -14,7 +14,8 @@ struct NearRootChrome: View {
         PulsoShellView(
             preference: shell.preference,
             trayDestinations: shell.trayDestinations,
-            navigator: shell.navigator
+            navigator: shell.navigator,
+            circularReveal: true
         ) { destination in
             NearShellPages.page(for: destination)
         }

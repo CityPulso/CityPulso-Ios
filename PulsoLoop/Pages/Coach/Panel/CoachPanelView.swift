@@ -10,15 +10,18 @@ struct CoachPanelView: View {
     @Environment(\.locale) private var locale
 
     var body: some View {
+        VStack(spacing: 0) {
+            PulsoUnderlineTabRow(CoachPanelTab.allCases, selection: $model.tab) { Text($0.labelKey) }
+            list
+        }
+        .navigationTitle("coach_panel_title")
+        .task { await model.observe() }
+        .pulsoHoldConfirm($confirm)
+        .sheet(item: $model.draft) { _ in CoachCreateSessionSheet(model: model) }
+    }
+
+    private var list: some View {
         List {
-            Section {
-                Picker("coach_panel_title", selection: $model.tab) {
-                    ForEach(CoachPanelTab.allCases, id: \.self) { Text($0.labelKey).tag($0) }
-                }
-                .pickerStyle(.segmented)
-                .listRowBackground(Color.clear)
-                .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
-            }
             switch model.tab {
             case .sessions: sessionsTab
             case .venues: venuesTab
@@ -32,11 +35,7 @@ struct CoachPanelView: View {
                 }
             }
         }
-        .navigationTitle("coach_panel_title")
         .refreshable { await model.refresh() }
-        .task { await model.observe() }
-        .pulsoHoldConfirm($confirm)
-        .sheet(item: $model.draft) { _ in CoachCreateSessionSheet(model: model) }
     }
 
     /* ------------------------------ 课次 ------------------------------ */
@@ -194,10 +193,12 @@ struct CoachPanelView: View {
             }
         }
         Section {
-            Picker("coach_panel_tab_compensation", selection: Binding(get: { model.compensationStatus }, set: { status in Task { await model.selectCompensationStatus(status) } })) {
-                ForEach(CoachCompensationStatus.allCases, id: \.self) { Text($0.labelKey).tag($0) }
-            }
-            .pickerStyle(.segmented)
+            PulsoHighlightTabRow(
+                CoachCompensationStatus.allCases,
+                selection: Binding(get: { model.compensationStatus }, set: { status in Task { await model.selectCompensationStatus(status) } })
+            ) { Text($0.labelKey) }
+            .listRowInsets(EdgeInsets())
+            .listRowBackground(Color.clear)
             let items = model.compensations.data ?? []
             if items.isEmpty, !model.compensations.isLoading {
                 ContentUnavailableView {
@@ -500,7 +501,7 @@ private struct CoachCreateSessionSheet: View {
             }
         }
         Section {
-            DatePicker("coach_panel_starts_at", selection: Binding(get: { model.draft?.startsAt ?? .now }, set: { model.draft?.startsAt = $0 }), in: Date.now...)
+            PulsoWheelDatePicker("coach_panel_starts_at", selection: Binding(get: { model.draft?.startsAt ?? .now }, set: { model.draft?.startsAt = $0 }), in: Date.now...)
             Stepper(value: Binding(get: { model.draft?.minutes ?? 60 }, set: { model.draft?.minutes = $0 }), in: 30 ... 480, step: 15) {
                 LabeledContent("coach_panel_minutes") { Text(verbatim: "\(model.draft?.minutes ?? 60)") }
             }

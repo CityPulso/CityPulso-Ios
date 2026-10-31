@@ -63,7 +63,7 @@ struct EventSearchView: View {
                             }
                         }
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.pulsoPressBounce)
                 .accessibilityLabel(Text("nearby_filter_title"))
             }
             .padding(.horizontal, PulsoSpace.s4)

@@ -39,6 +39,9 @@ struct WalletView: View {
         _model = State(initialValue: WalletModel())
     }
 
+    /** Lists whose card deck is open (tab + filter); the toolbar button switches the one on screen. */
+    @State private var openDecks: Set<String> = []
+
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: PulsoSpace.s2) {
@@ -56,12 +59,35 @@ struct WalletView: View {
             .padding(.bottom, PulsoSpace.s4)
         }
         .navigationTitle("shell_dest_wallet")
+        .toolbar {
+            if let deck = currentDeck {
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        if openDecks.contains(deck) { openDecks.remove(deck) } else { openDecks.insert(deck) }
+                    } label: {
+                        Label {
+                            Text(openDecks.contains(deck) ? "pulso_ui_stack_collapse" : "pulso_ui_stack_expand", bundle: .pulsoLinkUI)
+                        } icon: {
+                            Image(systemName: openDecks.contains(deck) ? "rectangle.compress.vertical" : "rectangle.expand.vertical")
+                                .contentTransition(.symbolEffect(.replace))
+                        }
+                    }
+                }
+            }
+        }
         .refreshable {
             if model.membershipsTab == .cards { await model.memberships.refresh() } else { await model.waiting.refresh() }
         }
         .task { await model.memberships.observe() }
         .task { await model.waiting.observe() }
     }
+
+    /** The deck of the list on screen, if it has cards. */
+    private var currentDeck: String? {
+        model.membershipsTab == .cards && !model.memberships.isEmpty ? "memberships" : nil
+    }
+
+    private static let deckCards = 6
 
     /** 入口卡片：强调色图标、标题、一行说明，细边框（Android 钱包顶部两格）。 */
     private func entry(_ systemImage: String, _ title: LocalizedStringKey, _ hint: LocalizedStringKey, _ route: NearRoute) -> some View {
@@ -93,6 +119,7 @@ struct WalletView: View {
     private func paged<Item: Sendable, ID: Hashable, Empty: View, Row: View>(
         _ list: PagedList<Item, Int>,
         id: KeyPath<Item, ID>,
+        deck: String? = nil,
         @ViewBuilder empty: () -> Empty,
         @ViewBuilder row: @escaping (Item) -> Row
     ) -> some View {
@@ -102,6 +129,19 @@ struct WalletView: View {
             PulsoLoadErrorView(error) { Task { await list.refresh() } }
         } else if list.isEmpty {
             empty().frame(minHeight: 360)
+        } else if let deck {
+            // The first cards lie in a deck; open, the rest of the list follows and pages in.
+            let open = openDecks.contains(deck)
+            PulsoCardStack(items: Array(list.items.prefix(Self.deckCards)), id: id, expanded: open, onExpand: { openDecks.insert(deck) }, card: row)
+                .padding(.horizontal, PulsoSpace.s4)
+            if open {
+                ForEach(list.items.dropFirst(Self.deckCards), id: id) { item in
+                    row(item)
+                        .padding(.horizontal, PulsoSpace.s4)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                        .onAppear { if item[keyPath: id] == list.items.last?[keyPath: id] { list.loadMore() } }
+                }
+            }
         } else {
             ForEach(list.items, id: id) { item in
                 row(item)
@@ -118,7 +158,7 @@ struct WalletView: View {
         }
         subtitle("my_memberships_subtitle")
         if model.membershipsTab == .cards {
-            paged(model.memberships, id: \.id) {
+            paged(model.memberships, id: \.id, deck: "memberships") {
                 PulsoEmptyState(Text("my_memberships_empty_title"), description: Text("my_memberships_empty_body")) {
                     Button("my_memberships_empty_cta") { shell?.open(.explore) }.buttonStyle(.pulso())
                 }

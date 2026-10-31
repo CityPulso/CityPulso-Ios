@@ -35,8 +35,6 @@ struct PaymentAccountsView: View {
                                 creatingForm = false
                             }
                         }
-                    } else {
-                        Button { creatingForm = true } label: { Label("payment_accounts_create", systemImage: "plus") }
                     }
                 }
                 if model.items.isEmpty, !creatingForm {
@@ -44,6 +42,15 @@ struct PaymentAccountsView: View {
                 }
                 ForEach(model.items, id: \.id) { account in
                     Section { AccountCard(account: account, model: model) }
+                }
+            }
+            // Adding an account sits at the bottom of the page; the form opens at the top of the list.
+            .safeAreaInset(edge: .bottom) {
+                if !creatingForm {
+                    Button { creatingForm = true } label: { PulsoButtonLabel("payment_accounts_create", systemImage: "plus") }
+                        .buttonStyle(.pulso(fullWidth: true))
+                        .padding(.horizontal, PulsoSpace.s4)
+                        .padding(.vertical, PulsoSpace.s2)
                 }
             }
         }

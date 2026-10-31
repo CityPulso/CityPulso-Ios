@@ -333,6 +333,7 @@ private struct ExploreTopPanel: View {
                     }
                     .frame(width: 32, height: 32)
             }
+            .buttonStyle(.pulsoPressBounce)
             .accessibilityLabel(Text("explore_filter_cd"))
         }
         .padding(.leading, 14)

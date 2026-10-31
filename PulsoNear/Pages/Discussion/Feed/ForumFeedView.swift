@@ -151,6 +151,7 @@ struct ForumFeedView: View {
                     Image(systemName: "slider.horizontal.3")
                         .overlay(alignment: .topTrailing) { if model.forum != nil { Circle().fill(palette.accent.step(9)).frame(width: 8, height: 8).offset(x: 3, y: -3) } }
                 }
+                .buttonStyle(.pulsoPressBounce)
                 .accessibilityLabel(Text("discussion_choose_forum"))
             }
         }

@@ -207,16 +207,14 @@ struct ChatFavoritePickerView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Picker(selection: $model.tab) {
-                Text("shell_chat_favorite_picker_buildings").tag(ChatFavoriteTab.buildings)
-                Text("shell_chat_favorite_picker_venues").tag(ChatFavoriteTab.venues)
-                Text("shell_chat_favorite_picker_posts").tag(ChatFavoriteTab.posts)
-                Text("shell_chat_favorite_picker_forums").tag(ChatFavoriteTab.forums)
-            } label: {
-                EmptyView()
+            PulsoUnderlineTabRow([ChatFavoriteTab.buildings, .venues, .posts, .forums], selection: $model.tab) { tab in
+                switch tab {
+                case .buildings: Text("shell_chat_favorite_picker_buildings")
+                case .venues: Text("shell_chat_favorite_picker_venues")
+                case .posts: Text("shell_chat_favorite_picker_posts")
+                case .forums: Text("shell_chat_favorite_picker_forums")
+                }
             }
-            .pickerStyle(.segmented)
-            .padding()
             switch model.tab {
             case .buildings:
                 pickList(model.buildings, empty: "shell_chat_favorite_picker_empty_buildings") { item in

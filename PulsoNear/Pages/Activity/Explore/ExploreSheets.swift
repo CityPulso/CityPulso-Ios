@@ -80,8 +80,8 @@ struct ExploreFilterSheet: View {
                 Label("nearby_filter_date", systemImage: "calendar")
             }
             if model.activityFilters.datePreset == .custom {
-                DatePicker("nearby_filter_date_from", selection: instant(activityFilters.customFrom))
-                DatePicker("nearby_filter_date_to", selection: instant(activityFilters.customTo))
+                PulsoWheelDatePicker("nearby_filter_date_from", selection: instant(activityFilters.customFrom))
+                PulsoWheelDatePicker("nearby_filter_date_to", selection: instant(activityFilters.customTo))
             }
             Picker(selection: activityFilters.priceCap) {
                 ForEach(ActivityPriceCap.allCases, id: \.self) { Text(verbatim: activityPriceText($0)).tag($0) }

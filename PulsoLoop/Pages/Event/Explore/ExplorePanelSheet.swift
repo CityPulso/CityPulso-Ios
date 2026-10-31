@@ -58,15 +58,9 @@ struct ExplorePanelSheet: View {
                     if wasPeek { detent = .height(height) }
                 }
             if detent == .large {
-                Picker(selection: $tab) {
-                    Text("explore_sheet_tab_events").tag(ExploreSheetTab.events)
-                    Text("explore_sheet_tab_venues").tag(ExploreSheetTab.venues)
-                } label: {
-                    EmptyView()
+                PulsoUnderlineTabRow([ExploreSheetTab.events, .venues], selection: $tab) { tab in
+                    Text(tab == .events ? "explore_sheet_tab_events" : "explore_sheet_tab_venues")
                 }
-                .pickerStyle(.segmented)
-                .padding(.horizontal)
-                .padding(.vertical, 8)
                 nearbyList
             }
             Spacer(minLength: 0)

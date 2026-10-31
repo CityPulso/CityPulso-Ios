@@ -65,23 +65,26 @@ struct CreateWizardView: View {
                         .tint(.secondary)
                         .disabled(model.isSubmitting)
                 }
-                Button {
-                    if isLast {
+                if isLast {
+                    PulsoSubmitButton("create_flow_publish", phase: model.publish.phase) {
                         Task { await model.submit() }
-                    } else {
+                    } onSuccessShown: {
+                        Task { await model.publish.successShown() }
+                    }
+                    .layoutPriority(1)
+                } else {
+                    Button {
                         model.nextStep()
+                    } label: {
+                        HStack(spacing: 6) {
+                            Text("create_flow_next")
+                            Image(systemName: "chevron.right")
+                        }
+                        .frame(maxWidth: .infinity)
                     }
-                } label: {
-                    HStack(spacing: 6) {
-                        if model.isSubmitting { ProgressView() }
-                        Text((model.isSubmitting ? "create_submitting" : isLast ? "create_flow_publish" : "create_flow_next") as LocalizedStringKey)
-                        if !isLast { Image(systemName: "chevron.right") }
-                    }
-                    .frame(maxWidth: .infinity)
+                    .buttonStyle(.pulso())
+                    .layoutPriority(1)
                 }
-                .buttonStyle(.pulso())
-                .layoutPriority(1)
-                .disabled(model.isSubmitting)
             }
             .controlSize(.large)
         }

@@ -13,7 +13,10 @@ import SwiftUI
 final class LoginModel {
     var email = "" { didSet { errorText = nil } }
     var password = "" { didSet { errorText = nil } }
+    /** Google / Apple 登录进行中（邮箱登录走 [submit]）。 */
     private(set) var loading = false
+    /** 邮箱登录按钮的阶段：画完勾才进 App。 */
+    let submit = SubmitAction()
     /** 显示在密码框下面。 */
     private(set) var errorText: String?
 
@@ -21,17 +24,23 @@ final class LoginModel {
     @ObservationIgnored @Injected(\.authService) private var authService
 
     var canSubmit: Bool {
-        !email.trimmingCharacters(in: .whitespaces).isEmpty && !password.isEmpty && !loading
+        !email.trimmingCharacters(in: .whitespaces).isEmpty && !password.isEmpty && !loading && !submit.phase.busy
     }
 
-    func submit() async {
+    /** 先拿 step-1 账号 token；会话（进 App）等按钮画完勾再建。 */
+    func login() async {
         guard canSubmit else { return }
-        await run(fallback: "login_failed_retry") {
-            try await self.signIn.loginWithEmail(
-                email: self.email.trimmingCharacters(in: .whitespaces),
-                password: self.password
-            )
-        }
+        errorText = nil
+        let email = email.trimmingCharacters(in: .whitespaces)
+        await submit.run({
+            let deviceId = await self.signIn.deviceId()
+            let response = try await self.authService.loginWithEmail(LoginWithEmailRequest(email: email, password: self.password, deviceId: deviceId))
+            return (response, deviceId)
+        }, onFailure: { error in
+            self.errorText = signInErrorText(error, fallback: "login_failed_retry")
+        }, afterSuccess: { result in
+            try await self.signIn.complete(result.0, deviceId: result.1)
+        })
     }
 
     func signInWithGoogle() async {

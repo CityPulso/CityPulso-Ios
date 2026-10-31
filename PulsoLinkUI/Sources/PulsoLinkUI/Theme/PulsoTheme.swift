@@ -66,5 +66,6 @@ extension View {
             .accentColor(settings.accent.color)
             .environment(\.pulsoPalette, PulsoPalette(settings))
             .preferredColorScheme(settings.appearance.colorScheme)
+            .onChange(of: settings, initial: true) { _, settings in PulsoUIKitAppearance.apply(PulsoPalette(settings)) }
     }
 }
