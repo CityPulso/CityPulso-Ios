@@ -21,7 +21,7 @@ public final class SubmitAction {
 
     public init() {}
 
-    public func run<T>(_ work: () async throws -> T, onFailure: @escaping (any Error) -> Void, afterSuccess: @escaping (T) async throws -> Void = { _ in }) async {
+    public func run<T: Sendable>(_ work: () async throws -> T, onFailure: @escaping (any Error) -> Void, afterSuccess: @escaping (T) async throws -> Void = { _ in }) async {
         guard !phase.busy else { return }
         phase = .loading
         do {
