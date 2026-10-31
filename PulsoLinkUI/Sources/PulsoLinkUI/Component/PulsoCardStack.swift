@@ -100,3 +100,22 @@ private struct DeckLayout: Layout {
         }
     }
 }
+
+/** 顶栏上展开 / 收起卡片堆的按钮（Android `PulsoStackToggleAction`），图标切换时淡入缩放。 */
+public struct PulsoStackToggleButton: View {
+    @Binding var expanded: Bool
+
+    public init(expanded: Binding<Bool>) {
+        _expanded = expanded
+    }
+
+    public var body: some View {
+        Button {
+            withAnimation(.snappy) { expanded.toggle() }
+        } label: {
+            Image(systemName: expanded ? "arrow.down.right.and.arrow.up.left" : "chevron.up.chevron.down")
+                .contentTransition(.symbolEffect(.replace))
+        }
+        .accessibilityLabel(Text(expanded ? "pulso_ui_stack_collapse" : "pulso_ui_stack_expand", bundle: .module))
+    }
+}

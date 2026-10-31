@@ -141,30 +141,45 @@ struct AddFriendView: View {
     @Environment(\.pulsoPalette) private var palette
 
     var body: some View {
-        VStack(spacing: 0) {
-            // 身份类型是搜索范围（值筛选，分段）；下面搜索框只认完整的名字、@用户名或身份 id。
+        VStack(alignment: .leading, spacing: 0) {
+            // 身份类型是搜索范围（页面一级标签，下划线）；下面搜索框只认完整的名字、@用户名或身份 id。
+            PulsoUnderlineTabRow(ProfileKind.allCases, selection: $model.scope) { Text(scopeLabel($0)) }
+                .padding(.horizontal, PulsoSpace.s4)
             VStack(alignment: .leading, spacing: PulsoSpace.s2) {
-                PulsoSegmentedControl(ProfileKind.allCases, selection: $model.scope) { Text(scopeLabel($0)) }
                 Text(scopeHint(model.scope)).font(.caption).foregroundStyle(palette.secondaryText)
-                HStack(spacing: PulsoSpace.s2) {
-                    PulsoSearchField(text: $model.query, prompt: Text("shell_social_add_friend_placeholder"))
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .onSubmit { model.submit() }
+                PulsoTextField(
+                    "shell_social_add_friend_placeholder",
+                    text: $model.query,
+                    hintText: String(localized: "shell_social_add_friend_exact_hint")
+                ) {
                     Button { model.submit() } label: {
                         Image(systemName: "magnifyingglass")
-                            .foregroundStyle(palette.onAccent)
-                            .frame(width: PulsoControlSize.compact.height, height: PulsoControlSize.compact.height)
-                            .background(palette.accent.step(9), in: palette.controlShape)
+                            .foregroundStyle(palette.secondaryText)
+                            .frame(width: PulsoControlSize.small.height, height: PulsoControlSize.small.height)
                     }
                     .buttonStyle(.plain)
+                    .disabled(model.query.trimmingCharacters(in: .whitespaces).isEmpty)
                     .accessibilityLabel(Text("shell_social_add_friend_submit"))
                 }
-                Text("shell_social_add_friend_exact_hint").font(.caption).foregroundStyle(palette.secondaryText)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .submitLabel(.search)
+                .onSubmit { model.submit() }
             }
-            .padding(PulsoSpace.s4)
-            List {
-                results
+            .padding(.horizontal, PulsoSpace.s4)
+            .padding(.top, PulsoSpace.s2)
+            if model.submitted == nil, !model.isLoading {
+                Text("shell_social_add_friend_idle")
+                    .foregroundStyle(palette.secondaryText)
+                    .multilineTextAlignment(.center)
+                    .padding(PulsoSpace.s5)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                List {
+                    results
+                }
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
             }
         }
         .navigationTitle("shell_social_add_friend_title")
@@ -176,8 +191,6 @@ struct AddFriendView: View {
             ProgressView().frame(maxWidth: .infinity, minHeight: 160).listRowBackground(Color.clear)
         } else if let error = model.error, model.rows.isEmpty {
             PulsoLoadErrorView(error) { model.submit() }.listRowBackground(Color.clear)
-        } else if model.submitted == nil {
-            Text("shell_social_add_friend_idle").foregroundStyle(.secondary).frame(maxWidth: .infinity).multilineTextAlignment(.center).listRowBackground(Color.clear)
         } else if model.rows.isEmpty {
             PulsoEmptyState(Text("shell_social_add_friend_empty")).frame(minHeight: 300).listRowBackground(Color.clear)
         } else {

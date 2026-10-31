@@ -153,6 +153,8 @@ final class ScreenshotTests: XCTestCase {
             do {
                 let favorited = try await Container.shared.favoriteService().isFavorite(.venue, id: venue.venueId)
                 print("screenshot favorite check: \(favorited)")
+                let buildingFavorited = try await Container.shared.favoriteService().isFavorite(.building, id: venue.building.id)
+                print("screenshot building favorite check: \(buildingFavorited)")
             } catch {
                 print("screenshot favorite check failed: \(error)")
             }

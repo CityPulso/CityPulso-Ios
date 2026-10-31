@@ -327,9 +327,10 @@ struct PostDetailView: View {
                     onBookmark: { Task { await model.toggleBookmark() } }
                 )
             }
-            // 正文直接铺在页面上，不套卡片（Android 帖子页）。
+            // 正文直接铺在页面上，不套卡片，各块之间只留一点空（Android 帖子页）。
             .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)
+            .listRowInsets(EdgeInsets(top: PulsoSpace.s1, leading: PulsoSpace.s4, bottom: PulsoSpace.s1, trailing: PulsoSpace.s4))
             if !data.publications.isEmpty {
                 Section("discussion_published_in") {
                     ForEach(data.publications, id: \.forumId) { publication in
@@ -350,6 +351,8 @@ struct PostDetailView: View {
             }
             commentsSection(data)
         }
+        .listSectionSpacing(PulsoSpace.s4)
+        .contentMargins(.top, PulsoSpace.s2, for: .scrollContent)
         .safeAreaInset(edge: .bottom) { if data.allowComments { composer } }
         .refreshable { await model.load() }
         .toolbar {

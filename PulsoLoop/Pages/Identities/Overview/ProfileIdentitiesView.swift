@@ -84,7 +84,7 @@ struct ProfileIdentitiesView: View {
                     }
                     .font(.headline)
                     .foregroundStyle(palette.text)
-                    Text(languageKey(profile.profileLanguage)).font(.subheadline).foregroundStyle(palette.secondaryText)
+                    Text(profile.profileLanguage.profileLabelKey).font(.subheadline).foregroundStyle(palette.secondaryText)
                 }
                 Spacer(minLength: 0)
                 if isCurrent {
@@ -210,15 +210,6 @@ struct ProfileIdentitiesView: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(label).font(.caption.weight(.semibold)).foregroundStyle(tint)
             body
-        }
-    }
-
-    private func languageKey(_ language: PulsoLanguage) -> LocalizedStringKey {
-        switch language {
-        case .zh: "profile_lang_zh"
-        case .zhHant: "profile_lang_zh_hant"
-        case .en: "profile_lang_en"
-        case .fr: "profile_lang_fr"
         }
     }
 }

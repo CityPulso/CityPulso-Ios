@@ -152,6 +152,15 @@ enum GenderOption: String, CaseIterable, Identifiable {
         }
     }
 
+    var labelResource: String.LocalizationValue {
+        switch self {
+        case .male: "profile_edit_gender_male"
+        case .female: "profile_edit_gender_female"
+        case .nonBinary: "profile_edit_gender_non_binary"
+        case .preferNot: "profile_edit_gender_prefer_not"
+        }
+    }
+
     static func preset(_ raw: String) -> GenderOption? {
         GenderOption(rawValue: raw.trimmingCharacters(in: .whitespaces).lowercased())
     }
@@ -184,5 +193,26 @@ enum Birthday {
 
     static func display(_ raw: String?) -> String? {
         date(raw).map { $0.formatted(Date.FormatStyle(date: .abbreviated, time: .omitted, timeZone: .gmt)) }
+    }
+}
+
+extension PulsoLanguage {
+    /** 资料里的语言名（「简体中文」「English」…，跟着界面语言写）。 */
+    var profileLabelResource: String.LocalizationValue {
+        switch self {
+        case .zh: "profile_lang_zh"
+        case .zhHant: "profile_lang_zh_hant"
+        case .en: "profile_lang_en"
+        case .fr: "profile_lang_fr"
+        }
+    }
+
+    var profileLabelKey: LocalizedStringKey {
+        switch self {
+        case .zh: "profile_lang_zh"
+        case .zhHant: "profile_lang_zh_hant"
+        case .en: "profile_lang_en"
+        case .fr: "profile_lang_fr"
+        }
     }
 }

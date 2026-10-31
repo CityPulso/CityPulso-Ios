@@ -6,8 +6,9 @@ import SwiftUI
  * - 平时 0.5pt gray8 描边；聚焦 1pt 强调色；出错 1pt 红色，[errorText] 在框下一行。
  * - [hintText] 在框下一行说明用途（没有错误时显示）。
  * - [secure] 是密码框：右侧眼睛切换明文。
+ * - [trailing] 放在框内右侧（Android `trailingIcon`），比如搜索框的提交按钮。
  */
-public struct PulsoTextField: View {
+public struct PulsoTextField<Trailing: View>: View {
     let label: Text
     @Binding var text: String
     let prompt: String?
@@ -15,6 +16,7 @@ public struct PulsoTextField: View {
     let errorText: String?
     let secure: Bool
     let size: PulsoControlSize?
+    let trailing: Trailing
 
     @Environment(\.pulsoPalette) private var palette
     @Environment(\.pulsoControlSize) private var pageSize
@@ -30,9 +32,10 @@ public struct PulsoTextField: View {
         hintText: String? = nil,
         errorText: String? = nil,
         secure: Bool = false,
-        size: PulsoControlSize? = nil
+        size: PulsoControlSize? = nil,
+        @ViewBuilder trailing: () -> Trailing
     ) {
-        self.init(label: Text(label), text: text, prompt: prompt, hintText: hintText, errorText: errorText, secure: secure, size: size)
+        self.init(label: Text(label), text: text, prompt: prompt, hintText: hintText, errorText: errorText, secure: secure, size: size, trailing: trailing)
     }
 
     /** 标签已经是 `Text`（别的文案包里的字）。 */
@@ -43,7 +46,8 @@ public struct PulsoTextField: View {
         hintText: String? = nil,
         errorText: String? = nil,
         secure: Bool = false,
-        size: PulsoControlSize? = nil
+        size: PulsoControlSize? = nil,
+        @ViewBuilder trailing: () -> Trailing
     ) {
         self.label = label
         _text = text
@@ -52,6 +56,7 @@ public struct PulsoTextField: View {
         self.errorText = errorText
         self.secure = secure
         self.size = size
+        self.trailing = trailing()
     }
 
     private var floated: Bool { focused || !text.isEmpty }
@@ -87,10 +92,11 @@ public struct PulsoTextField: View {
                     // Android 同样写死英文（没有文案 key）。
                     .accessibilityLabel(Text(verbatim: revealed ? "Hide password" : "Show password"))
                 }
+                trailing
             }
             .font(.body)
             .padding(.leading, PulsoSpace.s4)
-            .padding(.trailing, secure ? PulsoSpace.s1 : PulsoSpace.s4)
+            .padding(.trailing, secure || Trailing.self != EmptyView.self ? PulsoSpace.s1 : PulsoSpace.s4)
             .frame(height: height)
             .background { outline }
             .overlay(alignment: .topLeading) { floatingLabel }
@@ -145,5 +151,31 @@ public struct PulsoTextField: View {
                     }
                     .compositingGroup()
             }
+    }
+}
+
+extension PulsoTextField where Trailing == EmptyView {
+    public init(
+        _ label: LocalizedStringKey,
+        text: Binding<String>,
+        prompt: String? = nil,
+        hintText: String? = nil,
+        errorText: String? = nil,
+        secure: Bool = false,
+        size: PulsoControlSize? = nil
+    ) {
+        self.init(label, text: text, prompt: prompt, hintText: hintText, errorText: errorText, secure: secure, size: size) { EmptyView() }
+    }
+
+    public init(
+        label: Text,
+        text: Binding<String>,
+        prompt: String? = nil,
+        hintText: String? = nil,
+        errorText: String? = nil,
+        secure: Bool = false,
+        size: PulsoControlSize? = nil
+    ) {
+        self.init(label: label, text: text, prompt: prompt, hintText: hintText, errorText: errorText, secure: secure, size: size) { EmptyView() }
     }
 }

@@ -13,6 +13,7 @@ struct ActivityFeedCard: View {
     let imageURL: URL?
 
     @Environment(\.locale) private var locale
+    @Environment(\.pulsoPalette) private var palette
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -27,14 +28,14 @@ struct ActivityFeedCard: View {
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
-                                .background(Color.accentColor, in: .capsule)
+                                .background(Color.accentColor, in: palette.chipShape)
                         }
                         Spacer()
                         Label { Text(item.activityType.labelKey) } icon: { Image(item.activityType.iconAsset).resizable().frame(width: 14, height: 14) }
                             .font(.caption.weight(.medium))
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
-                            .glassEffect(.regular, in: .capsule)
+                            .glassEffect(.regular, in: palette.chipShape)
                     }
                     .padding(12)
                 }
@@ -53,11 +54,15 @@ struct ActivityFeedCard: View {
                     if !item.isEnded, let price = priceLabel {
                         price.font(.subheadline.weight(.semibold))
                     }
+                    // 开放报名绿色、已结束灰色的柔和小标签（Android `ActivityStatusChip`）。
+                    let tone = item.isEnded ? RadixScale.slate.lightStep(9) : RadixScale.green.lightStep(9)
                     Text(item.isEnded ? ActivityOpenStatus.ended.labelKey : ActivityOpenStatus.open.labelKey)
-                        .font(.caption.weight(.medium))
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 2)
-                        .background(.fill.tertiary, in: .capsule)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(tone)
+                        .lineLimit(1)
+                        .padding(.horizontal, PulsoSpace.s2)
+                        .padding(.vertical, PulsoSpace.s1)
+                        .background(tone.opacity(0.14), in: palette.chipShape)
                 }
             }
             .padding()

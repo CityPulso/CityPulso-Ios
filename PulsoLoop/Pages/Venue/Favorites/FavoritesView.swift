@@ -379,7 +379,8 @@ struct FavoritesView: View {
                                         ForEach(item.venueSports, id: \.self) { SportTag(sport: $0.loopSport, compact: true) }
                                     }
                                     .fixedSize()
-                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    // minWidth 0：框子按行宽走，不被一长串标签撑宽。
+                                    .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                                     .clipped()
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)

@@ -232,6 +232,7 @@ struct NotificationsView: View {
                             notificationRow(row)
                         }
                         .buttonStyle(.plain)
+                        .listRowBackground(Color.clear)
                         .onAppear { if row.id == rows.last?.id { list.loadMore() } }
                     }
                     if list.isLoadingMore { ProgressView().frame(maxWidth: .infinity) }
@@ -245,6 +246,9 @@ struct NotificationsView: View {
                         .listRowBackground(Color.clear)
                 }
             }
+            // 行直接铺在页面上（Android 通知列表不套卡片）。
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
             .refreshable { await list.refresh() }
         }
         .navigationTitle("shell_dest_notifications")

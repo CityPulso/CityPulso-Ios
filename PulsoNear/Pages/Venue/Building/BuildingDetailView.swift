@@ -78,39 +78,41 @@ struct BuildingDetailView: View {
     private var content: some View {
         if let building = model.building.data {
             List {
-                let photos = building.images.sorted { $0.sortOrder < $1.sortOrder }.compactMap { model.imageURL($0.imageId) }
-                if !photos.isEmpty {
-                    Section {
+                Section {
+                    let photos = building.images.sorted { $0.sortOrder < $1.sortOrder }.compactMap { model.imageURL($0.imageId) }
+                    if !photos.isEmpty {
+                        // 第一张宽，后面的窄，横着滑；最后一张后面留一点空（Android `BuildingPhotoRow`）。
                         ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 8) {
+                            HStack(spacing: PulsoSpace.s2) {
                                 ForEach(photos.indices, id: \.self) { index in
                                     PulsoRemoteImage(url: photos[index])
-                                        .frame(width: 260, height: 170)
-                                        .clipShape(palette.cardShape)
+                                        .frame(width: index == 0 ? 240 : 120, height: 160)
+                                        .clipShape(palette.innerShape)
                                         .accessibilityLabel(Text(verbatim: localizedFormat("building_detail_photo", building.name)))
                                 }
                             }
+                            .padding(.horizontal, PulsoSpace.s4)
+                            .padding(.trailing, PulsoSpace.s8)
                         }
-                        .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+                        .listRowInsets(EdgeInsets(top: PulsoSpace.s4, leading: 0, bottom: PulsoSpace.s2, trailing: 0))
                     }
-                    .listRowBackground(Color.clear)
-                }
-                Section {
-                    // 名字、类型和地址直接在页面上；收藏在顶栏（Android 场馆建筑页）。
-                    VStack(alignment: .leading, spacing: PulsoSpace.s2) {
-                        Text(verbatim: building.name).font(.title.bold()).foregroundStyle(palette.text)
-                        Text(BuildingType.fromWire(building.buildingType).labelKey).font(.subheadline).foregroundStyle(palette.secondaryText)
+                    // 名字和地址直接在页面上；收藏在顶栏（Android 场馆建筑页）。
+                    VStack(alignment: .leading, spacing: PulsoSpace.s4) {
+                        Text(verbatim: building.name).font(.title2.weight(.semibold)).foregroundStyle(palette.text)
                         if !building.address.isEmpty {
-                            Label { Text(verbatim: building.address) } icon: { Image(systemName: "mappin.and.ellipse") }
-                                .font(.subheadline)
-                                .foregroundStyle(palette.secondaryText)
+                            HStack(alignment: .top, spacing: PulsoSpace.s2) {
+                                Image(systemName: "mappin")
+                                Text(verbatim: building.address)
+                            }
+                            .font(.footnote)
+                            .foregroundStyle(palette.secondaryText)
                         }
                     }
-                    .listRowInsets(EdgeInsets(top: PulsoSpace.s2, leading: 0, bottom: PulsoSpace.s3, trailing: 0))
+                    .listRowInsets(EdgeInsets(top: PulsoSpace.s2, leading: PulsoSpace.s4, bottom: PulsoSpace.s2, trailing: PulsoSpace.s4))
                     PulsoUnderlineTabRow([VenueDetailTab.venue, .activities], selection: $model.tab) { tab in
                         Text(tab == .venue ? "venue_detail_tab_venue" : "venue_detail_tab_activities")
                     }
-                    .listRowInsets(EdgeInsets())
+                    .listRowInsets(EdgeInsets(top: PulsoSpace.s2, leading: PulsoSpace.s4, bottom: PulsoSpace.s2, trailing: PulsoSpace.s4))
                 }
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
@@ -118,36 +120,30 @@ struct BuildingDetailView: View {
                 case .venue:
                     Section {
                         if let venue = model.venue {
-                            NavigationLink(value: NearRoute.venue(venueId: venue.id)) {
-                                HStack(spacing: 12) {
-                                    ActivityTypeCover(url: model.imageURL(venue.images.min { $0.sortOrder < $1.sortOrder }?.imageId), activityType: venue.publishedActivityTypes.first?.kind ?? .boardGame, iconSize: 24)
-                                        .frame(width: 64, height: 64)
-                                        .clipShape(.rect(cornerRadius: 12))
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text(verbatim: venue.displayName).font(.headline)
-                                        PulsoFlowLayout(spacing: 4) {
-                                            ForEach(venue.publishedActivityTypes, id: \.self) { ActivityTypeTag(activityType: $0.kind) }
-                                        }
-                                    }
-                                }
-                            }
+                            venueCard(venue)
                         } else {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("building_detail_no_venue").font(.subheadline.weight(.semibold))
-                                Text("building_detail_no_venue_body").font(.footnote).foregroundStyle(.secondary)
-                            }
+                            PulsoEmptyState(Text("building_detail_no_venue"), description: Text("building_detail_no_venue_body"))
+                                .padding(.top, PulsoSpace.s6)
                         }
                     }
+                    .listRowInsets(EdgeInsets(top: PulsoSpace.s2, leading: PulsoSpace.s4, bottom: PulsoSpace.s2, trailing: PulsoSpace.s4))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
                 case .activities:
                     BuildingActivitiesSection(activities: model.activities, imageURL: { model.imageURL($0) }, onRetry: { Task { await model.refresh() } })
                 }
             }
+            .listStyle(.plain)
+            .listSectionSeparator(.hidden)
+            .scrollContentBackground(.hidden)
             .refreshable { await model.refresh() }
             .navigationTitle(Text(verbatim: building.name))
             .toolbar {
+                // Android 顶栏的心形是一个图标，不垫底。
                 ToolbarItem(placement: .topBarTrailing) {
                     FavoriteHeart(target: .building, id: building.id, name: building.name)
                 }
+                .sharedBackgroundVisibility(.hidden)
             }
         } else if model.building.isLoading {
             ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -162,5 +158,34 @@ struct BuildingDetailView: View {
                 Button("venue_detail_back_to_explore") { shell?.open(.explore) }
             }
         }
+    }
+
+    /** 楼里营业的那家：封面、项目、现在开没开，点开进详情（Android `BuildingVenueCard`）。 */
+    private func venueCard(_ venue: VenueDetail) -> some View {
+        let cover = venue.images.min { $0.sortOrder < $1.sortOrder }?.imageId ?? venue.building.images.min { $0.sortOrder < $1.sortOrder }?.imageId
+        return Button { shell?.push(NearRoute.venue(venueId: venue.id)) } label: {
+            PulsoCard {
+                HStack(spacing: PulsoSpace.s3) {
+                    ActivityTypeCover(url: model.imageURL(cover), activityType: venue.activityTypes.first?.kind ?? .boardGame, iconSize: 24)
+                        .frame(width: 72, height: 72)
+                        .clipShape(palette.innerShape)
+                    VStack(alignment: .leading, spacing: PulsoSpace.s1) {
+                        Text(verbatim: venue.displayName).font(.headline).foregroundStyle(palette.text).lineLimit(2)
+                        if !venue.activityTypes.isEmpty {
+                            Text(verbatim: venue.activityTypes.map { String(localized: $0.kind.labelResource) }.joined(separator: " · "))
+                                .font(.footnote)
+                                .foregroundStyle(palette.secondaryText)
+                        }
+                        if let status = venueOpenStatus(venueWeek(venue.hours), timezone: venue.timezone) {
+                            VenueOpenChip(status: status)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    Image(systemName: "chevron.right").foregroundStyle(palette.secondaryText)
+                }
+                .padding(PulsoSpace.s3)
+            }
+        }
+        .buttonStyle(.plain)
     }
 }

@@ -78,7 +78,7 @@ struct ProfileIdentitiesView: View {
                     }
                     .font(.headline)
                     .foregroundStyle(palette.text)
-                    Text(languageKey(profile.profileLanguage)).font(.subheadline).foregroundStyle(palette.secondaryText)
+                    Text(profile.profileLanguage.profileLabelKey).font(.subheadline).foregroundStyle(palette.secondaryText)
                 }
                 Spacer(minLength: 0)
                 if isCurrent {
@@ -148,15 +148,6 @@ struct ProfileIdentitiesView: View {
                     .accessibilityLabel(Text("profile_identities_citypulso_id_edit"))
                 }
             }
-        }
-    }
-
-    private func languageKey(_ language: PulsoLanguage) -> LocalizedStringKey {
-        switch language {
-        case .zh: "profile_lang_zh"
-        case .zhHant: "profile_lang_zh_hant"
-        case .en: "profile_lang_en"
-        case .fr: "profile_lang_fr"
         }
     }
 }

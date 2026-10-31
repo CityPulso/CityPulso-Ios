@@ -56,6 +56,11 @@ struct PaymentMethodsView: View {
         }
         .refreshable { model.refresh() }
         .navigationTitle("payment_methods_title")
+        .toolbar {
+            if !model.items.isEmpty {
+                ToolbarItem(placement: .topBarTrailing) { PulsoStackToggleButton(expanded: $deckOpen) }
+            }
+        }
         // Adding a card sits at the bottom of the page.
         .safeAreaInset(edge: .bottom) {
             Button { Task { await model.startAdd() } } label: {

@@ -197,6 +197,9 @@ struct ForumDetailView: View {
             case .rules: rules(forum.settings)
             }
         }
+        // 封面贴着顶栏，各块之间不留系统分组的大空（Android 论坛页是一整列）。
+        .listSectionSpacing(PulsoSpace.s3)
+        .contentMargins(.top, 0, for: .scrollContent)
         .refreshable { await model.load() }
         .overlay(alignment: .bottomTrailing) {
             if forum.status == .active, model.tab == .posts {

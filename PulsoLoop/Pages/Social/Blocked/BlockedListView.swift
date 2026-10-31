@@ -57,6 +57,7 @@ struct BlockedListView: View {
                                     }
                                 }
                             }
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         }
                         // 解除拉黑：灰色柔和小按钮（Android 黑名单行）；不用按住确认（hold-confirm 规则里属于普通点击）。
                         Button("shell_social_unblock") { Task { await model.unblock(item) } }
@@ -64,6 +65,7 @@ struct BlockedListView: View {
                             .disabled(model.busyId == item.blockedProfileId)
                     }
                     .navigationLinkIndicatorVisibility(.hidden)
+                    .listRowBackground(Color.clear)
                     .onAppear { if item.blockedProfileId == rows.items.last?.blockedProfileId { rows.loadMore() } }
                 }
             } else if rows.isLoading {
@@ -75,6 +77,7 @@ struct BlockedListView: View {
             }
         }
         .listStyle(.plain)
+        .scrollContentBackground(.hidden)
         .navigationTitle("shell_social_blocked_title")
         .refreshable { await model.rows.refresh() }
         .task { await model.rows.observe() }

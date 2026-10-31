@@ -23,6 +23,7 @@ struct ChangePasswordView: View {
                 .font(.footnote)
                 .foregroundStyle(palette.secondaryText)
                 PulsoTextField("signup_code", text: $model.verificationCode)
+                    .disabled(!hasPrimary)
                     .textContentType(.oneTimeCode)
                     .keyboardType(.numberPad)
                     .onChange(of: model.verificationCode) { _, value in
@@ -37,14 +38,20 @@ struct ChangePasswordView: View {
                         PulsoButtonLabel("signup_send_code", loading: model.sendingCode)
                     }
                     .buttonStyle(.pulso(.outline, fullWidth: true))
-                    .disabled(model.sendingCode)
+                    .disabled(!hasPrimary || model.sendingCode || model.submitting)
                     Button {
                         Task { await model.changePassword() }
                     } label: {
                         PulsoButtonLabel("account_security_change_password", loading: model.submitting)
                     }
                     .buttonStyle(.pulso(fullWidth: true))
-                    .disabled(model.submitting)
+                    // 填齐才能提交（Android 同样的条件）。
+                    .disabled(
+                        !hasPrimary || model.submitting || model.sendingCode
+                            || model.newPassword.trimmingCharacters(in: .whitespaces).isEmpty
+                            || model.confirmPassword.trimmingCharacters(in: .whitespaces).isEmpty
+                            || model.verificationCode.count != 6
+                    )
                 }
             }
             .padding(PulsoSpace.s4)
@@ -52,4 +59,6 @@ struct ChangePasswordView: View {
         .navigationTitle("account_security_change_password")
         .task { await model.emails.observe() }
     }
+
+    private var hasPrimary: Bool { model.emails.verifiedPrimaryEmail != nil }
 }
