@@ -182,7 +182,7 @@ extension PaymentsPaymentAccountStatus {
         case .onboarding: RadixScale.amber.lightStep(9)
         case .active: RadixScale.green.lightStep(9)
         case .restricted: RadixScale.red.lightStep(9)
-        case .disabled: palette.secondaryText
+        case .disabled: RadixScale.slate.lightStep(9)
         }
     }
 }

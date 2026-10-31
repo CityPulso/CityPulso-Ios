@@ -1,3 +1,4 @@
+import PulsoLinkUI
 import SwiftUI
 
 /** 系统授权（对应 Android `PermissionsScreen`）。 */

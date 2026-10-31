@@ -104,9 +104,9 @@ struct ForumSearchView: View {
                 .padding(.horizontal, PulsoSpace.s4)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: PulsoSpace.s2) {
-                    PulsoChoiceChip(Text("discussion_all_sports"), selected: model.sport == nil) { model.sport = nil }
-                    ForEach(ForumSport.allCases, id: \.self) { sport in
-                        PulsoChoiceChip(Text(sport.labelKey), image: sport.sport.map { Image($0.iconAsset) }, selected: model.sport == sport) { model.sport = sport }
+                    PulsoChoiceChip(Text("discussion_all_activity_types"), selected: model.activityType == nil) { model.activityType = nil }
+                    ForEach(ForumActivityType.allCases, id: \.self) { activityType in
+                        PulsoChoiceChip(Text(activityType.labelKey), image: activityType.activityType.map { Image($0.iconAsset) }, selected: model.activityType == activityType) { model.activityType = activityType }
                     }
                     ForEach(ForumSort.allCases, id: \.self) { sort in
                         PulsoChoiceChip(Text(sort.labelKey), selected: model.sort == sort) { model.sort = sort }
