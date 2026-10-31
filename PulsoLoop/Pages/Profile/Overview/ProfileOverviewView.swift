@@ -89,8 +89,8 @@ struct ProfileOverviewView: View {
                 LinearGradient(colors: [.clear, palette.background], startPoint: .top, endPoint: .bottom)
                     .frame(height: 72)
             }
-            // 背景图往上铺到状态栏下面。
-            .ignoresSafeArea(edges: .top)
+            // 背景图往上铺到状态栏下面：滚动内容从安全区下面开始，背景往上多画一截（滚动视图不裁安全区）。
+            .padding(.top, -120)
             .allowsHitTesting(false)
         }
     }

@@ -249,7 +249,7 @@ struct ForumDetailView: View {
                     Button {
                         Task { await model.toggleFollow() }
                     } label: {
-                        Text((forum.favoritedByMe ? "discussion_unfollow" : "discussion_follow") as LocalizedStringKey)
+                        Text((forum.favoritedByMe ? "discussion_following" : "discussion_follow") as LocalizedStringKey)
                             .frame(maxWidth: .infinity)
                     }
                     // 已收藏是灰色柔和，没收藏是实心（Android 论坛头部）。
@@ -303,7 +303,7 @@ struct ForumDetailView: View {
             .listRowBackground(Color.clear)
         }
         if !model.events.items.isEmpty {
-            Section("discussion_forum_events") {
+            Section {
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHStack(spacing: 10) {
                         ForEach(model.events.items, id: \.eventId) { event in
@@ -315,7 +315,16 @@ struct ForumDetailView: View {
                         }
                     }
                 }
+            } header: {
+                HStack(spacing: PulsoSpace.s2) {
+                    Image(systemName: "calendar").foregroundStyle(palette.accent.step(9))
+                    Text("discussion_forum_events").foregroundStyle(palette.text)
+                }
+                .font(.headline)
+                .textCase(nil)
             }
+            .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets())
         }
         if !model.announcements.isEmpty {
             Section("discussion_announcements") {
@@ -382,15 +391,25 @@ struct ForumDetailView: View {
     private func eventCard(_ event: ForumEvent) -> some View {
         let info = model.eventInfo[event.eventId]
         return Button { shell?.push(LoopRoute.event(sport: event.sport, eventId: event.eventId)) } label: {
-            VStack(alignment: .leading, spacing: 4) {
+            // 卡片：上面封面，下面标题、强调色时间、地点（Android 论坛里的活动）。
+            VStack(alignment: .leading, spacing: 0) {
                 SportCover(url: model.imageURL(info?.coverImageId), sport: event.sport, iconSize: 28)
-                    .frame(width: 180, height: 90)
-                    .clipShape(.rect(cornerRadius: 8))
-                Text(verbatim: info?.title ?? event.postTitle).font(.subheadline.weight(.semibold)).lineLimit(1)
-                Text(verbatim: [info.flatMap { DateTimeFormatters.monthDayTime($0.startsAt) }, info?.venueName].compactMap { $0 }.joined(separator: " · "))
-                    .font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                    .frame(width: 220, height: 120)
+                    .clipped()
+                VStack(alignment: .leading, spacing: PulsoSpace.s1) {
+                    Text(verbatim: info?.title ?? event.postTitle).font(.subheadline.weight(.semibold)).foregroundStyle(palette.text).lineLimit(1)
+                    if let when = info.flatMap({ DateTimeFormatters.monthDayTime($0.startsAt) }) {
+                        Text(verbatim: when).font(.caption.weight(.semibold)).foregroundStyle(palette.accent.step(11)).lineLimit(1)
+                    }
+                    if let venue = info?.venueName {
+                        Text(verbatim: venue).font(.caption).foregroundStyle(palette.secondaryText).lineLimit(1)
+                    }
+                }
+                .padding(PulsoSpace.s3)
             }
-            .frame(width: 180, alignment: .leading)
+            .frame(width: 220, alignment: .leading)
+            .background(palette.panel, in: palette.cardShape)
+            .clipShape(palette.cardShape)
         }
         .buttonStyle(.plain)
     }

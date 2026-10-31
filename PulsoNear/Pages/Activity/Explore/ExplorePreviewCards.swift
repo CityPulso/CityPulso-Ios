@@ -193,16 +193,19 @@ private struct MetaLine: View {
 /** 活动类型标签，用活动类型自己的颜色（和地图针一样）。 */
 struct ActivityTypeTag: View {
     let activityType: NearActivityKind
+    /** 列表行里的小标签（Android 收藏行）：小字、小圆角方块。 */
+    var compact = false
 
     var body: some View {
-        HStack(spacing: 4) {
-            Image(activityType.iconAsset).resizable().scaledToFit().frame(width: 16, height: 16)
-            Text(activityType.labelKey).font(.subheadline).foregroundStyle(activityType.pinHeading)
+        let shape = RoundedRectangle(cornerRadius: compact ? 4 : 14, style: .continuous)
+        HStack(spacing: compact ? 3 : 4) {
+            Image(activityType.iconAsset).resizable().scaledToFit().frame(width: compact ? 13 : 16, height: compact ? 13 : 16)
+            Text(activityType.labelKey).font(compact ? .caption : .subheadline).foregroundStyle(activityType.pinHeading).lineLimit(1)
         }
-        .padding(.horizontal, 8)
-        .frame(height: 28)
-        .background(activityType.pinAccentBg, in: .capsule)
-        .overlay(Capsule().stroke(activityType.pinAccent.opacity(0.4), lineWidth: 0.5))
+        .padding(.horizontal, compact ? 6 : 8)
+        .frame(height: compact ? 22 : 28)
+        .background(activityType.pinAccentBg, in: shape)
+        .overlay(shape.stroke(activityType.pinAccent.opacity(0.4), lineWidth: 0.5))
     }
 }
 
@@ -221,9 +224,10 @@ struct VenueOpenChip: View {
         Text(verbatim: text)
             .font(.caption.weight(.semibold))
             .foregroundStyle(color)
+            .lineLimit(1)
             .padding(.horizontal, 8)
-            .padding(.vertical, 2)
-            .background(color.opacity(0.14), in: .capsule)
+            .padding(.vertical, 3)
+            .background(color.opacity(0.14), in: RoundedRectangle(cornerRadius: 4, style: .continuous))
     }
 
     private func closedText(opensAt: String, inDays: Int, dayOfWeek: Int) -> String {

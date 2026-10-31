@@ -94,6 +94,7 @@ struct ChatHubView: View {
     private func conversationLink(_ row: ConversationRowUi) -> some View {
         NavigationLink(value: LoopRoute.conversation(conversationId: row.conversationId, isGroup: row.isGroup)) {
             ConversationRowView(row: row)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, PulsoSpace.s4)
                 .padding(.vertical, PulsoSpace.s3)
                 .contentShape(Rectangle())

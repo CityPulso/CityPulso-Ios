@@ -21,7 +21,7 @@ struct VenueOverviewSections: View {
             Section("venue_detail_sections_about") {
                 if !about.isEmpty {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(verbatim: about).font(.subheadline).lineLimit(expanded ? nil : 4)
+                        Text(verbatim: about).font(.body).foregroundStyle(.secondary).lineLimit(expanded ? nil : 4)
                         Button((expanded ? "venue_detail_read_less" : "venue_detail_read_more") as LocalizedStringKey) { expanded.toggle() }
                             .font(.footnote)
                             .buttonStyle(.borderless)
@@ -40,8 +40,8 @@ struct VenueOverviewSections: View {
                                 }
                                 Spacer(minLength: 0)
                             }
-                            .padding(10)
-                            .background(Color(.tertiarySystemFill), in: .rect(cornerRadius: 12))
+                            .padding(PulsoSpace.s3)
+                            .overlay { RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Color.secondary.opacity(0.3), lineWidth: 1) }
                         }
                     }
                 }
@@ -60,6 +60,8 @@ struct VenueOverviewSections: View {
                     }
                 }
             }
+            .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets(top: PulsoSpace.s2, leading: 0, bottom: PulsoSpace.s2, trailing: 0))
         }
         hours
         location

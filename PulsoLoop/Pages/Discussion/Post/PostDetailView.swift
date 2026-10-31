@@ -303,11 +303,7 @@ struct PostDetailView: View {
                         .disabled(model.followBusy)
                     }
                 }
-                HStack(alignment: .top) {
-                    Text(verbatim: data.title).font(.title2.bold())
-                    Spacer(minLength: 0)
-                    PostKindChip(kind: data.kind)
-                }
+                Text(verbatim: data.title).font(.title2.bold())
                 if let edited = data.editedAt {
                     Text(verbatim: localizedFormat("discussion_edited_at", DateTimeFormatters.monthDayTime(edited) ?? "")).font(.caption2).foregroundStyle(.secondary)
                 }

@@ -374,9 +374,13 @@ struct FavoritesView: View {
                                         }
                                         Text(verbatim: localizedFormat("shell_views_count", item.venueView)).font(.caption2).foregroundStyle(palette.secondaryText)
                                     }
-                                    PulsoFlowLayout(spacing: PulsoSpace.s1) {
-                                        ForEach(item.venueActivityTypes, id: \.self) { ActivityTypeTag(activityType: $0.kind) }
+                                    // 一行放不下的标签被裁掉（Android 收藏行）。
+                                    HStack(spacing: PulsoSpace.s1) {
+                                        ForEach(item.venueActivityTypes, id: \.self) { ActivityTypeTag(activityType: $0.kind, compact: true) }
                                     }
+                                    .fixedSize()
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .clipped()
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             }

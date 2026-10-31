@@ -4,7 +4,8 @@ import SwiftUI
 /**
  * 悬浮底栏（对应 Android `PulsoFloatingShellNavigation`）：左边胶囊放槽 1–4 和「应用」，右边单独的圆形按钮放槽 6。
  * 材质用 iOS 26 系统 Liquid Glass（`glassEffect`），系统 TabView 在 iPhone 上最多 5 个 Tab，排不下这套布局。
- * 「应用」展开时，其余页面的格子在同一块玻璃里从底栏上方长出来。
+ * 「应用」展开时，其余页面的格子在同一块玻璃里从胶囊上方长出来（和胶囊同宽，标题「应用」）。
+ * 底栏只放图标，选中项垫一块浅强调色圆；格子里的图标也在浅强调色圆里（Android 底栏 / 应用面板）。
  */
 public struct PulsoFloatingShellNavigation: View {
     private static let barHeight: CGFloat = 62
@@ -19,6 +20,7 @@ public struct PulsoFloatingShellNavigation: View {
 
     @Namespace private var glass
     @Namespace private var highlight
+    @Environment(\.pulsoPalette) private var palette
 
     public init(
         slots: [ResolvedAndroidNavSlot],
@@ -40,9 +42,12 @@ public struct PulsoFloatingShellNavigation: View {
         GlassEffectContainer(spacing: Self.gap) {
             VStack(spacing: Self.gap) {
                 if appsExpanded {
-                    tray
-                        .glassEffect(.regular, in: .rect(cornerRadius: 28))
-                        .glassEffectID("tray", in: glass)
+                    HStack(spacing: Self.gap) {
+                        tray
+                            .glassEffect(.regular, in: .rect(cornerRadius: 28))
+                            .glassEffectID("tray", in: glass)
+                        Color.clear.frame(width: Self.barHeight, height: 1)
+                    }
                 }
                 HStack(spacing: Self.gap) {
                     capsule
@@ -86,7 +91,7 @@ public struct PulsoFloatingShellNavigation: View {
             Image(systemName: action.iconPack.systemImage)
                 .symbolVariant(selected ? .fill : .none)
                 .font(.system(size: 22, weight: .medium))
-                .foregroundStyle(selected ? AnyShapeStyle(.tint) : AnyShapeStyle(.primary))
+                .foregroundStyle(selected ? palette.accent.step(9) : palette.text)
                 .frame(width: Self.barHeight, height: Self.barHeight)
                 .contentShape(.circle)
         }
@@ -102,55 +107,55 @@ public struct PulsoFloatingShellNavigation: View {
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
-            VStack(spacing: 2) {
-                Image(systemName: systemImage)
-                    .symbolVariant(selected ? .fill : .none)
-                    .font(.system(size: 20, weight: .medium))
-                    .frame(height: 26)
-                Text(label)
-                    .font(.system(size: 10, weight: .semibold))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-            }
-            .foregroundStyle(selected ? AnyShapeStyle(.tint) : AnyShapeStyle(.primary))
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background {
-                if selected {
-                    Capsule()
-                        .fill(.fill.tertiary)
-                        .matchedGeometryEffect(id: "highlight", in: highlight)
+            Image(systemName: systemImage)
+                .symbolVariant(selected ? .fill : .none)
+                .font(.system(size: 21, weight: .medium))
+                .foregroundStyle(selected ? palette.accent.step(9) : palette.text)
+                .frame(width: 46, height: 46)
+                .background {
+                    if selected {
+                        Circle()
+                            .fill(palette.accent.step(3))
+                            .matchedGeometryEffect(id: "highlight", in: highlight)
+                    }
                 }
-            }
-            .contentShape(.capsule)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .contentShape(.capsule)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(Text(label))
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
     private var tray: some View {
-        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 4), spacing: 16) {
-            ForEach(trayDestinations, id: \.self) { destination in
-                Button {
-                    onOpen(destination)
-                } label: {
-                    VStack(spacing: 6) {
-                        Image(systemName: destination.defaultIconPack.systemImage)
-                            .symbolVariant(destination == selection ? .fill : .none)
-                            .font(.system(size: 22, weight: .medium))
-                            .frame(height: 28)
-                        Text(destination.labelKey)
-                            .font(.caption2.weight(.medium))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.8)
+        VStack(alignment: .leading, spacing: PulsoSpace.s4) {
+            Text("home_nav_apps").font(.subheadline).foregroundStyle(palette.secondaryText)
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 4), spacing: PulsoSpace.s5) {
+                ForEach(trayDestinations, id: \.self) { destination in
+                    Button {
+                        onOpen(destination)
+                    } label: {
+                        VStack(spacing: PulsoSpace.s2) {
+                            Image(systemName: destination.defaultIconPack.systemImage)
+                                .symbolVariant(destination == selection ? .fill : .none)
+                                .font(.system(size: 21, weight: .medium))
+                                .foregroundStyle(palette.accent.step(9))
+                                .frame(width: 52, height: 52)
+                                .background(palette.accent.step(3), in: Circle())
+                            Text(destination.labelKey)
+                                .font(.caption.weight(.medium))
+                                .foregroundStyle(palette.text)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .contentShape(.rect)
                     }
-                    .foregroundStyle(destination == selection ? AnyShapeStyle(.tint) : AnyShapeStyle(.primary))
-                    .frame(maxWidth: .infinity)
-                    .contentShape(.rect)
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
         }
-        .padding(.vertical, 20)
-        .padding(.horizontal, 12)
+        .padding(.vertical, PulsoSpace.s5)
+        .padding(.horizontal, PulsoSpace.s4)
     }
 }
