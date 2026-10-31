@@ -109,17 +109,25 @@ jobs:
           echo "SIMULATOR_UDID=$UDID" >> "$GITHUB_ENV"
           xcrun simctl list devices | grep "$UDID"
       - name: Run screenshot tests
+        env:
+          SCREENSHOT_EMAIL: ${{ secrets.SCREENSHOT_EMAIL }}
+          SCREENSHOT_PASSWORD: ${{ secrets.SCREENSHOT_PASSWORD }}
         run: |
           set -euo pipefail
           mkdir -p "screenshots/${{ matrix.device }}"
           # 两个 App 各跑一遍；一个崩了不影响另一个的截图。
           status=0
           for scheme in PulsoLoop PulsoNear; do
-            TEST_RUNNER_SCREENSHOT_DIR="$PWD/screenshots/${{ matrix.device }}" xcodebuild test \
+            # 连 dev 后端的公网域名（各 App 自己的 PULSO_PUBLIC_HOST），用截图账号登录拿真数据。
+            TEST_RUNNER_SCREENSHOT_DIR="$PWD/screenshots/${{ matrix.device }}" \
+            TEST_RUNNER_SCREENSHOT_EMAIL="$SCREENSHOT_EMAIL" \
+            TEST_RUNNER_SCREENSHOT_PASSWORD="$SCREENSHOT_PASSWORD" \
+            xcodebuild test \
               -project CityPulso.xcodeproj \
               -scheme "$scheme" \
               -destination "id=$SIMULATOR_UDID" \
               -derivedDataPath build \
+              'PULSO_API_BASE_URL=https://$(PULSO_PUBLIC_HOST)/api' \
               CODE_SIGNING_ALLOWED=NO || status=1
           done
           exit $status

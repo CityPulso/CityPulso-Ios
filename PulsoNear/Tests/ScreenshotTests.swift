@@ -8,9 +8,24 @@ import XCTest
 /**
  * 页面截图：在模拟器里把页面画进一个窗口存成 PNG，CI 当 artifact 上传，
  * 用来看页面真实长什么样（没有 Mac 时唯一能看到的方式）。
+ *
+ * 登录后的页面连 dev 后端（公网域名）拿真数据：账号从环境变量 `SCREENSHOT_EMAIL` / `SCREENSHOT_PASSWORD`
+ * 读（CI 里是 GitHub Secrets，经 `TEST_RUNNER_` 前缀传进来），源码里没有账号。
  */
 @MainActor
 final class ScreenshotTests: XCTestCase {
+    private static var signedIn = false
+
+    /** 用截图账号登录一次（会话留在内存里；CI 不签名时 Keychain 写不进去也没关系）。 */
+    private func signIn() async throws {
+        guard !Self.signedIn else { return }
+        let environment = ProcessInfo.processInfo.environment
+        let email = try XCTUnwrap(environment["SCREENSHOT_EMAIL"], "SCREENSHOT_EMAIL 没有设置")
+        let password = try XCTUnwrap(environment["SCREENSHOT_PASSWORD"], "SCREENSHOT_PASSWORD 没有设置")
+        try await Container.shared.communitySignIn().loginWithEmail(email: email, password: password)
+        Self.signedIn = true
+    }
+
     func testDefaultTabBar() async throws {
         try await capture(ShellPreview(appsExpanded: false), name: "near-shell-default")
     }
@@ -34,6 +49,7 @@ final class ScreenshotTests: XCTestCase {
     }
 
     func testSettings() async throws {
+        try await signIn()
         let session = PulsoSessionModel()
         try await capture(NavigationStack { SettingsView() }.environment(session), name: "near-settings")
         try await capture(NavigationStack { ThemeSettingsView() }, name: "near-settings-theme")
@@ -44,7 +60,7 @@ final class ScreenshotTests: XCTestCase {
     }
 
     func testProfile() async throws {
-        Container.shared.profileStore().set(.community(try sampleAccount()))
+        try await signIn()
         let session = PulsoSessionModel()
         try await capture(NavigationStack { ProfileOverviewView().nearRoutes() }.environment(session), name: "near-profile")
         try await capture(NavigationStack { ProfileEditView() }, name: "near-profile-edit")
@@ -52,10 +68,10 @@ final class ScreenshotTests: XCTestCase {
         try await capture(NavigationStack { ProfileIdentitiesView() }, name: "near-identities")
     }
 
-    /** 每个底栏页面（没有后端时显示加载 / 空状态 / 出错，看布局用）。 */
-    /** 每个底栏页面（没有后端时显示加载 / 空状态 / 出错，看布局用）。 */
+    /** 每个底栏页面。 */
+    /** 每个底栏页面。 */
     func testShellPages() async throws {
-        Container.shared.profileStore().set(.community(try sampleAccount()))
+        try await signIn()
         let session = PulsoSessionModel()
         for destination in ShellDestination.allCases where Container.shared.pulsoCoreConfig().shellDestinations.contains(destination) {
             try await capture(NavigationStack { NearShellPages.page(for: destination) }.environment(session), name: "near-tab-\(destination.rawValue.lowercased())")
@@ -64,7 +80,7 @@ final class ScreenshotTests: XCTestCase {
 
     /** 不需要 id 的二级页面。 */
     func testRoutes() async throws {
-        Container.shared.profileStore().set(.community(try sampleAccount()))
+        try await signIn()
         let session = PulsoSessionModel()
         let routes: [(String, NearRoute)] = [
             ("theme", NearRoute.theme),
@@ -102,30 +118,13 @@ final class ScreenshotTests: XCTestCase {
         }
     }
 
-    /** 资料页用的示例账号（不连网；背景图地址取不到时显示占位）。 */
-    private func sampleAccount() throws -> FullAccountInformationWithCommunityProfile {
-        let json = #"""
-        {"account":{"id":"acc-1","account_status":"active","signup_platform":"pulsonear",
-         "created_at":"2026-01-01T00:00:00Z","updated_at":"2026-01-01T00:00:00Z"},
-         "emails":[{"id":"e1","account_id":"acc-1","email":"lin@example.com","is_primary":true,
-           "verified_at":"2026-01-01T00:00:00Z","created_at":"","updated_at":""}],
-         "community_profile":{"profile_id":"prof-1","account_id":"acc-1","citypulso_id":"lin_boardgame",
-          "profile_language":"zh","display_name":"林小羽","first_name":"小羽","last_name":"林",
-          "city":"Toronto","country":"Canada","gender":"female","birthday":"1996-05-20T00:00:00Z",
-          "website":"citypulso.com","bio":"周五晚上桌游，周末偶尔打麻将。",
-          "created_at":"2026-01-01T00:00:00Z","updated_at":"2026-01-01T00:00:00Z",
-          "community_roles":["pulser","creator"],"favorite_activities":["board_game","mahjong"]}}
-        """#
-        return try WireCoding.decoder.decode(FullAccountInformationWithCommunityProfile.self, from: Data(json.utf8))
-    }
-
     private func capture(_ view: some View, name: String, style: UIUserInterfaceStyle = .light) async throws {
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.first as? UIWindowScene)
         let window = UIWindow(windowScene: scene)
         window.overrideUserInterfaceStyle = style
         window.rootViewController = UIHostingController(rootView: view)
         window.makeKeyAndVisible()
-        try await Task.sleep(for: .seconds(2))
+        try await waitUntilLoaded(window)
 
         let png = UIGraphicsImageRenderer(bounds: window.bounds).pngData { _ in
             window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
@@ -134,6 +133,22 @@ final class ScreenshotTests: XCTestCase {
         try png.write(to: URL(filePath: directory).appending(path: "\(name).png"))
         add(XCTAttachment(data: png, uniformTypeIdentifier: "public.png"))
         window.isHidden = true
+    }
+
+    /** 等页面数据回来：转圈消失后再等一会儿让图片画上；最多等 15 秒，超时照样截（截图里能看出还在加载）。 */
+    private func waitUntilLoaded(_ window: UIWindow) async throws {
+        try await Task.sleep(for: .seconds(1.5))
+        for _ in 0..<27 where Self.isSpinning(window) {
+            try await Task.sleep(for: .milliseconds(500))
+        }
+        try await Task.sleep(for: .seconds(1.5))
+    }
+
+    private static func isSpinning(_ view: UIView) -> Bool {
+        if let indicator = view as? UIActivityIndicatorView, indicator.isAnimating, !indicator.isHidden, indicator.window != nil {
+            return true
+        }
+        return view.subviews.contains { !$0.isHidden && $0.alpha > 0 && isSpinning($0) }
     }
 }
 
