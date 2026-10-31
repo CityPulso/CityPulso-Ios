@@ -24,7 +24,13 @@ final class ScreenshotTests: XCTestCase {
         let password = try XCTUnwrap(environment["SCREENSHOT_PASSWORD"], "SCREENSHOT_PASSWORD 没有设置")
         try await Container.shared.communitySignIn().loginWithEmail(email: email, password: password)
         // App 里是主界面回到前台时刷新定位；截图直接画页面，这里先拿一次（CI 把模拟器放在温哥华）。
+        // 测试宿主拿不到定位授权时，直接放一个温哥华的缓存位置（和 App 用上次定位是同一条路）。
         await Container.shared.deviceLocationBootstrap().refresh()
+        if Container.shared.deviceLocationStore().location.value == nil {
+            Container.shared.deviceLocationStore().save(
+                DeviceLocation(point: PickedLocation(latitude: 49.2827, longitude: -123.1207), label: "Vancouver")
+            )
+        }
         Self.signedIn = true
     }
 
@@ -180,7 +186,8 @@ final class ScreenshotTests: XCTestCase {
         let directory = ProcessInfo.processInfo.environment["SCREENSHOT_DIR"] ?? NSTemporaryDirectory()
         try png.write(to: URL(filePath: directory).appending(path: "\(name).png"))
         add(XCTAttachment(data: png, uniformTypeIdentifier: "public.png"))
-        window.isHidden = true
+        // 不隐藏旧窗口（下一张盖在上面）：隐藏会触发页面的 onDisappear，编辑资料等页面会在那时自动保存，
+        // 截图账号是真账号，截图不能改它的数据。
     }
 
     /** 等页面数据回来：转圈消失后再等一会儿让图片画上；最多等 15 秒，超时照样截（截图里能看出还在加载）。 */
