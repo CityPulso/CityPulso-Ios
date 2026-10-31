@@ -214,7 +214,7 @@ private struct ShellPreview: View {
             preference: .default,
             trayDestinations: ResolvedAndroidPreference.default.appsTrayDestinations(
                 kind: .community,
-                supported: Set(ShellDestination.allCases)
+                supported: Container.shared.pulsoCoreConfig().shellDestinations
             ),
             navigator: navigator
         ) { destination in

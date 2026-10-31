@@ -82,7 +82,7 @@ final class ProfileEditModel {
     @ObservationIgnored @Injected(\.authService) private var authService
     @ObservationIgnored @Injected(\.pulsoCoreConfig) private var config
 
-    static let shortFieldMax = 100
+    nonisolated static let shortFieldMax = 100
 
     var isDirty: Bool { form != baseline }
     var websiteError: Bool {

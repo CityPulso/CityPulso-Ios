@@ -175,6 +175,12 @@ final class ScreenshotTests: XCTestCase {
             routes.append(("tournament", .tournament(tournamentId: tournament.id)))
         }
 
+        let courses = Container.shared.courseService().pageMyEnrollments()
+        await courses.refresh()
+        if let enrollment = courses.items.first {
+            routes.append(("course", .course(courseId: enrollment.courseId)))
+        }
+
         for (name, route) in routes {
             try await capture(NavigationStack { route.page.loopRoutes() }.environment(session), name: "loop-detail-\(name)")
         }
@@ -232,7 +238,7 @@ private struct ShellPreview: View {
             preference: .default,
             trayDestinations: ResolvedAndroidPreference.default.appsTrayDestinations(
                 kind: .community,
-                supported: Set(ShellDestination.allCases)
+                supported: Container.shared.pulsoCoreConfig().shellDestinations
             ),
             navigator: navigator
         ) { destination in

@@ -28,7 +28,7 @@ struct NearbyActivityCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: PulsoSpace.s3) {
             HStack(alignment: .top, spacing: PulsoSpace.s3) {
-                ActivityTypeCover(url: imageURL, activityType: activityType)
+                ActivityTypeCover(url: imageURL, activityType: activityType, iconSize: 64)
                     .frame(width: 96, height: 96)
                     .clipShape(palette.innerShape)
                 VStack(alignment: .leading, spacing: PulsoSpace.s1) {

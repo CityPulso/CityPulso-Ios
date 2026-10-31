@@ -119,7 +119,7 @@ struct VenueSearchView: View {
             PulsoLoadErrorView(error) { Task { await model.refresh(index) } }
         } else {
             // 搜过或开了筛选是「没找到」，否则是「附近还没有」（Android 同样两套文案，没有按钮）。
-            let searched = !search.trimmingCharacters(in: .whitespaces).isEmpty || model.filters.activeCount > 0
+            let searched = !self.search.trimmingCharacters(in: .whitespaces).isEmpty || model.filters.activeCount > 0
             PulsoEmptyState(
                 Text(searched ? "shell_venue_search_none" : "shell_venue_search_empty"),
                 description: Text(searched ? "shell_venue_search_none_hint" : "shell_venue_search_empty_hint"),
