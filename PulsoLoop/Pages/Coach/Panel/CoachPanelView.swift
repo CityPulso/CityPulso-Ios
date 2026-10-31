@@ -255,7 +255,7 @@ struct CoachPanelView: View {
         } else if let error = list.error {
             PulsoLoadErrorView(error) { Task { await list.refresh() } }
         } else if list.isEmpty {
-            PulsoEmptyState(Text(emptyTitle), description: if let emptyBody { Text(emptyBody) }) {
+            PulsoEmptyState(Text(emptyTitle), description: emptyBody.map { Text($0) }) {
                 emptyAction()
             }
         } else {
