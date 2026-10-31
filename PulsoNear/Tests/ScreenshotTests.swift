@@ -126,6 +126,42 @@ final class ScreenshotTests: XCTestCase {
         }
     }
 
+    /**
+     * 详情页：从截图账号自己的数据里各取第一条（我发起的活动、收藏的门店、论坛最新帖子和它的论坛），再打开详情。
+     * 拿不到就跳过那一页（不写死 id，dev 库重置后照样能截）。
+     */
+    func testDetails() async throws {
+        try await signIn()
+        let session = PulsoSessionModel()
+        var routes: [(String, NearRoute)] = []
+
+        let center = ActivityCenterModel()
+        let observing = Task { await center.observe() }
+        for _ in 0 ..< 40 where center.hostedItems.isEmpty { try await Task.sleep(for: .milliseconds(250)) }
+        observing.cancel()
+        if let activity = center.hostedItems.first {
+            routes.append(("activity", .activity(activityType: activity.activityType, activityId: activity.id)))
+        }
+
+        let venues = Container.shared.favoriteService().pageVenues(VenueFavoritesFilter())
+        await venues.refresh()
+        if let venue = venues.items.first {
+            routes.append(("venue", .venue(venueId: venue.venueId)))
+            routes.append(("building", .building(buildingId: venue.building.id)))
+        }
+
+        let feed = Container.shared.discussionService().pageFeed(tab: .latest, activityType: nil, forumId: nil)
+        await feed.refresh()
+        if let post = feed.items.first {
+            routes.append(("post", .post(postId: post.id)))
+            if let forum = post.forums.first { routes.append(("forum", .forum(forumId: forum.forumId))) }
+        }
+
+        for (name, route) in routes {
+            try await capture(NavigationStack { route.page.nearRoutes() }.environment(session), name: "near-detail-\(name)")
+        }
+    }
+
     private func capture(_ view: some View, name: String, style: UIUserInterfaceStyle = .light) async throws {
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.first as? UIWindowScene)
         let window = UIWindow(windowScene: scene)

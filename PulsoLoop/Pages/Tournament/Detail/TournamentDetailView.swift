@@ -7,6 +7,7 @@ import SwiftUI
  * 标题和状态，日期 · 球馆 · 组别和报名费，然后是 关于 | 组别 | 赛程 | 场地，底部固定「立即报名」或我的报名。
  */
 struct TournamentDetailView: View {
+    @Environment(\.pulsoPalette) private var palette
     @State private var model: TournamentDetailModel
     @Environment(\.locale) private var locale
     @Environment(\.openURL) private var openURL
@@ -148,28 +149,11 @@ struct TournamentDetailView: View {
         .padding(.vertical, 4)
     }
 
+    /** 一级标签（Android `PulsoUnderlineTabRow`）：介绍 | 项目 | 赛程 | 场馆，滚动时贴顶。 */
     private var tabBar: some View {
-        HStack(spacing: 0) {
-            ForEach(TournamentDetailTab.allCases, id: \.self) { tab in
-                let selected = model.tab == tab
-                Button { model.tab = tab } label: {
-                    VStack(spacing: 6) {
-                        Text(tab.labelKey).font(.subheadline.weight(selected ? .semibold : .regular)).lineLimit(1)
-                        Capsule().fill(selected ? Color.accentColor : .clear).frame(height: 2)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .foregroundStyle(selected ? Color.accentColor : .secondary)
-                    .contentShape(.rect)
-                }
-                .buttonStyle(.plain)
-                .accessibilityAddTraits(selected ? .isSelected : [])
-            }
-        }
-        .padding(.horizontal, 16)
-        .padding(.top, 8)
-        .background(.bar)
-        .listRowInsets(EdgeInsets())
-        .textCase(nil)
+        PulsoUnderlineTabRow(TournamentDetailTab.allCases, selection: $model.tab) { Text($0.labelKey) }
+            .listRowInsets(EdgeInsets())
+            .textCase(nil)
     }
 
     @ViewBuilder
@@ -356,21 +340,19 @@ struct TournamentDetailView: View {
                             if mine.captainProfileId == model.myProfileId, mine.status == .awaitingPayment {
                                 Button("tournament_mine_pay") { Task { await model.payMine() } }.buttonStyle(.pulso())
                             } else {
-                                NavigationLink("tournament_detail_view_entry", value: LoopRoute.myTournaments).buttonStyle(.pulso(.soft))
+                                NavigationLink("tournament_detail_view_entry", value: LoopRoute.myTournaments).buttonStyle(.pulso())
                             }
                         }
                     }
                 }
                 .disabled(model.busy)
-                .controlSize(.large)
-                .padding(16)
-                .background(.bar)
+                .padding(PulsoSpace.s4)
+                .background(palette.background.shadow(.drop(color: .black.opacity(0.08), radius: 4, y: -1)))
             } else if !model.openDivisions.isEmpty {
                 Button { model.registerNow() } label: { Text("tournament_detail_register_now").frame(maxWidth: .infinity) }
                     .buttonStyle(.pulso())
-                    .controlSize(.large)
-                    .padding(16)
-                    .background(.bar)
+                    .padding(PulsoSpace.s4)
+                    .background(palette.background.shadow(.drop(color: .black.opacity(0.08), radius: 4, y: -1)))
             }
         }
     }
@@ -381,7 +363,7 @@ struct TournamentDetailView: View {
         VStack(alignment: .leading, spacing: 12) { content() }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(.background.secondary, in: .rect(cornerRadius: 16))
+            .background(palette.panel, in: palette.cardShape)
             .listRowSeparator(.hidden)
             .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
     }

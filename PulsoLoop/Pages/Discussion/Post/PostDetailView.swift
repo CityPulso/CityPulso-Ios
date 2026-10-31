@@ -246,6 +246,7 @@ struct PostDetailView: View {
     @Environment(\.fontResolutionContext) private var fontContext
     @Environment(PulsoShellNavigator.self) private var shell: PulsoShellNavigator?
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.pulsoPalette) private var palette
 
     init(postId: String) {
         _model = State(initialValue: PostDetailModel(postId: postId))
@@ -295,11 +296,10 @@ struct PostDetailView: View {
                     }
                     if let following = model.followingAuthor {
                         Button { Task { await model.toggleFollowAuthor() } } label: {
-                            if model.followBusy { ProgressView() } else { Text((following ? "discussion_following_author" : "discussion_follow_author") as LocalizedStringKey) }
+                            PulsoButtonLabel((following ? "discussion_following_author" : "discussion_follow_author") as LocalizedStringKey, loading: model.followBusy)
                         }
-                        .buttonStyle(.borderless)
-                        .controlSize(.small)
-                        .tint(following ? Color.secondary : Color.accentColor)
+                        // 已关注是灰色柔和，没关注是强调色柔和（Android 作者行右边的小按钮）。
+                        .buttonStyle(.pulso(.soft, tone: following ? .gray : .accent, size: .small))
                         .disabled(model.followBusy)
                     }
                 }
@@ -438,8 +438,11 @@ struct PostDetailView: View {
         } header: {
             HStack {
                 Text(verbatim: localizedFormat("discussion_comments_count", data.commentCount))
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(palette.text)
+                    .textCase(nil)
                 Spacer()
-                Toggle("discussion_op_only", isOn: $model.opOnly).fixedSize().font(.caption)
+                Toggle("discussion_op_only", isOn: $model.opOnly).fixedSize().font(.caption).tint(palette.accent.step(9))
             }
         }
     }
@@ -470,8 +473,9 @@ struct PostDetailView: View {
                 Image(systemName: thread != nil ? "chevron.up" : "chevron.down")
             }
             .font(.caption.weight(.medium))
+            .foregroundStyle(palette.accent.step(11))
         }
-        .buttonStyle(.borderless)
+        .buttonStyle(.plain)
         .padding(.leading, 32)
         if let thread {
             ForEach(thread.replies, id: \.id) { reply in
@@ -511,8 +515,8 @@ struct PostDetailView: View {
                 .disabled(model.posting || String(draft.characters).trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
         }
-        .padding(10)
-        .background(.bar)
+        .padding(PulsoSpace.s3)
+        .background(palette.background.shadow(.drop(color: .black.opacity(0.08), radius: 4, y: -1)))
     }
 }
 

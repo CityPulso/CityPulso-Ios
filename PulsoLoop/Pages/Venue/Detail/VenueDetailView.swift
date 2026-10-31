@@ -15,6 +15,7 @@ struct VenueDetailView: View {
     @State private var photoPage = 0
     @Environment(\.locale) private var locale
     @Environment(\.openURL) private var openURL
+    @Environment(\.pulsoPalette) private var palette
     @Environment(PulsoShellNavigator.self) private var shell: PulsoShellNavigator?
 
     init(venueId: String, sheet: VenueDetailSheet? = nil) {
@@ -27,23 +28,14 @@ struct VenueDetailView: View {
     var body: some View {
         content
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                if let venue = model.venue.data {
-                    ToolbarItem(placement: .primaryAction) {
-                        ShareLink(item: shareText(venue)) { Image(systemName: "square.and.arrow.up") }
-                            .accessibilityLabel(Text("venue_detail_action_share"))
-                    }
-                }
-            }
             .safeAreaInset(edge: .bottom) {
                 if model.venue.data != nil, let sport = model.sport, let route = model.bookRoute {
                     Button { shell?.push(route) } label: {
                         Text(verbatim: localizedFormat("venue_detail_book_sport_cta", String(localized: sport.loopSport.labelResource))).frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.pulso())
-                    .controlSize(.large)
-                    .padding()
-                    .background(.bar)
+                    .buttonStyle(.pulso(fullWidth: true))
+                    .padding(PulsoSpace.s4)
+                    .background(palette.background)
                 }
             }
             .sheet(isPresented: Binding(get: { model.purchase.open }, set: { if !$0 { model.closeMembershipSheet() } })) {
@@ -86,12 +78,8 @@ struct VenueDetailView: View {
             .refreshable { model.refresh() }
         } else if let error = model.venue.error {
             if error.kind == .notFound {
-                ContentUnavailableView {
-                    Label("venue_detail_not_found", systemImage: "building.2")
-                } description: {
-                    Text("venue_detail_not_found_body")
-                } actions: {
-                    Button("venue_detail_back_to_explore") { shell?.open(.explore) }
+                PulsoEmptyState(Text("venue_detail_not_found"), description: Text("venue_detail_not_found_body")) {
+                    Button("venue_detail_back_to_explore") { shell?.open(.explore) }.buttonStyle(.pulso())
                 }
             } else {
                 PulsoLoadErrorView(error) { model.refresh() }
@@ -130,7 +118,7 @@ struct VenueDetailView: View {
             .listRowInsets(EdgeInsets())
             VStack(alignment: .leading, spacing: 6) {
                 HStack(alignment: .firstTextBaseline) {
-                    Text(verbatim: venue.displayName).font(.title2.bold())
+                    Text(verbatim: venue.displayName).font(.title2.bold()).foregroundStyle(palette.text)
                     if venue.status != .published {
                         VenueChip(text: String(localized: venue.status.labelResource), tone: RadixScale.amber.lightStep(9))
                     }
@@ -155,7 +143,7 @@ struct VenueDetailView: View {
 
     /** 导航（菜单：地图里看 / Google 地图 / 其他地图）、电话、网站、收藏。 */
     private func quickActions(_ venue: VenueDetail) -> some View {
-        HStack(spacing: 10) {
+        HStack(spacing: PulsoSpace.s2) {
             if let lat = venue.building.locationLat, let lng = venue.building.locationLng {
                 Menu {
                     Button { openOnExplore() } label: { Label("venue_detail_maps_in_app", systemImage: "map") }
@@ -172,23 +160,33 @@ struct VenueDetailView: View {
             if let phone = venue.phone, !phone.isEmpty, let url = URL(string: "tel:\(phone.filter { !$0.isWhitespace })") {
                 Button { openURL(url) } label: { quickAction("phone", "venue_detail_action_call") }
             }
+            ShareLink(item: shareText(venue)) { quickAction("square.and.arrow.up", "venue_detail_action_share") }
             if let site = venue.website, !site.isEmpty, let url = URL(string: site.hasPrefix("http") ? site : "https://\(site)") {
                 Button { openURL(url) } label: { quickAction("globe", "venue_detail_website") }
             }
-            FavoriteHeart(target: .venue, id: venue.id, name: venue.displayName)
-                .frame(width: 44, height: 44)
-                .background(Color(.tertiarySystemFill), in: .circle)
+            VStack(spacing: PulsoSpace.s1) {
+                FavoriteHeart(target: .venue, id: venue.id, name: venue.displayName)
+                    .frame(width: 48, height: 48)
+                    .background(palette.accent.step(3), in: palette.innerShape)
+                Text("venue_detail_action_favorite").font(.caption2).foregroundStyle(palette.secondaryText)
+            }
+            .frame(maxWidth: .infinity)
         }
         .buttonStyle(.plain)
-        .padding(.top, 4)
+        .padding(.top, PulsoSpace.s2)
     }
 
+    /** 快捷操作（Android 详情页的一排）：强调色 step3 方块里 step9 图标，下面小字。 */
     private func quickAction(_ systemImage: String, _ label: LocalizedStringKey) -> some View {
-        VStack(spacing: 4) {
-            Image(systemName: systemImage).font(.body.weight(.semibold)).frame(width: 44, height: 44).background(Color(.tertiarySystemFill), in: .circle)
-            Text(label).font(.caption2)
+        VStack(spacing: PulsoSpace.s1) {
+            Image(systemName: systemImage)
+                .font(.body.weight(.semibold))
+                .foregroundStyle(palette.accent.step(9))
+                .frame(width: 48, height: 48)
+                .background(palette.accent.step(3), in: palette.innerShape)
+            Text(label).font(.caption2).foregroundStyle(palette.secondaryText)
         }
-        .foregroundStyle(Color.primary)
+        .frame(maxWidth: .infinity)
     }
 
     private func openOnExplore() {
@@ -217,26 +215,9 @@ struct VenueDetailView: View {
         }
     }
 
+    /** 一级分段（Android `PulsoUnderlineTabRow`）：没内容的分段不放进来。 */
     private func tabBar(_ venue: VenueDetail) -> some View {
-        let tabs = visibleTabs(venue)
-        return ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(tabs, id: \.self) { tab in
-                    let isOn = tab == currentTab(venue)
-                    Button { model.tab = tab } label: {
-                        Text(tab.labelKey)
-                            .font(.subheadline.weight(isOn ? .semibold : .regular))
-                            .padding(.horizontal, 14)
-                            .frame(height: 34)
-                            .foregroundStyle(isOn ? Color.white : Color.primary)
-                            .background(isOn ? Color.accentColor : Color(.tertiarySystemFill), in: .capsule)
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            .padding(.horizontal)
-            .padding(.vertical, 4)
-        }
+        PulsoUnderlineTabRow(visibleTabs(venue), selection: Binding(get: { currentTab(venue) }, set: { model.tab = $0 })) { Text($0.labelKey) }
     }
 
     private func currentTab(_ venue: VenueDetail) -> VenueInfoTab {

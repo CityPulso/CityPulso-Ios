@@ -152,6 +152,7 @@ final class ForumDetailModel {
 
 /** 论坛页（Android `ForumDetailScreen`）。 */
 struct ForumDetailView: View {
+    @Environment(\.pulsoPalette) private var palette
     @State private var model: ForumDetailModel
     @Environment(PulsoShellNavigator.self) private var shell: PulsoShellNavigator?
 
@@ -202,21 +203,21 @@ struct ForumDetailView: View {
     private func header(_ forum: ForumDetail) -> some View {
         Section {
             ZStack(alignment: .bottomLeading) {
-                Rectangle().fill(.tint.opacity(0.2))
+                Rectangle().fill(palette.accent.step(3))
                 if let cover = model.imageURL(forum.coverImageId) { PulsoRemoteImage(url: cover) }
                 PulsoRemoteImage(url: model.imageURL(forum.avatarImageId))
                     .frame(width: 56, height: 56)
-                    .background(.fill.tertiary)
-                    .clipShape(.rect(cornerRadius: 10))
-                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color(.systemBackground), lineWidth: 2))
+                    .background(palette.gray.step(3))
+                    .clipShape(palette.innerShape)
+                    .overlay(palette.innerShape.stroke(palette.background, lineWidth: 2))
                     .padding(12)
             }
-            .frame(height: 150)
+            .frame(height: 180)
             .clipped()
             .listRowInsets(EdgeInsets())
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
-                    Text(verbatim: forum.name).font(.title3.bold())
+                    Text(verbatim: forum.name).font(.title3.bold()).foregroundStyle(palette.text)
                     ForumBadge(scope: forum.owner.profileScope)
                 }
                 Text(verbatim: localizedFormat("discussion_forum_stats", forum.favoriteCount, forum.postCount, forum.staffCount)).font(.caption).foregroundStyle(.secondary)
@@ -227,10 +228,11 @@ struct ForumDetailView: View {
                     Button {
                         Task { await model.toggleFollow() }
                     } label: {
-                        Label((forum.favoritedByMe ? "discussion_unfollow" : "discussion_follow") as LocalizedStringKey, systemImage: forum.favoritedByMe ? "star.fill" : "star")
+                        Text((forum.favoritedByMe ? "discussion_unfollow" : "discussion_follow") as LocalizedStringKey)
                             .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.pulso())
+                    // 已收藏是灰色柔和，没收藏是实心（Android 论坛头部）。
+                    .buttonStyle(.pulso(forum.favoritedByMe ? .soft : .solid, tone: forum.favoritedByMe ? .gray : .accent))
                     .disabled(model.busy)
                     if forum.status == .active {
                         NavigationLink(value: LoopRoute.postCreate(prefill: PostCreatePrefill(forumId: forum.id))) {
@@ -250,9 +252,11 @@ struct ForumDetailView: View {
                                 .disabled(forum.status != .active)
                         }
                     } label: {
-                        Image(systemName: "ellipsis").frame(width: 36, height: 30)
+                        Image(systemName: "ellipsis")
+                            .foregroundStyle(palette.text)
+                            .frame(width: PulsoControlSize.compact.height, height: PulsoControlSize.compact.height)
                     }
-                    .buttonStyle(.pulso(.soft))
+                    .buttonStyle(.plain)
                     .accessibilityLabel(Text("discussion_more_actions"))
                 }
             }

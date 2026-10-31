@@ -30,7 +30,7 @@ struct AgendaView: View {
                 footer
             }
             .pulsoTimelineList(timeline)
-            .task(id: model.eventsByDay.flatMap { $0.items.map(\.id) }) { timeline.order = model.eventsByDay.flatMap { $0.items.map { AnyHashable($0.id) } } }
+            .task(id: model.activitiesByDay.flatMap { $0.items.map(\.id) }) { timeline.order = model.activitiesByDay.flatMap { $0.items.map { AnyHashable($0.id) } } }
             .refreshable { await model.refresh() }
             .navigationTitle("home_agenda_title")
             .navigationBarTitleDisplayMode(.inline)
