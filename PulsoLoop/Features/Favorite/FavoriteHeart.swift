@@ -76,7 +76,9 @@ struct FavoriteHeart: View {
     }
 
     var body: some View {
-        Group {
+        // 读到状态前心形不显示；空的 Group 不会跑 .task，所以垫一个 0 尺寸的占位让读取一定开始。
+        ZStack {
+            Color.clear.frame(width: 0, height: 0)
             if model.visible {
                 Button {
                     Task { await model.toggle() }
